@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.29",
+        "pixelPetRetroGuardianV33.32",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.29",
+        "pixelPetOwnedAppearancesV33.32",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -389,6 +389,7 @@ const canvas = document.getElementById("petCanvas");
     }
 
     function playBgm() {
+      v3330SetAudioElementVolume();
       if (!bgmEnabled || !bgmAudio) return;
       bgmAudio.muted = false;
       bgmAudio.volume = bgmEnabled ? bgmVolume / 100 : 0;
@@ -900,7 +901,15 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系統設定",
-        "cloud.local": "本機存檔",
+        "cloud.dialog.title": "雲端同步",
+    "cloud.dialog.text": "請選擇同步方向。這次不會再用「好 / 取消」混淆操作。",
+    "cloud.upload.title": "上傳本機到雲端",
+    "cloud.upload.desc": "用目前手機 / 瀏覽器的進度覆蓋雲端存檔。",
+    "cloud.download.title": "下載雲端到本機",
+    "cloud.download.desc": "用雲端存檔覆蓋目前手機 / 瀏覽器的進度。",
+    "cloud.cancel.title": "先不要同步",
+    "cloud.cancel.desc": "保留目前狀態，不做任何更動。",
+    "cloud.local": "本機存檔",
         "cloud.signedOutHint": "未登入：僅使用本機存檔",
         "cloud.signedInHint": "已登入：雲端會自動保存，手動同步只作備用",
         "cloud.status.signedOut": "未登入雲端",
@@ -966,7 +975,15 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系统设置",
-        "cloud.local": "本机存档",
+        "cloud.dialog.title": "云端同步",
+    "cloud.dialog.text": "请选择同步方向。这次不会再用“好 / 取消”混淆操作。",
+    "cloud.upload.title": "上传本机到云端",
+    "cloud.upload.desc": "用目前手机 / 浏览器的进度覆盖云端存档。",
+    "cloud.download.title": "下载云端到本机",
+    "cloud.download.desc": "用云端存档覆盖目前手机 / 浏览器的进度。",
+    "cloud.cancel.title": "先不要同步",
+    "cloud.cancel.desc": "保留目前状态，不做任何更动。",
+    "cloud.local": "本机存档",
         "cloud.signedOutHint": "未登录：仅使用本机存档",
         "cloud.signedInHint": "已登录：云端会自动保存，手动同步仅作备用",
         "cloud.status.signedOut": "未登录云端",
@@ -1032,7 +1049,15 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "再孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "システム設定",
-        "cloud.local": "ローカル保存",
+        "cloud.dialog.title": "クラウド同期",
+    "cloud.dialog.text": "同期する方向を選んでください。「OK / キャンセル」ではなく、内容が分かるボタンにしました。",
+    "cloud.upload.title": "この端末のデータをアップロード",
+    "cloud.upload.desc": "今使っているスマホ / ブラウザの進行状況でクラウドセーブを上書きします。",
+    "cloud.download.title": "クラウドデータを読み込む",
+    "cloud.download.desc": "クラウドセーブで今使っているスマホ / ブラウザの進行状況を上書きします。",
+    "cloud.cancel.title": "今は同期しない",
+    "cloud.cancel.desc": "現在の状態をそのまま残し、何も変更しません。",
+    "cloud.local": "ローカル保存",
         "cloud.signedOutHint": "未ログイン：ローカル保存のみ",
         "cloud.signedInHint": "ログイン中：クラウドは自動保存、手動同期は予備用",
         "cloud.status.signedOut": "クラウド未ログイン",
@@ -1098,7 +1123,15 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "Re-hatch",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "System Settings",
-        "cloud.local": "Local Save",
+        "cloud.dialog.title": "Cloud sync",
+    "cloud.dialog.text": "Choose the sync direction. These buttons clearly show what will happen.",
+    "cloud.upload.title": "Upload this device to cloud",
+    "cloud.upload.desc": "Overwrite the cloud save with the progress on this phone / browser.",
+    "cloud.download.title": "Download cloud to this device",
+    "cloud.download.desc": "Overwrite this phone / browser with the cloud save.",
+    "cloud.cancel.title": "Do not sync now",
+    "cloud.cancel.desc": "Keep the current state and make no changes.",
+    "cloud.local": "Local Save",
         "cloud.signedOutHint": "Not signed in: local save only",
         "cloud.signedInHint": "Signed in: cloud auto-save is on; manual sync is backup only",
         "cloud.status.signedOut": "Cloud not signed in",
@@ -1199,7 +1232,8 @@ const canvas = document.getElementById("petCanvas");
       const languageSelect = document.getElementById("languageSelect");
       if (languageSelect) languageSelect.value = lang;
 
-      window.PixelPetI18N = {
+      window.PixelPetCloudUI = { cloudSyncChoice: () => v3331OpenCloudSyncChoice() };
+window.PixelPetI18N = {
         t,
         currentLanguage: getCurrentLanguage,
         applyLanguage
@@ -1229,7 +1263,7 @@ const canvas = document.getElementById("petCanvas");
     }
 
 
-/* V33.29 full i18n QA patch */
+/* V33.32 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1566,6 +1600,72 @@ function v3329ApplyI18n() {
   if (syncBtn) syncBtn.textContent = v3329Text("btn.manualSync");
 }
 
+
+function v3331ApplyCloudDialogI18n() {
+  const setText = (selector, text) => {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = text;
+  };
+  setText("#cloudSyncChoiceTitle", v3329Text("cloud.dialog.title"));
+  setText("#cloudSyncChoiceText", v3329Text("cloud.dialog.text"));
+  setText("#cloudSyncUploadBtn strong", v3329Text("cloud.upload.title"));
+  setText("#cloudSyncUploadBtn span", v3329Text("cloud.upload.desc"));
+  setText("#cloudSyncDownloadBtn strong", v3329Text("cloud.download.title"));
+  setText("#cloudSyncDownloadBtn span", v3329Text("cloud.download.desc"));
+  setText("#cloudSyncCancelBtn strong", v3329Text("cloud.cancel.title"));
+  setText("#cloudSyncCancelBtn span", v3329Text("cloud.cancel.desc"));
+}
+
+function v3331OpenCloudSyncChoice() {
+  return new Promise(resolve => {
+    v3331ApplyCloudDialogI18n();
+
+    const backdrop = document.getElementById("cloudSyncChoiceBackdrop");
+    const upload = document.getElementById("cloudSyncUploadBtn");
+    const download = document.getElementById("cloudSyncDownloadBtn");
+    const cancel = document.getElementById("cloudSyncCancelBtn");
+    const close = document.getElementById("cloudSyncChoiceClose");
+
+    if (!backdrop || !upload || !download || !cancel || !close) {
+      const fallback = window.confirm("雲端同步：\\n確定＝上傳本機到雲端\\n取消＝先不要同步");
+      resolve(fallback ? "upload" : "cancel");
+      return;
+    }
+
+    const cleanup = value => {
+      backdrop.classList.remove("open");
+      backdrop.setAttribute("aria-hidden", "true");
+      upload.removeEventListener("click", onUpload);
+      download.removeEventListener("click", onDownload);
+      cancel.removeEventListener("click", onCancel);
+      close.removeEventListener("click", onCancel);
+      backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      resolve(value);
+    };
+
+    const onUpload = () => cleanup("upload");
+    const onDownload = () => cleanup("download");
+    const onCancel = () => cleanup("cancel");
+    const onBackdrop = ev => {
+      if (ev.target === backdrop) cleanup("cancel");
+    };
+    const onKey = ev => {
+      if (ev.key === "Escape") cleanup("cancel");
+    };
+
+    upload.addEventListener("click", onUpload);
+    download.addEventListener("click", onDownload);
+    cancel.addEventListener("click", onCancel);
+    close.addEventListener("click", onCancel);
+    backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+
+    backdrop.classList.add("open");
+    backdrop.setAttribute("aria-hidden", "false");
+  });
+}
+
 function v3329PatchMessageHelpers() {
   if (window.__v3329MessagePatched) return;
   window.__v3329MessagePatched = true;
@@ -1599,6 +1699,256 @@ function v3329PatchMessageHelpers() {
 
     return originalSetMessage.call(this, out);
   };
+}
+
+
+
+/* V33.32 live volume patch */
+
+window.PixelPetVolumeQA = {
+  apply: () => v3330ApplyVolumes(),
+  bgm: () => v3330ReadVolumeSetting("bgmVolume", 0.38),
+  sfx: () => v3330ReadVolumeSetting("sfxVolume", 0.7)
+};
+
+function v3330Clamp01(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+function v3330ReadVolumeSetting(key, fallback) {
+  try {
+    const fromSettings = settings && typeof settings[key] === "number" ? settings[key] : null;
+    if (fromSettings !== null) return v3330Clamp01(fromSettings);
+  } catch {}
+  try {
+    const raw = localStorage.getItem("pixelPetSettings");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed[key] === "number") return v3330Clamp01(parsed[key]);
+    }
+  } catch {}
+  return v3330Clamp01(fallback);
+}
+
+function v3330SetAudioElementVolume() {
+  const bgmVolume = v3330ReadVolumeSetting("bgmVolume", 0.38);
+  const candidates = [
+    document.getElementById("bgm"),
+    document.getElementById("bgmAudio"),
+    document.getElementById("backgroundMusic"),
+    window.bgm,
+    window.bgmAudio,
+    window.backgroundMusic
+  ].filter(Boolean);
+
+  document.querySelectorAll("audio").forEach(audio => {
+    if (!candidates.includes(audio)) candidates.push(audio);
+  });
+
+  candidates.forEach(audio => {
+    try {
+      if ("volume" in audio) audio.volume = bgmVolume;
+      if ("muted" in audio) audio.muted = bgmVolume <= 0;
+    } catch {}
+  });
+
+  const bgmVal = document.getElementById("bgmVolValue");
+  if (bgmVal) bgmVal.textContent = `${Math.round(bgmVolume * 100)}%`;
+
+  const bgmSlider = document.getElementById("settingBgmVolume");
+  if (bgmSlider && String(bgmSlider.value) !== String(Math.round(bgmVolume * 100))) {
+    bgmSlider.value = Math.round(bgmVolume * 100);
+  }
+
+  return bgmVolume;
+}
+
+function v3330SetSfxVolumeDisplay() {
+  const sfxVolume = v3330ReadVolumeSetting("sfxVolume", 0.7);
+  const sfxVal = document.getElementById("sfxVolValue");
+  if (sfxVal) sfxVal.textContent = `${Math.round(sfxVolume * 100)}%`;
+
+  const sfxSlider = document.getElementById("settingSfxVolume");
+  if (sfxSlider && String(sfxSlider.value) !== String(Math.round(sfxVolume * 100))) {
+    sfxSlider.value = Math.round(sfxVolume * 100);
+  }
+
+  return sfxVolume;
+}
+
+function v3330ApplyVolumes() {
+  v3330SetAudioElementVolume();
+  v3330SetSfxVolumeDisplay();
+}
+
+function v3330SaveVolume(key, value01) {
+  try {
+    settings[key] = v3330Clamp01(value01);
+    if (typeof saveSettings === "function") saveSettings();
+    else localStorage.setItem("pixelPetSettings", JSON.stringify(settings));
+  } catch {
+    try {
+      const raw = localStorage.getItem("pixelPetSettings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed[key] = v3330Clamp01(value01);
+      localStorage.setItem("pixelPetSettings", JSON.stringify(parsed));
+    } catch {}
+  }
+}
+
+function v3330BindVolumeSliders() {
+  if (window.__v3330VolumeBound) return;
+  window.__v3330VolumeBound = true;
+
+  const bind = (id, key, after) => {
+    const slider = document.getElementById(id);
+    if (!slider) return;
+
+    const handler = () => {
+      const value01 = v3330Clamp01(Number(slider.value) / 100);
+      v3330SaveVolume(key, value01);
+      if (typeof after === "function") after(value01);
+      v3330ApplyVolumes();
+    };
+
+    slider.addEventListener("input", handler, { passive: true });
+    slider.addEventListener("change", handler, { passive: true });
+  };
+
+  bind("settingBgmVolume", "bgmVolume", value01 => {
+    try {
+      if (value01 > 0 && settings && settings.bgmEnabled && typeof playBgm === "function") playBgm();
+    } catch {}
+  });
+
+  bind("settingSfxVolume", "sfxVolume", value01 => {
+    try {
+      if (value01 > 0 && typeof sfx === "function") sfx("click");
+    } catch {}
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) v3330ApplyVolumes();
+  });
+
+  v3330ApplyVolumes();
+}
+
+
+function v3330BindVolumeResetHook() {
+  if (window.__v3330VolumeResetHookBound) return;
+  window.__v3330VolumeResetHookBound = true;
+  document.addEventListener("click", ev => {
+    const target = ev.target && ev.target.closest ? ev.target.closest("#settingsDefault,#settingsDone,#settingsClose") : null;
+    if (!target) return;
+    setTimeout(() => v3330ApplyVolumes(), 0);
+    setTimeout(() => v3330ApplyVolumes(), 120);
+  }, true);
+}
+
+function v3330PatchSfxVolume() {
+  if (window.__v3330SfxPatched) return;
+  if (typeof sfx !== "function") return;
+  window.__v3330SfxPatched = true;
+
+  const originalSfx = sfx;
+  sfx = function patchedSfx(...args) {
+    const sfxVolume = v3330ReadVolumeSetting("sfxVolume", 0.7);
+    if (sfxVolume <= 0) return;
+    try {
+      window.__pixelPetCurrentSfxVolume = sfxVolume;
+    } catch {}
+    return originalSfx.apply(this, args);
+  };
+}
+
+
+
+/* V33.32 mobile bottom auto hide controller */
+function v3332IsMobileUi() {
+  return document.documentElement.classList.contains("mobile-ui") ||
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+}
+
+function v3332AnyOverlayOpen() {
+  const selectors = [
+    "#settingsBackdrop.open",
+    "#dexBackdrop.open",
+    ".dex-backdrop.open",
+    "#cloudSyncChoiceBackdrop.open",
+    ".cloud-sync-backdrop.open",
+    ".battle-backdrop.open",
+    ".modal.open"
+  ];
+  return selectors.some(sel => document.querySelector(sel));
+}
+
+function v3332SetMobileControlsMode() {
+  if (!v3332IsMobileUi()) {
+    document.documentElement.classList.remove("mobile-controls-collapsed", "mobile-controls-suspended");
+    return;
+  }
+
+  const overlayOpen = v3332AnyOverlayOpen();
+  document.documentElement.classList.toggle("mobile-controls-suspended", overlayOpen);
+
+  if (overlayOpen) {
+    document.documentElement.classList.remove("mobile-controls-collapsed");
+    return;
+  }
+
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  const shouldCollapse = y > 12 || window.__v3332ManualCollapsed === true;
+  document.documentElement.classList.toggle("mobile-controls-collapsed", shouldCollapse);
+}
+
+function v3332BindMobileBottomControls() {
+  if (window.__v3332MobileBottomBound) return;
+  window.__v3332MobileBottomBound = true;
+
+  const handle = document.getElementById("mobileControlCollapseHandle");
+  if (handle) {
+    handle.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.__v3332ManualCollapsed = !document.documentElement.classList.contains("mobile-controls-collapsed");
+      v3332SetMobileControlsMode();
+    }, { passive:false });
+  }
+
+  let touchStartY = 0;
+  const controls = document.getElementById("mobileNativeControls");
+  if (controls) {
+    controls.addEventListener("touchstart", ev => {
+      touchStartY = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
+    }, { passive:true });
+
+    controls.addEventListener("touchmove", ev => {
+      const y = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
+      if (touchStartY && Math.abs(y - touchStartY) > 18) {
+        window.__v3332ManualCollapsed = true;
+        document.documentElement.classList.add("mobile-controls-collapsed");
+      }
+    }, { passive:true });
+  }
+
+  window.addEventListener("scroll", () => {
+    window.__v3332ManualCollapsed = false;
+    v3332SetMobileControlsMode();
+  }, { passive:true });
+
+  window.addEventListener("resize", v3332SetMobileControlsMode, { passive:true });
+  window.addEventListener("orientationchange", () => setTimeout(v3332SetMobileControlsMode, 350), { passive:true });
+
+  const mo = new MutationObserver(() => v3332SetMobileControlsMode());
+  mo.observe(document.documentElement, { attributes:true, attributeFilter:["class"] });
+  mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "hidden", "aria-hidden"] });
+
+  setInterval(v3332SetMobileControlsMode, 800);
+  v3332SetMobileControlsMode();
 }
 
 
@@ -1650,6 +2000,11 @@ function v3329PatchMessageHelpers() {
       if (led) led.classList.toggle("on", true);
       ensureMobileControlsVisible();
       applyLanguage();
+      v3330PatchSfxVolume();
+      v3332BindMobileBottomControls();
+      v3330BindVolumeSliders();
+      v3330BindVolumeResetHook();
+      v3330ApplyVolumes();
       v3329PatchMessageHelpers();
       v3329ApplyI18n();
       updateMotionShakeControls();
@@ -1930,7 +2285,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.29",
+        "Mikisun Pixel Guardian V33.32",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2891,6 +3246,7 @@ LV 回到 1。
 
 
     function openSettings() {
+      setTimeout(v3332SetMobileControlsMode, 0);
       applyLanguage();
       setSystemTab("actions");
       setSystemTab("actions");
@@ -3174,7 +3530,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.29: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.32: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
