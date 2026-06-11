@@ -1,3 +1,4 @@
+/* V33.25 unified system menu stylesheet */
 /* V33.24 mobile desktop fix stylesheet */
 /* V33.23 mobile controls restore stylesheet */
 /* V33.21 mobile status gear stylesheet */
@@ -1162,4 +1163,173 @@
 
 #cloudSyncBtn[hidden]{
   display:none!important;
+}
+
+/* V33.25 unified system menu */
+[data-cloud-only="signed-in"]{
+  display:none!important;
+}
+html[data-cloud-state="signed-in"] [data-cloud-only="signed-in"]{
+  display:inline-flex!important;
+}
+
+.settings-quick{
+  display:grid;
+  gap:12px;
+  margin:12px 0 14px;
+}
+
+.settings-quick-section{
+  background:rgba(255,250,239,.34);
+  border:3px solid rgba(89,78,61,.30);
+  border-radius:16px;
+  padding:12px;
+}
+
+.settings-quick-section h3{
+  margin:0 0 8px;
+  font-size:.72rem;
+  letter-spacing:.18em;
+  color:#665d50;
+  font-weight:1000;
+}
+
+.settings-quick-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+.settings-quick-grid button{
+  appearance:none;
+  -webkit-appearance:none;
+  min-height:38px;
+  border-radius:12px;
+  border:2px solid rgba(55,45,33,.28);
+  background:linear-gradient(145deg,#f1e6ce,#d4c6ab);
+  color:#332e27;
+  font-weight:1000;
+  font-size:13px;
+  letter-spacing:.04em;
+  box-shadow:0 3px 0 rgba(48,39,30,.35), inset 2px 2px 0 rgba(255,255,255,.28);
+  cursor:pointer;
+}
+
+.settings-quick-grid button:active{
+  transform:translateY(2px);
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.18);
+}
+
+.settings-cloud-hint{
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(70,85,62,.12);
+  color:#4b463d;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.35;
+  text-align:center;
+}
+
+html.mobile-ui .settings-backdrop{
+  z-index:2147483200!important;
+  place-items:end center!important;
+  align-items:flex-end!important;
+  padding:0!important;
+  background:rgba(12,10,8,.52)!important;
+  overscroll-behavior:contain!important;
+}
+
+html.mobile-ui .settings-backdrop.open{
+  display:flex!important;
+}
+
+html.mobile-ui .settings-panel{
+  width:100%!important;
+  max-width:none!important;
+  max-height:min(86dvh,720px)!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  box-sizing:border-box!important;
+  border-radius:24px 24px 0 0!important;
+  border-width:4px 4px 0 4px!important;
+  padding:16px 14px calc(22px + env(safe-area-inset-bottom))!important;
+  margin:0!important;
+  background:linear-gradient(145deg,#eadfc9,#cdbda2)!important;
+  box-shadow:0 -18px 38px rgba(0,0,0,.38), inset 5px 5px 0 rgba(255,255,255,.22)!important;
+}
+
+html.mobile-ui .settings-panel::before{
+  content:"";
+  display:block;
+  width:48px;
+  height:5px;
+  margin:0 auto 12px;
+  border-radius:999px;
+  background:rgba(65,55,43,.45);
+}
+
+html.mobile-ui .settings-head{
+  position:sticky!important;
+  top:0!important;
+  z-index:2!important;
+  background:linear-gradient(145deg,#eadfc9,#d6c8ad)!important;
+  border-radius:14px!important;
+  padding:10px 8px!important;
+  margin:-2px 0 12px!important;
+  box-shadow:0 6px 10px rgba(80,60,40,.08)!important;
+}
+
+html.mobile-ui .settings-close{
+  width:42px!important;
+  height:42px!important;
+  font-size:20px!important;
+}
+
+html.mobile-ui .settings-quick{
+  margin:10px 0 12px!important;
+  gap:10px!important;
+}
+
+html.mobile-ui .settings-quick-section{
+  padding:10px!important;
+  border-radius:15px!important;
+}
+
+html.mobile-ui .settings-quick-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+
+html.mobile-ui .settings-quick-grid button{
+  min-height:42px!important;
+  font-size:13px!important;
+  border-radius:13px!important;
+}
+
+html.mobile-ui .setting-list{
+  gap:10px!important;
+}
+
+html.mobile-ui .setting-row{
+  padding:10px!important;
+  border-radius:15px!important;
+}
+
+html.mobile-ui .setting-note{
+  max-height:none!important;
+  overflow:visible!important;
+}
+
+html.mobile-ui .settings-actions{
+  position:sticky!important;
+  bottom:0!important;
+  background:linear-gradient(180deg,rgba(205,189,162,0),#cdbda2 28%)!important;
+  padding-top:14px!important;
+  padding-bottom:4px!important;
+}
+
+html.mobile-ui #mobileNativeControls{
+  z-index:2147483000!important;
 }

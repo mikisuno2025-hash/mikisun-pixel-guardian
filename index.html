@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.24</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-24-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.25</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-25-20260611">
 \n
 \n
 
@@ -183,7 +183,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.24 Mobile Desktop Fix Release.
+  <!-- Pixel Pet Retro Guardian V33.25 Unified System Menu Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -195,7 +195,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.24</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.25</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -319,6 +319,38 @@ html.mobile-ui .mobile-debug-panel[hidden]{
           <small><span data-i18n="settings.subtitle">OPTION</span></small>
         </div>
         <button class="settings-close" id="settingsClose" aria-label="關閉設定">×</button>
+      </div>
+
+      <div class="settings-quick" id="settingsQuickActions">
+        <div class="settings-quick-section">
+          <h3>GAME</h3>
+          <div class="settings-quick-grid">
+            <button type="button" data-mobile-action="rename" data-i18n="btn.rename">命名</button>
+            <button type="button" data-mobile-action="dex" data-i18n="btn.dex">圖鑑</button>
+            <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
+            <button type="button" data-mobile-action="debug" data-i18n="btn.debug">狀態診斷</button>
+          </div>
+        </div>
+
+        <div class="settings-quick-section">
+          <h3>AUTO / SOUND</h3>
+          <div class="settings-quick-grid">
+            <button type="button" data-mobile-action="sound" data-i18n="btn.soundShort">音效</button>
+            <button type="button" data-mobile-action="bgm" data-i18n="btn.bgmShort">BGM</button>
+            <button type="button" data-mobile-action="autocare" data-i18n="btn.autocare">AUTO CARE</button>
+            <button type="button" data-mobile-action="autopatrol" data-i18n="btn.patrol">PATROL</button>
+            <button type="button" data-mobile-action="motion" id="settingsMotionQuick">啟用搖動</button>
+          </div>
+        </div>
+
+        <div class="settings-quick-section">
+          <h3>ACCOUNT</h3>
+          <div class="settings-quick-grid">
+            <button type="button" data-mobile-action="login" data-cloud-login-trigger="1" data-i18n="btn.google">Google登入</button>
+            <button type="button" data-mobile-action="sync" data-cloud-only="signed-in" data-i18n="btn.manualSync">手動同步</button>
+          </div>
+          <div class="settings-cloud-hint" data-cloud-hint>未登入：僅使用本機存檔</div>
+        </div>
       </div>
 
       <div class="setting-list">
@@ -456,8 +488,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 
-  <script defer src="assets/js/game.js?v=33-24-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-24-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-25-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-25-20260611"></script>
 
 
 
@@ -479,33 +511,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
     <button type="button" class="mobile-compact-btn slate" data-mobile-action="patrol"><b>E</b><small data-i18n="mobile.search">搜索</small></button>
     <button type="button" class="mobile-compact-btn gray" data-mobile-action="status"><b>F</b><small data-i18n="mobile.status">狀態</small></button>
   </div>
-  <button type="button" class="mobile-gear-toggle" data-mobile-drawer-toggle="system" aria-label="SYSTEM">⚙</button>
+  <button type="button" class="mobile-gear-toggle" data-mobile-action="system" aria-label="SYSTEM">⚙</button>
 </div>
-
-<div id="mobileSystemDrawer" class="mobile-system-drawer" aria-label="手機系統功能面板" hidden>
-  <div class="mobile-system-sheet">
-    <div class="mobile-system-head">
-      <strong data-i18n="settings.title">SYSTEM</strong>
-      <button type="button" data-mobile-drawer-close="system" data-i18n="mobile.close">關閉</button>
-    </div>
-    <div class="mobile-system-grid">
-      <button type="button" data-mobile-action="rename" data-i18n="btn.rename">命名</button>
-      <button type="button" data-mobile-action="dex" data-i18n="btn.dex">圖鑑</button>
-      <button type="button" data-mobile-action="sound" data-i18n="btn.soundShort">音效</button>
-      <button type="button" data-mobile-action="bgm" data-i18n="btn.bgmShort">BGM</button>
-      <button type="button" data-mobile-action="autocare" data-i18n="btn.autocare">AUTO CARE</button>
-      <button type="button" data-mobile-action="autopatrol" data-i18n="btn.patrol">PATROL</button>
-      <button type="button" data-mobile-action="motion">啟用搖動</button>
-      <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
-      <button type="button" data-mobile-action="system" data-i18n="btn.systemSettings">系統設定</button>
-      <button type="button" data-mobile-action="debug" data-i18n="btn.debug">狀態診斷</button>
-      <button type="button" data-mobile-action="login" data-cloud-login-trigger="1" data-i18n="btn.google">Google登入</button>
-      <button type="button" data-mobile-action="sync" data-cloud-only="signed-in" data-i18n="btn.manualSync">手動同步</button>
-    </div>
-    <div class="mobile-cloud-hint" data-cloud-hint>未登入：僅使用本機存檔</div>
-  </div>
-</div>
-
 
 <div id="mobileDebugPanel" class="mobile-debug-panel" aria-label="狀態診斷面板" hidden>
   <div class="mobile-debug-sheet">

@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.24",
+        "pixelPetRetroGuardianV33.25",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.24",
+        "pixelPetOwnedAppearancesV33.25",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1553,7 +1553,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.24",
+        "Mikisun Pixel Guardian V33.25",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2618,8 +2618,19 @@ LV 回到 1。
 
 
 
+
+    function closeSettingsForQuickAction(actionName) {
+      if (!["rename", "dex", "reset", "debug", "login", "sync", "sound", "bgm", "autocare", "autopatrol", "motion"].includes(actionName)) return;
+      const backdrop = document.getElementById("settingsBackdrop");
+      if (backdrop && backdrop.classList.contains("open")) {
+        backdrop.classList.remove("open");
+        backdrop.setAttribute("aria-hidden", "true");
+      }
+    }
+
     function runMobileV28Action(actionName) {
       try {
+        closeSettingsForQuickAction(actionName);
         if (actionName === "login") {
           if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.signInOrOut === "function") {
             window.PixelPetCloudAuth.signInOrOut();
@@ -2675,7 +2686,7 @@ LV 回到 1。
 
       const getButton = target => {
         if (!target || !target.closest) return null;
-        return target.closest("#mobileNativeControls [data-mobile-action], #mobileSystemDrawer [data-mobile-action]");
+        return target.closest("#mobileNativeControls [data-mobile-action], #settingsBackdrop [data-mobile-action]");
       };
 
       document.addEventListener("touchstart", ev => {
@@ -2716,62 +2727,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      if (window.__mobileSystemDrawerBound) return;
-      window.__mobileSystemDrawerBound = true;
-
-      const drawer = () => document.getElementById("mobileSystemDrawer");
-
-      document.addEventListener("click", ev => {
-        const actionBtn = ev.target && ev.target.closest ? ev.target.closest("#mobileSystemDrawer [data-mobile-action]") : null;
-        if (actionBtn) return;
-        const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
-        const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
-
-        if (openBtn) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const d = drawer();
-          if (d) d.hidden = false;
-          return;
-        }
-
-        if (closeBtn) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const d = drawer();
-          if (d) d.hidden = true;
-          return;
-        }
-
-        const d = drawer();
-        if (d && !d.hidden && ev.target === d) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          d.hidden = true;
-        }
-      }, { capture: true });
-
-      document.addEventListener("touchend", ev => {
-        const actionBtnTouch = ev.target && ev.target.closest ? ev.target.closest("#mobileSystemDrawer [data-mobile-action]") : null;
-        if (actionBtnTouch) return;
-        const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
-        const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
-
-        if (openBtn) {
-          if (ev.cancelable) ev.preventDefault();
-          ev.stopPropagation();
-          const d = drawer();
-          if (d) d.hidden = false;
-          return;
-        }
-
-        if (closeBtn) {
-          if (ev.cancelable) ev.preventDefault();
-          ev.stopPropagation();
-          const d = drawer();
-          if (d) d.hidden = true;
-        }
-      }, { passive: false, capture: true });
+      // V33.25: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
