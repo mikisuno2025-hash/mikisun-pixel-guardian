@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.20",
+        "pixelPetRetroGuardianV33.22",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.20",
+        "pixelPetOwnedAppearancesV33.22",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1218,6 +1218,15 @@ const canvas = document.getElementById("petCanvas");
       $("moodBar").style.width = `${pet.mood}%`;
       $("energyBar").style.width = `${pet.energy}%`;
       $("cleanBar").style.width = `${pet.clean}%`;
+
+      const mobileHungerBar = $("mobileHungerBar");
+      const mobileMoodBar = $("mobileMoodBar");
+      const mobileEnergyBar = $("mobileEnergyBar");
+      const mobileCleanBar = $("mobileCleanBar");
+      if (mobileHungerBar) mobileHungerBar.style.width = `${pet.hunger}%`;
+      if (mobileMoodBar) mobileMoodBar.style.width = `${pet.mood}%`;
+      if (mobileEnergyBar) mobileEnergyBar.style.width = `${pet.energy}%`;
+      if (mobileCleanBar) mobileCleanBar.style.width = `${pet.clean}%`;
       $("scanFill").style.width = `${scan}%`;
 
       const label = gameMode === "battle" ? "FIGHT" : gameMode === "transition" ? "SIGNAL" : gameMode === "encounter" ? "WARN" : gameMode === "victory" ? "WIN" : gameMode === "defeat" ? "LOSE" : `${Math.floor(scan)}%`;
@@ -1515,7 +1524,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.20",
+        "Mikisun Pixel Guardian V33.22",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2583,21 +2592,29 @@ LV 回到 1。
     function runMobileV28Action(actionName) {
       try {
         if (actionName === "login") {
-          const btn = document.getElementById("googleLoginBtn");
-          if (btn) btn.click();
-          else {
-            setMessage("登入模組尚未載入。");
-            updateUI();
+          if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.signInOrOut === "function") {
+            window.PixelPetCloudAuth.signInOrOut();
+          } else {
+            const btn = document.getElementById("googleLoginBtn");
+            if (btn) btn.click();
+            else {
+              setMessage("Google登入模組尚未載入。\n請稍後再試。");
+              updateUI();
+            }
           }
           return;
         }
 
         if (actionName === "sync") {
-          const btn = document.getElementById("cloudSyncBtn");
-          if (btn) btn.click();
-          else {
-            setMessage("雲端同步模組尚未載入。");
-            updateUI();
+          if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.manualSync === "function") {
+            window.PixelPetCloudAuth.manualSync();
+          } else {
+            const btn = document.getElementById("cloudSyncBtn");
+            if (btn) btn.click();
+            else {
+              setMessage("雲端同步模組尚未載入。\n請稍後再試。");
+              updateUI();
+            }
           }
           return;
         }
@@ -2676,6 +2693,8 @@ LV 回到 1。
       const drawer = () => document.getElementById("mobileSystemDrawer");
 
       document.addEventListener("click", ev => {
+        const actionBtn = ev.target && ev.target.closest ? ev.target.closest("#mobileSystemDrawer [data-mobile-action]") : null;
+        if (actionBtn) return;
         const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
         const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
 
@@ -2704,6 +2723,8 @@ LV 回到 1。
       }, { capture: true });
 
       document.addEventListener("touchend", ev => {
+        const actionBtnTouch = ev.target && ev.target.closest ? ev.target.closest("#mobileSystemDrawer [data-mobile-action]") : null;
+        if (actionBtnTouch) return;
         const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
         const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
 

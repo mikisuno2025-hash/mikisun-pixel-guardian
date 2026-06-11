@@ -144,6 +144,13 @@ async function initFirebase() {
     auth = firebaseApi.getAuth(app);
     db = firebaseApi.getFirestore(app);
 
+    if (firebaseApi.getRedirectResult) {
+      firebaseApi.getRedirectResult(auth).catch(error => {
+        console.warn("redirect result error", error);
+        if (error) setStatus("登入跳轉確認失敗", "error");
+      });
+    }
+
     firebaseApi.onAuthStateChanged(auth, async user => {
       currentUser = user || null;
       if (currentUser) {
@@ -173,39 +180,52 @@ function saveDocRef() {
 }
 
 async function signInOrOut() {
-  if (!FIREBASE_CONFIG_READY) {
-    alert("Firebase 尚未設定。\n請先編輯 assets/js/firebase-config.js。");
-    return;
+  try {
+    if (!auth) {
+      const ok = await initFirebase();
+      if (!ok) return;
+    }
+
+    if (currentUser) {
+      setStatus("正在登出...", "warn");
+      await firebaseApi.signOut(auth);
+      return;
+    }
+
+    if (!provider) {
+      provider = new firebaseApi.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+    }
+
+    setStatus("正在開啟 Google 登入...", "warn");
+
+    try {
+      await firebaseApi.signInWithPopup(auth, provider);
+    } catch (popupError) {
+      console.warn("Google popup sign-in failed, trying redirect", popupError);
+
+      const code = popupError && popupError.code ? String(popupError.code) : "";
+      const canRedirect =
+        code.includes("popup-blocked") ||
+        code.includes("popup-closed-by-user") ||
+        code.includes("cancelled-popup-request") ||
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (canRedirect && firebaseApi.signInWithRedirect) {
+        setStatus("改用跳轉登入...", "warn");
+        await firebaseApi.signInWithRedirect(auth, provider);
+        return;
+      }
+
+      throw popupError;
+    }
+  } catch (error) {
+    console.error(error);
+    const message = error && error.message ? error.message : String(error);
+    setStatus("Google登入失敗", "error");
+    alert("Google 登入失敗：
+" + message);
   }
-
-  if (!auth) {
-    const ok = await initFirebase();
-    if (!ok) return;
-  }
-
-  if (currentUser) {
-    await firebaseApi.signOut(auth);
-    return;
-  }
-
-  const provider = new firebaseApi.GoogleAuthProvider();
-  await firebaseApi.signInWithPopup(auth, provider);
-}
-
-function buildCloudPayload() {
-  const api = gameApi();
-  const pet = api.getSaveData();
-  const dexOwned = api.getDexData();
-  const summary = api.getSummary();
-
-  return {
-    saveVersion: pet.saveVersion || 1,
-    pet,
-    dexOwned,
-    summary,
-    updatedAtMs: Date.now(),
-    updatedAt: firebaseApi.serverTimestamp()
-  };
 }
 
 async function uploadCloudSave(showAlert = false) {
