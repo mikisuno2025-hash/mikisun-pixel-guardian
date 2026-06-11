@@ -1,4 +1,3 @@
-/* V33.38 safe boot rollback stylesheet */
 /* V33.32 mobile bottom auto hide stylesheet */
 /* V33.31 cloud sync dialog stylesheet */
 /* V33.28 all device button check stylesheet */
@@ -1594,27 +1593,4 @@ html.mobile-ui #mobileNativeControls .mobile-compact-btn,
 html.mobile-ui #mobileNativeControls .mobile-gear-toggle,
 html.mobile-ui #mobileNativeControls .mobile-control-collapse-handle{
   touch-action:manipulation!important;
-}
-
-/* V33.38 Safe Boot rollback: no blocking intro/menu/loading */
-.opening-intro-backdrop,
-.title-menu-backdrop,
-.login-loading-backdrop{
-  display:none!important;
-  pointer-events:none!important;
-}
-
-body.opening-active,
-body.title-menu-active,
-body.login-loading-active{
-  overflow:auto!important;
-}
-
-body.opening-active .device,
-body.title-menu-active .device,
-body.login-loading-active .device,
-body.opening-active #mobileNativeControls,
-body.title-menu-active #mobileNativeControls,
-body.login-loading-active #mobileNativeControls{
-  pointer-events:auto!important;
 }

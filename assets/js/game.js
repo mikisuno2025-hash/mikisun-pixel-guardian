@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.38",
+        "pixelPetRetroGuardianV33.32",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.38",
+        "pixelPetOwnedAppearancesV33.32",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1263,7 +1263,7 @@ window.PixelPetI18N = {
     }
 
 
-/* V33.38 full i18n QA patch */
+/* V33.32 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1703,7 +1703,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.38 live volume patch */
+/* V33.32 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1866,7 +1866,7 @@ function v3330PatchSfxVolume() {
 
 
 
-/* V33.38 mobile bottom auto hide controller */
+/* V33.32 mobile bottom auto hide controller */
 function v3332IsMobileUi() {
   return document.documentElement.classList.contains("mobile-ui") ||
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
@@ -1947,36 +1947,10 @@ function v3332BindMobileBottomControls() {
   mo.observe(document.documentElement, { attributes:true, attributeFilter:["class"] });
   mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "hidden", "aria-hidden"] });
 
-  setTimeout(v3332SetMobileControlsMode, 800);
+  setInterval(v3332SetMobileControlsMode, 800);
   v3332SetMobileControlsMode();
 }
 
-
-
-/* V33.38 Safe Boot rollback */
-function v3338SafeBootRollback() {
-  try {
-    document.body.classList.remove("opening-active", "title-menu-active", "login-loading-active");
-    document.documentElement.classList.remove("mobile-controls-suspended");
-    ["openingIntroBackdrop", "titleMenuBackdrop", "loginLoadingBackdrop"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.add("closed");
-        el.setAttribute("aria-hidden", "true");
-        el.style.display = "none";
-        el.style.pointerEvents = "none";
-      }
-    });
-  } catch {}
-}
-
-window.PixelPetSafeBoot = {
-  unblock: () => v3338SafeBootRollback()
-};
-
-v3338SafeBootRollback();
-setTimeout(v3338SafeBootRollback, 80);
-setTimeout(v3338SafeBootRollback, 400);
 
     function updateUI() {
       syncPetAppearanceStage();
@@ -2311,7 +2285,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.38",
+        "Mikisun Pixel Guardian V33.32",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -3556,7 +3530,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.38: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.32: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
