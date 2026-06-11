@@ -1,3 +1,4 @@
+/* V33.9 pet visible external stylesheet */
 /* V33.8 hatch boot fix */
 /* V33.7 mobile native buttons external stylesheet */
 :root{
@@ -1104,3 +1105,25 @@
       white-space:nowrap;
     }
 
+/* V33.9 pet canvas visible fix */
+#petCanvas{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background:transparent!important;
+}
+.game-area{
+  position:relative!important;
+  overflow:hidden!important;
+}
+@media (max-width:820px){
+  #petCanvas{
+    width:100%!important;
+    height:100%!important;
+    min-height:135px!important;
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:none!important;
+  }
+}

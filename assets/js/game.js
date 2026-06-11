@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.8",
+        "pixelPetRetroGuardianV33.9",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.8",
+        "pixelPetOwnedAppearancesV33.9",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -407,6 +407,7 @@ const canvas = document.getElementById("petCanvas");
         setMessage("BGM：OFF\\n背景音樂已靜音。");
       }
       updateUI();
+    try { forcePetVisibleFallback(); } catch {}
     }
 
     function toggleAutoCare() {
@@ -622,6 +623,40 @@ const canvas = document.getElementById("petCanvas");
     function setMessage(text) {
       pet.log = text;
       $("message").textContent = text;
+    }
+
+
+    function forcePetVisibleFallback() {
+      if (!canvas || !ctx || !pet) return;
+      const box = ensureCanvasSize ? ensureCanvasSize() : null;
+      const w = (box && box.w) || canvas.clientWidth || 520;
+      const h = (box && box.h) || canvas.clientHeight || 320;
+      // If the normal draw path produced an empty-looking screen, draw a simple LCD guardian fallback.
+      // This does not replace the full pixel art; it only prevents blank mobile canvas.
+      try {
+        const ap = getAppearance ? getAppearance(pet.appearanceId || 1) : null;
+        ctx.save();
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = "#263528";
+        const cx = w / 2;
+        const cy = h * 0.52;
+        const s = Math.max(22, Math.min(48, w * 0.09));
+        ctx.fillRect(cx - s, cy - s, s * 2, s * 1.7);
+        ctx.fillRect(cx - s * 0.7, cy - s * 1.6, s * 1.4, s * 0.8);
+        ctx.fillRect(cx - s * 1.25, cy - s * 0.2, s * 0.35, s * 0.8);
+        ctx.fillRect(cx + s * 0.9, cy - s * 0.2, s * 0.35, s * 0.8);
+        ctx.fillStyle = "#b6c98e";
+        ctx.fillRect(cx - s * 0.45, cy - s * 1.32, s * 0.25, s * 0.25);
+        ctx.fillRect(cx + s * 0.2, cy - s * 1.32, s * 0.25, s * 0.25);
+        ctx.fillRect(cx - s * 0.35, cy - s * 0.08, s * 0.7, s * 0.16);
+        ctx.fillStyle = "#263528";
+        ctx.font = "700 12px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(ap ? ("No." + String(ap.id).padStart(3, "0")) : "GUARDIAN", cx, Math.min(h - 12, cy + s * 1.25));
+        ctx.restore();
+      } catch (e) {
+        console.warn("fallback draw failed", e);
+      }
     }
 
     function updateUI() {
@@ -1371,6 +1406,25 @@ LV 回到 1。
       ctx.fillRect(x * 4, y * 4, w * 4, h * 4);
     }
 
+
+    function ensureCanvasSize() {
+      if (!canvas) return;
+      const box = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : null;
+      const cssW = Math.max(260, Math.floor((box && box.width) || canvas.clientWidth || 520));
+      const cssH = Math.max(180, Math.floor((box && box.height) || canvas.clientHeight || 320));
+      const ratio = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const targetW = Math.floor(cssW * ratio);
+      const targetH = Math.floor(cssH * ratio);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+      if (ctx && ctx.setTransform) {
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      }
+      return { w: cssW, h: cssH, ratio };
+    }
+
     function drawPetAt(offsetX, offsetY, scale = 1) {
       const old = ctx.getTransform();
       ctx.translate(offsetX * 4, offsetY * 4);
@@ -1937,6 +1991,7 @@ LV 回到 1。
 
 
     setInterval(tick, 15000);
+    setInterval(() => { try { forcePetVisibleFallback(); } catch {} }, 1200);
 
     function loop() {
       frame++;
