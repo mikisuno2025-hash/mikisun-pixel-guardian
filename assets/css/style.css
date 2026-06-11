@@ -1,3 +1,4 @@
+/* V33.37 emergency mobile stable stylesheet */
 /* V33.35 fullscreen title intro gate stylesheet */
 /* V33.34 title menu login flow stylesheet */
 /* V33.33 opening intro dual bgm stylesheet */
@@ -2255,5 +2256,56 @@ body.opening-active .title-menu-backdrop{
   }
   .title-menu-btn{
     padding:10px 14px!important;
+  }
+}
+
+/* V33.37 emergency mobile stable */
+body.opening-active .title-menu-backdrop,
+.opening-intro-backdrop:not(.closed) ~ .title-menu-backdrop{
+  display:none!important;
+}
+
+.title-menu-backdrop{
+  padding:0!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+}
+
+.title-menu-lcd,
+.title-menu-lcd.title-menu-fullscreen{
+  width:100vw!important;
+  height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:calc(48px + env(safe-area-inset-top)) 22px calc(34px + env(safe-area-inset-bottom))!important;
+  box-shadow:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+}
+
+.opening-intro-backdrop,
+.title-menu-backdrop,
+.login-loading-backdrop{
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+}
+
+.opening-noise{
+  animation:none!important;
+  opacity:.18!important;
+}
+
+@media (max-width:700px){
+  .opening-lcd{
+    width:96vw!important;
+    max-height:70dvh!important;
+  }
+  .title-menu-actions{
+    width:min(620px,88vw)!important;
   }
 }

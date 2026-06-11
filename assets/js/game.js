@@ -1,84 +1,107 @@
 
-/* V33.36 Correct Audio Flow */
-function v3336SetAudioVolumeAll() {
-  const vol = (typeof v3330ReadVolumeSetting === "function")
-    ? v3330ReadVolumeSetting("bgmVolume", 0.38)
-    : Math.max(0, Math.min(1, Number(settings?.bgmVolume ?? 0.38)));
+/* V33.37 single stable audio controller */
+const V3337_AUDIO = {
+  current: null,
+  lastSwitchAt: 0,
+  userStarted: false
+};
 
-  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(id => {
-    const audio = document.getElementById(id);
-    if (!audio) return;
-    audio.volume = vol;
-    audio.muted = vol <= 0;
-  });
+function v3337BgmVolume() {
+  try {
+    if (typeof v3330ReadVolumeSetting === "function") return v3330ReadVolumeSetting("bgmVolume", 0.38);
+  } catch {}
+  try {
+    const n = Number(settings && settings.bgmVolume);
+    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.38;
+  } catch {
+    return 0.38;
+  }
 }
 
-function v3336StopAudio(id, reset = true) {
+function v3337GetAudio(id) {
+  const audio = document.getElementById(id);
+  if (!audio) return null;
+  const vol = v3337BgmVolume();
+  audio.volume = vol;
+  audio.muted = vol <= 0;
+  return audio;
+}
+
+function v3337Pause(id, reset = false) {
   const audio = document.getElementById(id);
   if (!audio) return;
+  try { audio.pause(); } catch {}
+  if (reset) {
+    try { audio.currentTime = 0; } catch {}
+  }
+}
+
+function v3337StopAll(reset = false) {
+  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(id => v3337Pause(id, reset));
+  V3337_AUDIO.current = null;
+}
+
+function v3337SwitchMusic(id, options = {}) {
+  const now = Date.now();
+  if (V3337_AUDIO.current === id && !options.force) {
+    const audio = v3337GetAudio(id);
+    if (audio && audio.paused) audio.play().catch(() => {});
+    return;
+  }
+
+  if (now - V3337_AUDIO.lastSwitchAt < 120 && !options.force) return;
+  V3337_AUDIO.lastSwitchAt = now;
+
+  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(other => {
+    if (other !== id) v3337Pause(other, true);
+  });
+
+  const audio = v3337GetAudio(id);
+  V3337_AUDIO.current = id;
+  if (!audio) return;
+
+  try { if (options.reset) audio.currentTime = 0; } catch {}
   try {
-    audio.pause();
-    if (reset) audio.currentTime = 0;
+    if (settings && settings.bgmEnabled === false) return;
   } catch {}
+
+  audio.play().catch(() => {});
 }
 
-function v3336StopAllMusic() {
-  v3336StopAudio("introBgmAudio");
-  v3336StopAudio("menuBgmAudio");
-  v3336StopAudio("mainBgmAudio");
+function v3337PlayIntro() {
+  V3337_AUDIO.userStarted = true;
+  v3337SwitchMusic("introBgmAudio", { reset:true, force:true });
 }
 
-function v3336PlayIntroMusic() {
-  v3336SetAudioVolumeAll();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  v3336StopAudio("menuBgmAudio");
-  v3336StopAudio("mainBgmAudio");
-  const intro = document.getElementById("introBgmAudio");
-  if (intro) {
-    try { intro.currentTime = 0; } catch {}
-    intro.play().catch(() => {});
-  }
+function v3337PlayMenu() {
+  v3337SwitchMusic("menuBgmAudio", { reset:true, force:true });
 }
 
-function v3336PlayTitleMenuMusic() {
-  v3336SetAudioVolumeAll();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  v3336StopAudio("introBgmAudio");
-  v3336StopAudio("mainBgmAudio");
-  const menu = document.getElementById("menuBgmAudio");
-  if (menu) {
-    try { menu.currentTime = 0; } catch {}
-    menu.play().catch(() => {});
-  }
+function v3337StartLoadingAudioState() {
+  v3337Pause("menuBgmAudio", true);
+  v3337Pause("introBgmAudio", true);
+  V3337_AUDIO.current = null;
 }
 
-function v3336StopTitleMenuMusicForLoading() {
-  v3336StopAudio("menuBgmAudio");
+function v3337PlayGame() {
+  v3337SwitchMusic("mainBgmAudio", { reset:true, force:true });
 }
 
-function v3336PlayGameMusicAfterLoading() {
-  v3336SetAudioVolumeAll();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  v3336StopAudio("introBgmAudio");
-  v3336StopAudio("menuBgmAudio");
-  const gameBgm = document.getElementById("mainBgmAudio");
-  if (gameBgm) {
-    try { gameBgm.currentTime = 0; } catch {}
-    gameBgm.play().catch(() => {});
-  }
+function v3337ApplyAudioVolumeOnly() {
+  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(id => v3337GetAudio(id));
 }
 
 window.PixelPetAudioFlow = {
-  intro: () => v3336PlayIntroMusic(),
-  menu: () => v3336PlayTitleMenuMusic(),
-  loading: () => v3336StopTitleMenuMusicForLoading(),
-  game: () => v3336PlayGameMusicAfterLoading(),
-  stopAll: () => v3336StopAllMusic(),
-  applyVolumes: () => v3336SetAudioVolumeAll()
+  intro: () => v3337PlayIntro(),
+  menu: () => v3337PlayMenu(),
+  loading: () => v3337StartLoadingAudioState(),
+  game: () => v3337PlayGame(),
+  stopAll: () => v3337StopAll(true),
+  applyVolumes: () => v3337ApplyAudioVolumeOnly()
 };
 
 
-/* V33.36 Correct Intro Gate */
+/* V33.37 Correct Intro Gate */
 function v3335IsOpeningVisible() {
   const opening = document.getElementById("openingIntroBackdrop");
   return !!opening && !opening.classList.contains("closed");
@@ -112,1535 +135,13 @@ function v3335BindIntroGateGuard() {
   if (window.__v3335IntroGateGuardBound) return;
   window.__v3335IntroGateGuardBound = true;
 
-  const mo = new MutationObserver(() => {
-    if (v3335IsOpeningVisible()) v3335HideTitleMenuHard();
-  });
-  mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "aria-hidden"] });
-  const opening = document.getElementById("openingIntroBackdrop");
-  if (opening) mo.observe(opening, { attributes:true, attributeFilter:["class", "aria-hidden"] });
-
-  // On this corrected version, first entry must be opening tap screen, not title menu.
   let seen = false;
   try { seen = localStorage.getItem(OPENING_STORAGE_KEY) === "1"; } catch {}
+
   if (!seen && typeof v3335ShowOnlyOpeningTap === "function") {
     setTimeout(v3335ShowOnlyOpeningTap, 0);
-    setTimeout(v3335ShowOnlyOpeningTap, 120);
   }
 }
-
-/* v3323 force mobile-ui */
-
-(function(){
-  try {
-    var isMobile = window.matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) document.documentElement.classList.add("mobile-ui");
-  } catch (e) {
-    document.documentElement.classList.add("mobile-ui");
-  }
-})();
-
-const canvas = document.getElementById("petCanvas");
-    const ctx = canvas.getContext("2d");
-    const screenEl = document.getElementById("screen");
-    const $ = id => document.getElementById(id);
-
-    const SAVE_KEY = "pixelPetSave";
-    const SAVE_VERSION = 8;
-    const OWNED_APPEARANCE_KEY = "pixelPetDex";
-    const MIGRATION_FLAG_KEY = "pixelPetMigrationV30Done";
-    const COLLECTION_KEY = "pixelPetAppearanceCollectionV24";
-
-    const clamp = (n, min = 0, max = 100) => Math.max(min, Math.min(max, n));
-    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const now = () => performance.now();
-
-    const evolutions = [
-      { name: "幼年 I", minLv: 1, hp: 30, stageIndex: 0 },
-      { name: "幼年 II", minLv: 3, hp: 40, stageIndex: 1 },
-      { name: "成長期", minLv: 5, hp: 52, stageIndex: 2 },
-      { name: "成熟期", minLv: 7, hp: 66, stageIndex: 3 },
-      { name: "完全體", minLv: 9, hp: 82, stageIndex: 4 }
-    ];
-
-    const enemies = [
-      { name: "雜訊蟲", icon: "bug", baseHp: 18, atk: 4, exp: 10 },
-      { name: "資料史萊姆", icon: "slime", baseHp: 22, atk: 5, exp: 12 },
-      { name: "位元蝙蝠", icon: "bat", baseHp: 19, atk: 6, exp: 14 },
-      { name: "破圖野豬", icon: "boar", baseHp: 28, atk: 7, exp: 18 }
-    ];
-
-
-
-
-
-    const bodyNames = ["圓球", "尖角", "長耳", "豆芽", "甲殼", "幽浮", "蝙翼", "尾獸", "方塊", "皇冠"];
-    const familyNames = ["星芽家族", "雙角家族", "電波家族", "葉羽家族", "月牙家族", "機械家族", "貓耳家族", "螺旋家族", "小翼家族", "晶核家族"];
-    const branchNames = ["守護分支", "狂戰分支"];
-    const stageLabels = ["幼年I", "幼年II", "成長期", "成熟期", "完全體"];
-
-    function randomIndex(max) {
-      if (window.crypto && crypto.getRandomValues) {
-        const arr = new Uint32Array(1);
-        crypto.getRandomValues(arr);
-        return arr[0] % max;
-      }
-      return Math.floor(Math.random() * max);
-    }
-
-    function loadOwnedAppearances() {
-      try {
-        const raw = localStorage.getItem(OWNED_APPEARANCE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed.filter(n => Number.isInteger(n) && n >= 1 && n <= 100) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveOwnedAppearances(list) {
-      const clean = Array.from(new Set(list.map(Number).filter(n => Number.isInteger(n) && n >= 1 && n <= 100)));
-      try { localStorage.setItem(OWNED_APPEARANCE_KEY, JSON.stringify(clean)); } catch (e) { console.warn("dex save failed", e); }
-      return clean;
-    }
-
-    function markAppearanceOwned(id) {
-      const owned = loadOwnedAppearances();
-      if (!owned.includes(id)) owned.push(id);
-      return saveOwnedAppearances(owned);
-    }
-
-    function appearanceCollectionCount() {
-      const owned = loadOwnedAppearances();
-      return { owned: owned.length, remaining: Math.max(0, 100 - owned.length) };
-    }
-
-    function resetAppearanceCollection() {
-      try { localStorage.removeItem(OWNED_APPEARANCE_KEY); } catch (e) { console.warn("dex reset failed", e); }
-    }
-
-    function appearanceIdFromFamilyBranchStage(familyId, branchId, stageIndex) {
-      return (familyId - 1) * 10 + branchId * 5 + stageIndex + 1;
-    }
-
-    function parseAppearanceId(id) {
-      const safeId = ((Number(id || 1) - 1) % 100 + 100) % 100 + 1;
-      const familyId = Math.floor((safeId - 1) / 10) + 1;
-      const offset = (safeId - 1) % 10;
-      const branchId = Math.floor(offset / 5);
-      const stageIndex = offset % 5;
-      return { id: safeId, familyId, branchId, stageIndex };
-    }
-
-    function stageIndexForLevel(lv) {
-      if (lv >= 9) return 4;
-      if (lv >= 7) return 3;
-      if (lv >= 5) return 2;
-      if (lv >= 3) return 1;
-      return 0;
-    }
-
-    function randomStarterFamily(previousFamilyId = 0) {
-      let pool = Array.from({ length: 10 }, (_, i) => i + 1);
-      if (pool.length > 1 && previousFamilyId) {
-        pool = pool.filter(id => id !== previousFamilyId);
-      }
-      return pool[randomIndex(pool.length)];
-    }
-
-    function chooseEvolutionBranch() {
-      const guardianScore =
-        (pet.careScore || 0) +
-        (pet.cleanActions || 0) * 2 +
-        Math.floor((pet.clean || 0) / 20) +
-        Math.floor((pet.mood || 0) / 25);
-
-      const battleScore =
-        (pet.battleWins || 0) * 3 +
-        (pet.trainCount || 0) * 2 +
-        (pet.neglectScore || 0);
-
-      return guardianScore >= battleScore ? 0 : 1;
-    }
-
-    function getAppearance(id) {
-      const info = parseAppearanceId(id);
-      const familySeed = info.familyId - 1;
-      const stageIndex = info.stageIndex;
-
-      // 前兩個階段維持較中性的共同外觀；從成長期開始加入分支差異。
-      const effectiveBranch = stageIndex < 2 ? 0 : info.branchId;
-      const body = (familySeed + (stageIndex >= 2 ? effectiveBranch * 2 : 0) + Math.floor(stageIndex / 2)) % 10;
-      const trait = (familySeed * 3 + stageIndex + effectiveBranch * 4) % 10;
-
-      return {
-        id: info.id,
-        familyId: info.familyId,
-        familyName: familyNames[familySeed],
-        branchId: info.branchId,
-        branchName: branchNames[info.branchId],
-        stageIndex,
-        stageLabel: stageLabels[stageIndex],
-        body,
-        trait,
-        name: `${familyNames[familySeed]} ${stageLabels[stageIndex]}`
-      };
-    }
-
-    function appearanceLabel(id) {
-      const a = getAppearance(id);
-      return `No.${String(a.id).padStart(3, "0")} ${a.familyName} ${a.stageLabel}`;
-    }
-
-    function syncPetAppearanceStage() {
-      if (!pet) return;
-      const targetStage = stageIndexForLevel(pet.lv || 1);
-
-      if (!pet.familyId) {
-        const parsed = parseAppearanceId(pet.appearanceId || 1);
-        pet.familyId = parsed.familyId;
-      }
-
-      if (typeof pet.branchId !== "number") pet.branchId = 0;
-      if (typeof pet.branchChosen !== "boolean") pet.branchChosen = false;
-
-      if (targetStage >= 2 && !pet.branchChosen) {
-        pet.branchId = chooseEvolutionBranch();
-        pet.branchChosen = true;
-      }
-
-      pet.appearanceId = appearanceIdFromFamilyBranchStage(pet.familyId, pet.branchId || 0, targetStage);
-      markAppearanceOwned(pet.appearanceId);
-    }
-
-
-
-    function legacyReadJson(key) {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function migrateLegacyStorage() {
-      if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
-
-      const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.36",
-        "pixelPetRetroGuardianV28",
-        "pixelPetRetroGuardianV27",
-        "pixelPetRetroGuardianV26",
-        "pixelPetRetroGuardianV25",
-        "pixelPetRetroGuardianV24"
-      ];
-
-      const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.36",
-        "pixelPetOwnedAppearancesV28",
-        "pixelPetOwnedAppearancesV27",
-        "pixelPetOwnedAppearancesV26",
-        "pixelPetOwnedAppearancesV25",
-        "pixelPetOwnedAppearancesV24"
-      ];
-
-      if (!localStorage.getItem(SAVE_KEY)) {
-        for (const key of legacySaveKeys) {
-          const oldSave = legacyReadJson(key);
-          if (oldSave && typeof oldSave === "object") {
-            oldSave.saveVersion = SAVE_VERSION;
-            oldSave.migratedFrom = key;
-            oldSave.migratedAt = Date.now();
-            localStorage.setItem(SAVE_KEY, JSON.stringify(oldSave));
-            break;
-          }
-        }
-      }
-
-      const mergedDex = new Set(loadOwnedAppearances());
-      for (const key of legacyDexKeys) {
-        const oldDex = legacyReadJson(key);
-        if (Array.isArray(oldDex)) {
-          oldDex.forEach(id => {
-            const n = Number(id);
-            if (Number.isInteger(n) && n >= 1 && n <= 100) mergedDex.add(n);
-          });
-        }
-      }
-
-      if (mergedDex.size > 0) {
-        saveOwnedAppearances(Array.from(mergedDex));
-      }
-
-      localStorage.setItem(MIGRATION_FLAG_KEY, String(Date.now()));
-    }
-
-    const defaultPet = (forcedFamilyId = null) => {
-      const familyId = forcedFamilyId || randomStarterFamily(window.__lastFamilyId || 0);
-      const appearanceId = appearanceIdFromFamilyBranchStage(familyId, 0, 0);
-      window.__lastFamilyId = familyId;
-      try { markAppearanceOwned(appearanceId); } catch (e) { console.warn('dex mark failed', e); }
-      return {
-        saveVersion: SAVE_VERSION,
-        name: "PICO",
-        familyId,
-        branchId: 0,
-        branchChosen: false,
-        appearanceId,
-        careScore: 0,
-        cleanActions: 0,
-        battleWins: 0,
-        trainCount: 0,
-        neglectScore: 0,
-        lv: 1,
-        exp: 0,
-        age: 0,
-        hp: 30,
-        maxHp: 30,
-        hunger: 72,
-        mood: 70,
-        energy: 68,
-        clean: 75,
-        sick: false,
-        asleep: false,
-        lastTick: Date.now(),
-        bornAt: Date.now(),
-        log: `PICO 誕生了！
-初始家族 ${appearanceLabel(appearanceId)}`
-      };
-    };
-
-    migrateLegacyStorage();
-    let pet = load();
-    window.__PIXEL_BOOT_OK__ = true;
-    let frame = 0;
-    let flash = 0;
-    let rehatchPendingUntil = 0;
-    let nextForcedAppearanceId = null;
-
-    let gameMode = "idle"; // idle, transition, encounter, battle, victory, defeat
-    let enemy = null;
-    let enemyHp = 0;
-    let enemyMaxHp = 0;
-    let battlePhase = "none";
-    let animStart = 0;
-    let nextBattleStep = 0;
-
-    let scan = 0;
-    let lastPointerX = null;
-    let lastPointerTime = 0;
-    let lastDirection = 0;
-    let lastShakeAt = 0;
-    let shakeCooldownUntil = 0;
-    let isPointerNearScreen = false;
-
-    // V10：左右往返判定用。
-    // 不是滑動就抽，而是完成兩次方向轉折才抽一次。
-    let moveBucket = 0;
-    let stableDirection = 0;
-    let turnCount = 0;
-    let lastTurnAt = 0;
-
-    // ===== 8-BIT AUDIO ENGINE =====
-    let audioCtx = null;
-    let soundEnabled = localStorage.getItem("pixelPetSoundEnabled") !== "false";
-    const bgmAudio = document.getElementById("bgmAudio");
-    let bgmEnabled = localStorage.getItem("pixelPetBgmEnabledV19") !== "false";
-    let animationsEnabled = localStorage.getItem("pixelPetAnimationsEnabled") !== "false";
-    let autoCareEnabled = localStorage.getItem("pixelPetAutoCareEnabledV16") !== "false";
-    let autoPatrolEnabled = localStorage.getItem("pixelPetAutoPatrolEnabledV16") !== "false";
-    let motionShakeEnabled = localStorage.getItem("pixelPetMotionShakeEnabledV33") === "true";
-    let motionSensitivity = localStorage.getItem("pixelPetMotionSensitivityV33") || "medium";
-    let lastClientError = "";
-    let motionListenerBound = false;
-    let lastMotionMagnitude = null;
-    let lastMotionPeakAt = 0;
-    let motionShakeCount = 0;
-    let motionShakeWindowUntil = 0;
-    let lastAutoCareAt = 0;
-    let lastAutoPatrolAt = 0;
-    let bgmVolume = Number(localStorage.getItem("pixelPetBgmVolume") ?? "38");
-    let sfxVolume = Number(localStorage.getItem("pixelPetSfxVolume") ?? "70");
-    let fontSizePercent = Number(localStorage.getItem("pixelPetFontSize") ?? "100");
-    let bgmStarted = false;
-    let bgmBlockedByBrowser = false;
-    if (bgmAudio) {
-      bgmAudio.volume = bgmEnabled ? bgmVolume / 100 : 0;
-    }
-
-    function applySystemSettings() {
-      bgmVolume = clamp(Number(bgmVolume) || 0, 0, 100);
-      sfxVolume = clamp(Number(sfxVolume) || 0, 0, 100);
-      fontSizePercent = clamp(Number(fontSizePercent) || 100, 85, 130);
-
-      document.body.classList.toggle("no-animations", !animationsEnabled);
-      document.documentElement.style.setProperty("--ui-font-scale", String(fontSizePercent / 100));
-
-      if (bgmAudio) {
-        bgmAudio.volume = bgmEnabled ? bgmVolume / 100 : 0;
-      }
-
-      const animInput = document.getElementById("settingAnimations");
-      const autoCareInput = document.getElementById("settingAutoCare");
-      const autoPatrolInput = document.getElementById("settingAutoPatrol");
-      const motionShakeInput = document.getElementById("settingMotionShake");
-      const motionSensitivitySelect = document.getElementById("settingMotionSensitivity");
-      const bgmSlider = document.getElementById("settingBgmVolume");
-      const sfxSlider = document.getElementById("settingSfxVolume");
-      const fontSlider = document.getElementById("settingFontSize");
-      const languageSelect = document.getElementById("languageSelect");
-
-      if (animInput) animInput.checked = animationsEnabled;
-      if (autoCareInput) autoCareInput.checked = autoCareEnabled;
-      if (autoPatrolInput) autoPatrolInput.checked = autoPatrolEnabled;
-      if (motionShakeInput) motionShakeInput.checked = motionShakeEnabled;
-      if (motionSensitivitySelect) motionSensitivitySelect.value = motionSensitivity;
-      if (bgmSlider) bgmSlider.value = bgmVolume;
-      if (sfxSlider) sfxSlider.value = sfxVolume;
-      if (fontSlider) fontSlider.value = fontSizePercent;
-
-      const bgmVal = document.getElementById("bgmVolValue");
-      const sfxVal = document.getElementById("sfxVolValue");
-      const fontVal = document.getElementById("fontSizeValue");
-      if (bgmVal) bgmVal.textContent = `${Math.round(bgmVolume)}%`;
-      if (sfxVal) sfxVal.textContent = `${Math.round(sfxVolume)}%`;
-      if (fontVal) fontVal.textContent = `${Math.round(fontSizePercent)}%`;
-    }
-
-    function saveSystemSettings() {
-      localStorage.setItem("pixelPetAnimationsEnabled", String(animationsEnabled));
-      localStorage.setItem("pixelPetAutoCareEnabledV16", String(autoCareEnabled));
-      localStorage.setItem("pixelPetAutoPatrolEnabledV16", String(autoPatrolEnabled));
-      localStorage.setItem("pixelPetMotionShakeEnabledV33", String(motionShakeEnabled));
-      localStorage.setItem("pixelPetMotionSensitivityV33", String(motionSensitivity));
-      localStorage.setItem("pixelPetBgmVolume", String(Math.round(bgmVolume)));
-      localStorage.setItem("pixelPetSfxVolume", String(Math.round(sfxVolume)));
-      localStorage.setItem("pixelPetFontSize", String(Math.round(fontSizePercent)));
-    }
-
-    function playBgm() {
-      v3330SetAudioElementVolume();
-      if (!bgmEnabled || !bgmAudio) return;
-      bgmAudio.muted = false;
-      bgmAudio.volume = bgmEnabled ? bgmVolume / 100 : 0;
-
-      const p = bgmAudio.play();
-      if (p && typeof p.then === "function") {
-        p.then(() => {
-          bgmStarted = true;
-          bgmBlockedByBrowser = false;
-        }).catch(() => {
-          bgmStarted = false;
-          bgmBlockedByBrowser = true;
-          // 這通常是瀏覽器的自動播放限制。
-          // 遊戲會持續嘗試，並在第一次互動時自動接續播放。
-        });
-      } else {
-        bgmStarted = true;
-        bgmBlockedByBrowser = false;
-      }
-    }
-
-    function tryAutoStartBgm() {
-      if (!bgmEnabled || !bgmAudio || bgmStarted) return;
-      playBgm();
-    }
-
-    function stopBgm() {
-      if (!bgmAudio) return;
-      bgmAudio.pause();
-      bgmStarted = false;
-    }
-
-    function toggleBgm() {
-      bgmEnabled = !bgmEnabled;
-      localStorage.setItem("pixelPetBgmEnabledV19", String(bgmEnabled));
-      if (bgmEnabled) {
-        if (bgmAudio) bgmAudio.volume = bgmVolume / 100;
-        playBgm();
-        setMessage("BGM：ON\\n背景音樂會自動啟動。");
-      } else {
-        stopBgm();
-        setMessage("BGM：OFF\\n背景音樂已靜音。");
-      }
-      ensureMobileControlsVisible();
-    updateUI();
-    try { forcePetVisibleFallback(); } catch {}
-    }
-
-    function toggleAutoCare() {
-      autoCareEnabled = !autoCareEnabled;
-      saveSystemSettings();
-      applySystemSettings();
-      sfx("care");
-      setMessage(autoCareEnabled
-        ? "AUTO CARE：ON\\n全自動照顧啟動。"
-        : "AUTO CARE：OFF\\n改回手動照顧模式。");
-      v3329ApplyI18n();
-      if (typeof v3334ApplyTitleMenuI18n === 'function') v3334ApplyTitleMenuI18n();
-      updateUI();
-    }
-
-    function toggleAutoPatrol() {
-      autoPatrolEnabled = !autoPatrolEnabled;
-      lastAutoPatrolAt = now();
-      saveSystemSettings();
-      applySystemSettings();
-      sfx("care");
-      setMessage(autoPatrolEnabled
-        ? "AUTO PATROL：ON\\n全自動巡邏啟動。"
-        : "AUTO PATROL：OFF\\n掛機巡邏已停止。");
-      updateUI();
-    }
-
-
-
-    function motionShakeThreshold() {
-      if (motionSensitivity === "high") return 7.2;
-      if (motionSensitivity === "low") return 12.4;
-      return 9.5;
-    }
-
-    function updateMotionShakeControls() {
-      const input = document.getElementById("settingMotionShake");
-      if (input) input.checked = motionShakeEnabled;
-
-      document.querySelectorAll("[data-mobile-action='motion']").forEach(btn => {
-        btn.textContent = motionShakeEnabled ? t("btn.motionOff") : t("btn.motionOn");
-      });
-    }
-
-    function bindMotionShake() {
-      if (motionListenerBound) return;
-      if (typeof window.DeviceMotionEvent === "undefined") return;
-      window.addEventListener("devicemotion", onDeviceMotionShake, { passive: true });
-      motionListenerBound = true;
-    }
-
-    async function enableMotionShake() {
-      initAudio();
-
-      if (typeof window.DeviceMotionEvent === "undefined") {
-        motionShakeEnabled = false;
-        saveSystemSettings();
-        setMessage(t("motion.unsupported"));
-        updateUI();
-        return;
-      }
-
-      try {
-        if (typeof window.DeviceMotionEvent.requestPermission === "function") {
-          setMessage(t("motion.permission"));
-          updateUI();
-
-          const result = await window.DeviceMotionEvent.requestPermission();
-          if (result !== "granted") {
-            motionShakeEnabled = false;
-            saveSystemSettings();
-            setMessage(t("motion.denied"));
-            updateUI();
-            return;
-          }
-        }
-
-        motionShakeEnabled = true;
-        lastMotionMagnitude = null;
-        motionShakeCount = 0;
-        motionShakeWindowUntil = 0;
-        bindMotionShake();
-        saveSystemSettings();
-        sfx("care");
-        setMessage(t("motion.enabled"));
-        updateUI();
-      } catch (err) {
-        console.error("motion permission failed", err);
-        motionShakeEnabled = false;
-        saveSystemSettings();
-        setMessage(t("motion.denied"));
-        updateUI();
-      }
-    }
-
-    function disableMotionShake() {
-      motionShakeEnabled = false;
-      motionShakeCount = 0;
-      motionShakeWindowUntil = 0;
-      saveSystemSettings();
-      sfx("click");
-      setMessage(t("motion.disabled"));
-      updateUI();
-    }
-
-    async function toggleMotionShake() {
-      if (motionShakeEnabled) {
-        disableMotionShake();
-      } else {
-        await enableMotionShake();
-      }
-    }
-
-    function rollEncounterByMotionShake() {
-      if (!canEncounter() || gameMode !== "idle") return;
-
-      lastShakeAt = now();
-
-      if (scan >= 100) {
-        scan = 0;
-        setMessage(`保底條滿格！\n搖動探索保證遇怪，條歸零。`);
-        sfx("scanFull");
-        updateUI();
-        setTimeout(() => {
-          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
-        }, 220);
-        return;
-      }
-
-      const encounterRate = 0.10;
-
-      if (Math.random() < encounterRate) {
-        scan = 0;
-        setMessage(`搖動探索完成！\n10% 遭遇成功，保底條歸零。`);
-        sfx("scanFull");
-        updateUI();
-        setTimeout(() => {
-          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
-        }, 180);
-        return;
-      }
-
-      scan = clamp(scan + 1);
-      sfx("scan");
-
-      if (scan >= 100) {
-        scan = 0;
-        setMessage(`搖動探索失敗，但保底條滿格！\n這次保證遇怪，條歸零。`);
-        sfx("scanFull");
-        updateUI();
-        setTimeout(() => {
-          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
-        }, 220);
-        return;
-      }
-
-      setMessage(`搖動探索完成。\n沒有遇到怪物。\n保底條 +1% → ${Math.floor(scan)}%`);
-      updateUI();
-    }
-
-    function onDeviceMotionShake(ev) {
-      if (!motionShakeEnabled || !canEncounter()) return;
-
-      const a = ev.accelerationIncludingGravity || ev.acceleration;
-      if (!a) return;
-
-      const x = Number(a.x) || 0;
-      const y = Number(a.y) || 0;
-      const z = Number(a.z) || 0;
-      const mag = Math.sqrt(x * x + y * y + z * z);
-      const tNow = now();
-
-      if (lastMotionMagnitude === null) {
-        lastMotionMagnitude = mag;
-        return;
-      }
-
-      const delta = Math.abs(mag - lastMotionMagnitude);
-      lastMotionMagnitude = mag;
-
-      // 門檻偏保守，避免拿起手機或輕微晃動就誤觸。
-      if (delta < motionShakeThreshold()) return;
-      if (tNow - lastMotionPeakAt < 260) return;
-
-      lastMotionPeakAt = tNow;
-
-      if (tNow > motionShakeWindowUntil) {
-        motionShakeCount = 1;
-        motionShakeWindowUntil = tNow + 1500;
-        setMessage(t("motion.needMore"));
-        sfx("scan");
-        updateUI();
-        return;
-      }
-
-      motionShakeCount += 1;
-
-      if (motionShakeCount >= 2) {
-        motionShakeCount = 0;
-        motionShakeWindowUntil = 0;
-        pet.energy = clamp(pet.energy - 0.35);
-        rollEncounterByMotionShake();
-      }
-    }
-
-
-    function initAudio() {
-      if (!soundEnabled) return;
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
-      }
-      if (audioCtx && audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
-      playBgm();
-    }
-
-    function tone(freq, duration = 0.08, type = "square", volume = 0.045, delay = 0) {
-      if (!soundEnabled) return;
-      initAudio();
-      if (!audioCtx) return;
-      const t = audioCtx.currentTime + delay;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, t);
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(volume * (sfxVolume / 100), t + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + duration + 0.02);
-    }
-
-    function noise(duration = 0.08, volume = 0.035, delay = 0) {
-      if (!soundEnabled) return;
-      initAudio();
-      if (!audioCtx) return;
-      const t = audioCtx.currentTime + delay;
-      const bufferSize = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-      const source = audioCtx.createBufferSource();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(1800, t);
-      gain.gain.setValueAtTime(volume * (sfxVolume / 100), t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-      source.buffer = buffer;
-      source.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      source.start(t);
-      source.stop(t + duration + 0.02);
-    }
-
-    function sfx(name) {
-      if (!soundEnabled) return;
-      if (name === "click") tone(520, 0.035, "square", 0.035);
-      if (name === "scan") tone(420 + Math.floor(scan) * 3, 0.025, "square", 0.025);
-      if (name === "scanFull") {
-        tone(660, 0.06, "square", 0.045);
-        tone(880, 0.06, "square", 0.045, 0.06);
-        tone(1320, 0.08, "square", 0.04, 0.12);
-      }
-      if (name === "transition") {
-        noise(0.18, 0.028);
-        tone(160, 0.05, "square", 0.035);
-        tone(520, 0.04, "square", 0.03, 0.08);
-        tone(260, 0.05, "square", 0.03, 0.16);
-        noise(0.2, 0.024, 0.18);
-      }
-
-      if (name === "encounter") {
-        tone(180, 0.08, "sawtooth", 0.045);
-        tone(260, 0.08, "sawtooth", 0.045, 0.08);
-        tone(140, 0.14, "square", 0.05, 0.16);
-        noise(0.12, 0.025, 0.08);
-      }
-      if (name === "petAttack") {
-        tone(760, 0.055, "square", 0.045);
-        tone(1040, 0.055, "square", 0.045, 0.045);
-        tone(1320, 0.05, "square", 0.04, 0.09);
-      }
-      if (name === "enemyAttack") {
-        tone(300, 0.06, "sawtooth", 0.045);
-        tone(220, 0.09, "sawtooth", 0.045, 0.06);
-        noise(0.06, 0.03, 0.04);
-      }
-      if (name === "win") {
-        tone(523.25, 0.08, "square", 0.045);
-        tone(659.25, 0.08, "square", 0.045, 0.09);
-        tone(783.99, 0.08, "square", 0.045, 0.18);
-        tone(1046.5, 0.16, "square", 0.04, 0.28);
-      }
-      if (name === "lose") {
-        tone(392, 0.12, "square", 0.04);
-        tone(330, 0.12, "square", 0.04, 0.12);
-        tone(262, 0.22, "square", 0.04, 0.24);
-      }
-      if (name === "evolve") {
-        tone(440, 0.06, "square", 0.04);
-        tone(660, 0.06, "square", 0.04, 0.06);
-        tone(880, 0.06, "square", 0.04, 0.12);
-        tone(1320, 0.12, "square", 0.04, 0.18);
-      }
-      if (name === "care") {
-        tone(620, 0.04, "square", 0.035);
-        tone(820, 0.05, "square", 0.03, 0.045);
-      }
-    }
-
-    function load() {
-      try {
-        const raw = localStorage.getItem(SAVE_KEY);
-        if (!raw) return defaultPet();
-
-        const saved = JSON.parse(raw);
-        const p = {
-          saveVersion: SAVE_VERSION,
-          name: "PICO",
-          familyId: 1,
-          branchId: 0,
-          branchChosen: false,
-          appearanceId: 1,
-          careScore: 0,
-          cleanActions: 0,
-          battleWins: 0,
-          trainCount: 0,
-          neglectScore: 0,
-          lv: 1,
-          exp: 0,
-          age: 0,
-          hp: 30,
-          maxHp: 30,
-          hunger: 72,
-          mood: 70,
-          energy: 68,
-          clean: 75,
-          sick: false,
-          asleep: false,
-          lastTick: Date.now(),
-          bornAt: Date.now(),
-          log: "雲端前本機穩定存檔已載入。",
-          ...saved
-        };
-
-        p.saveVersion = SAVE_VERSION;
-
-        if (!p.familyId) {
-          const parsed = parseAppearanceId(p.appearanceId || 1);
-          p.familyId = parsed.familyId;
-        }
-        if (typeof p.branchId !== "number") p.branchId = 0;
-        if (typeof p.branchChosen !== "boolean") p.branchChosen = false;
-
-        pet = p;
-        syncPetAppearanceStage();
-        offlineDecay(pet);
-        return pet;
-      } catch {
-        return defaultPet();
-      }
-    }
-
-    function save() {
-      pet.saveVersion = SAVE_VERSION;
-      pet.lastTick = Date.now();
-      pet.updatedAt = Date.now();
-      try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(pet));
-        window.dispatchEvent(new CustomEvent("pixel-pet-local-save", {
-          detail: {
-            updatedAt: pet.updatedAt || pet.lastTick || Date.now(),
-            saveVersion: SAVE_VERSION
-          }
-        }));
-      } catch (e) {
-        console.warn("local save failed", e);
-      }
-    }
-
-    function offlineDecay(p) {
-      const minutes = Math.min(240, Math.floor((Date.now() - (p.lastTick || Date.now())) / 60000));
-      if (minutes <= 0) return;
-      const d = Math.floor(minutes / 4);
-      p.hunger = clamp(p.hunger - d * 2);
-      p.energy = clamp(p.energy - d);
-      p.clean = clamp(p.clean - d * 2);
-      p.mood = clamp(p.mood - d);
-      p.age = Math.floor((Date.now() - (p.bornAt || Date.now())) / 60000);
-      if (p.hunger < 15 || p.clean < 15) p.sick = true;
-      if (p.hunger === 0 || p.clean === 0) p.hp = clamp(p.hp - d * 2, 1, p.maxHp);
-    }
-
-    function currentEvolution() {
-      return evolutions[stageIndexForLevel(pet.lv || 1)] || evolutions[0];
-    }
-
-    function setMessage(text) {
-      pet.log = text;
-      $("message").textContent = text;
-    }
-
-
-    function forcePetVisibleFallback() {
-      if (!canvas || !ctx || !pet) return;
-      const box = ensureCanvasSize ? ensureCanvasSize() : null;
-      const w = (box && box.w) || canvas.clientWidth || 520;
-      const h = (box && box.h) || canvas.clientHeight || 320;
-      // If the normal draw path produced an empty-looking screen, draw a simple LCD guardian fallback.
-      // This does not replace the full pixel art; it only prevents blank mobile canvas.
-      try {
-        const ap = getAppearance ? getAppearance(pet.appearanceId || 1) : null;
-        ctx.save();
-        ctx.globalAlpha = 0.95;
-        ctx.fillStyle = "#263528";
-        const cx = w / 2;
-        const cy = h * 0.52;
-        const s = Math.max(22, Math.min(48, w * 0.09));
-        ctx.fillRect(cx - s, cy - s, s * 2, s * 1.7);
-        ctx.fillRect(cx - s * 0.7, cy - s * 1.6, s * 1.4, s * 0.8);
-        ctx.fillRect(cx - s * 1.25, cy - s * 0.2, s * 0.35, s * 0.8);
-        ctx.fillRect(cx + s * 0.9, cy - s * 0.2, s * 0.35, s * 0.8);
-        ctx.fillStyle = "#b6c98e";
-        ctx.fillRect(cx - s * 0.45, cy - s * 1.32, s * 0.25, s * 0.25);
-        ctx.fillRect(cx + s * 0.2, cy - s * 1.32, s * 0.25, s * 0.25);
-        ctx.fillRect(cx - s * 0.35, cy - s * 0.08, s * 0.7, s * 0.16);
-        ctx.fillStyle = "#263528";
-        ctx.font = "700 12px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(ap ? ("No." + String(ap.id).padStart(3, "0")) : "GUARDIAN", cx, Math.min(h - 12, cy + s * 1.25));
-        ctx.restore();
-      } catch (e) {
-        console.warn("fallback draw failed", e);
-      }
-    }
-
-
-
-    const LANGUAGE_STORAGE_KEY = "pixelPetLanguage";
-    const LANGUAGE_MANUAL_KEY = "pixelPetLanguageManual";
-
-    const I18N = {
-      "zh-TW": {
-        "btn.rename": "命名",
-        "btn.dex": "圖鑑",
-        "btn.google": "Google登入",
-        "btn.logout": "登出",
-        "btn.cloud": "雲端同步",
-        "btn.manualSync": "手動同步",
-        "btn.sound": "音效 ON",
-        "btn.soundShort": "音效",
-        "btn.bgm": "BGM ON",
-        "btn.bgmShort": "BGM",
-        "btn.autocare": "AUTO CARE",
-        "btn.patrol": "PATROL",
-        "btn.motionOn": "啟用搖動",
-        "btn.motionOff": "關閉搖動",
-        "btn.rehatch": "重新孵化",
-        "btn.system": "SYSTEM",
-        "btn.systemSettings": "系統設定",
-        "title.guest": "訪客開始",
-    "title.guest.desc": "使用本機存檔進入遊戲",
-    "title.google": "Google登入",
-    "title.google.desc": "雲端保存與跨裝置同步",
-    "title.settings": "系統設定",
-    "title.settings.desc": "音量 / 語言 / 開場動畫",
-    "title.footer": "SELECT LOGIN MODE",
-    "cloud.dialog.title": "雲端同步",
-    "cloud.dialog.text": "請選擇同步方向。這次不會再用「好 / 取消」混淆操作。",
-    "cloud.upload.title": "上傳本機到雲端",
-    "cloud.upload.desc": "用目前手機 / 瀏覽器的進度覆蓋雲端存檔。",
-    "cloud.download.title": "下載雲端到本機",
-    "cloud.download.desc": "用雲端存檔覆蓋目前手機 / 瀏覽器的進度。",
-    "cloud.cancel.title": "先不要同步",
-    "cloud.cancel.desc": "保留目前狀態，不做任何更動。",
-    "cloud.local": "本機存檔",
-        "cloud.signedOutHint": "未登入：僅使用本機存檔",
-        "cloud.signedInHint": "已登入：雲端會自動保存，手動同步只作備用",
-        "cloud.status.signedOut": "未登入雲端",
-        "cloud.status.signedIn": "已登入雲端｜自動同步中",
-        "cloud.status.saved": "雲端已自動保存",
-        "cloud.status.loginFirst": "請先登入Google",
-        "settings.title": "SYSTEM MENU",
-        "settings.subtitle": "OPTION",
-        "settings.animations": "動畫效果",
-        "settings.autoCare": "自動照顧",
-        "settings.autoPatrol": "掛機巡邏",
-
-        "settings.motionShake": "手機搖動探索",
-        "settings.motionShakeNote": "手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。",
-        "settings.motionSensitivity": "搖動靈敏度",
-        "settings.motionLow": "低：避免誤觸",
-        "settings.motionMedium": "中：標準",
-        "settings.motionHigh": "高：較容易觸發",
-        "settings.motionSensitivityNote": "如果搖不出來請調高；如果太容易誤觸請調低。",
-        "btn.debug": "狀態診斷",
-        "debug.title": "狀態診斷",
-        "motion.enabled": "手機搖動探索：ON\n快速搖動 2 下即可探索。",
-        "motion.disabled": "手機搖動探索：OFF\n已關閉搖動判定。",
-        "motion.unsupported": "此裝置或瀏覽器不支援搖動判定。",
-        "motion.permission": "請允許動作感測\n允許後即可用搖動探索。",
-        "motion.denied": "尚未允許動作感測\n請重新按啟用並允許權限。",
-        "motion.needMore": "搖動偵測 1/2\n再快速搖一下即可探索。",
-        "settings.bgmVolume": "BGM 音量",
-        "settings.sfxVolume": "音效音量",
-        "settings.fontSize": "字體大小",
-        "settings.language": "語言",
-        "settings.default": "恢復預設",
-        "settings.done": "完成",
-        "help.title": "使用說明",
-        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
-        "dex.title": "BRANCH EVOLUTION DEX",
-        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
-        "dex.hint": "重新孵化與進化可解鎖外觀",
-        "mobile.feed": "餵食",
-        "mobile.train": "訓練",
-        "mobile.clean": "清潔",
-        "mobile.sleep": "睡眠",
-        "mobile.search": "搜索",
-        "mobile.status": "狀態",
-        "mobile.systemToggle": "SYSTEM / 其他功能",
-        "mobile.close": "關閉"
-      },
-      "zh-CN": {
-        "btn.rename": "命名",
-        "btn.dex": "图鉴",
-        "btn.google": "Google登录",
-        "btn.logout": "登出",
-        "btn.cloud": "云端同步",
-        "btn.manualSync": "手动同步",
-        "btn.sound": "音效 ON",
-        "btn.soundShort": "音效",
-        "btn.bgm": "BGM ON",
-        "btn.bgmShort": "BGM",
-        "btn.autocare": "AUTO CARE",
-        "btn.patrol": "PATROL",
-        "btn.motionOn": "启用摇动",
-        "btn.motionOff": "关闭摇动",
-        "btn.rehatch": "重新孵化",
-        "btn.system": "SYSTEM",
-        "btn.systemSettings": "系统设置",
-        "title.guest": "游客开始",
-    "title.guest.desc": "使用本机存档进入游戏",
-    "title.google": "Google登录",
-    "title.google.desc": "云端保存与跨装置同步",
-    "title.settings": "系统设置",
-    "title.settings.desc": "音量 / 语言 / 开场动画",
-    "title.footer": "SELECT LOGIN MODE",
-    "cloud.dialog.title": "云端同步",
-    "cloud.dialog.text": "请选择同步方向。这次不会再用“好 / 取消”混淆操作。",
-    "cloud.upload.title": "上传本机到云端",
-    "cloud.upload.desc": "用目前手机 / 浏览器的进度覆盖云端存档。",
-    "cloud.download.title": "下载云端到本机",
-    "cloud.download.desc": "用云端存档覆盖目前手机 / 浏览器的进度。",
-    "cloud.cancel.title": "先不要同步",
-    "cloud.cancel.desc": "保留目前状态，不做任何更动。",
-    "cloud.local": "本机存档",
-        "cloud.signedOutHint": "未登录：仅使用本机存档",
-        "cloud.signedInHint": "已登录：云端会自动保存，手动同步仅作备用",
-        "cloud.status.signedOut": "未登录云端",
-        "cloud.status.signedIn": "已登录云端｜自动同步中",
-        "cloud.status.saved": "云端已自动保存",
-        "cloud.status.loginFirst": "请先登录 Google",
-        "settings.title": "SYSTEM MENU",
-        "settings.subtitle": "OPTION",
-        "settings.animations": "动画效果",
-        "settings.autoCare": "自动照顾",
-        "settings.autoPatrol": "挂机巡逻",
-
-        "settings.motionShake": "手机摇动探索",
-        "settings.motionShakeNote": "手机版可快速摇动 2 下进行探索。iPhone 第一次启用需要允许动作感测。",
-        "settings.motionSensitivity": "摇动灵敏度",
-        "settings.motionLow": "低：避免误触",
-        "settings.motionMedium": "中：标准",
-        "settings.motionHigh": "高：较容易触发",
-        "settings.motionSensitivityNote": "如果摇不出来请调高；如果太容易误触请调低。",
-        "btn.debug": "状态诊断",
-        "debug.title": "状态诊断",
-        "motion.enabled": "手机摇动探索：ON\n快速摇动 2 下即可探索。",
-        "motion.disabled": "手机摇动探索：OFF\n已关闭摇动判定。",
-        "motion.unsupported": "此设备或浏览器不支持摇动判定。",
-        "motion.permission": "请允许动作感测\n允许后即可用摇动探索。",
-        "motion.denied": "尚未允许动作感测\n请重新按启用并允许权限。",
-        "motion.needMore": "摇动侦测 1/2\n再快速摇一下即可探索。",
-        "settings.bgmVolume": "BGM 音量",
-        "settings.sfxVolume": "音效音量",
-        "settings.fontSize": "字体大小",
-        "settings.language": "语言",
-        "settings.default": "恢复默认",
-        "settings.done": "完成",
-        "help.title": "使用说明",
-        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
-        "dex.title": "BRANCH EVOLUTION DEX",
-        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
-        "dex.hint": "重新孵化与进化可解锁外观",
-        "mobile.feed": "喂食",
-        "mobile.train": "训练",
-        "mobile.clean": "清洁",
-        "mobile.sleep": "睡眠",
-        "mobile.search": "搜索",
-        "mobile.status": "状态",
-        "mobile.systemToggle": "SYSTEM / 其他功能",
-        "mobile.close": "关闭"
-      },
-      "ja": {
-        "btn.rename": "名前",
-        "btn.dex": "図鑑",
-        "btn.google": "Googleログイン",
-        "btn.logout": "ログアウト",
-        "btn.cloud": "クラウド同期",
-        "btn.manualSync": "手動同期",
-        "btn.sound": "効果音 ON",
-        "btn.soundShort": "効果音",
-        "btn.bgm": "BGM ON",
-        "btn.bgmShort": "BGM",
-        "btn.autocare": "AUTO CARE",
-        "btn.patrol": "PATROL",
-        "btn.motionOn": "シェイクON",
-        "btn.motionOff": "シェイクOFF",
-        "btn.rehatch": "再孵化",
-        "btn.system": "SYSTEM",
-        "btn.systemSettings": "システム設定",
-        "title.guest": "ゲストではじめる",
-    "title.guest.desc": "この端末のローカルセーブで遊ぶ",
-    "title.google": "Googleログイン",
-    "title.google.desc": "クラウド保存と端末間同期を使う",
-    "title.settings": "システム設定",
-    "title.settings.desc": "音量 / 言語 / オープニング",
-    "title.footer": "LOGIN MODE SELECT",
-    "cloud.dialog.title": "クラウド同期",
-    "cloud.dialog.text": "同期する方向を選んでください。「OK / キャンセル」ではなく、内容が分かるボタンにしました。",
-    "cloud.upload.title": "この端末のデータをアップロード",
-    "cloud.upload.desc": "今使っているスマホ / ブラウザの進行状況でクラウドセーブを上書きします。",
-    "cloud.download.title": "クラウドデータを読み込む",
-    "cloud.download.desc": "クラウドセーブで今使っているスマホ / ブラウザの進行状況を上書きします。",
-    "cloud.cancel.title": "今は同期しない",
-    "cloud.cancel.desc": "現在の状態をそのまま残し、何も変更しません。",
-    "cloud.local": "ローカル保存",
-        "cloud.signedOutHint": "未ログイン：ローカル保存のみ",
-        "cloud.signedInHint": "ログイン中：クラウドは自動保存、手動同期は予備用",
-        "cloud.status.signedOut": "クラウド未ログイン",
-        "cloud.status.signedIn": "クラウドログイン中｜自動同期中",
-        "cloud.status.saved": "クラウド自動保存済み",
-        "cloud.status.loginFirst": "先に Google でログインしてください",
-        "settings.title": "SYSTEM MENU",
-        "settings.subtitle": "OPTION",
-        "settings.animations": "アニメ効果",
-        "settings.autoCare": "自動お世話",
-        "settings.autoPatrol": "自動パトロール",
-
-        "settings.motionShake": "スマホシェイク探索",
-        "settings.motionShakeNote": "スマホでは素早く 2 回振ると探索できます。iPhone は初回にモーション許可が必要です。",
-        "settings.motionSensitivity": "シェイク感度",
-        "settings.motionLow": "低：誤作動を防ぐ",
-        "settings.motionMedium": "中：標準",
-        "settings.motionHigh": "高：反応しやすい",
-        "settings.motionSensitivityNote": "反応しにくい時は高、誤反応が多い時は低にしてください。",
-        "btn.debug": "状態診断",
-        "debug.title": "状態診断",
-        "motion.enabled": "スマホシェイク探索：ON\n素早く 2 回振ると探索できます。",
-        "motion.disabled": "スマホシェイク探索：OFF\nシェイク判定を停止しました。",
-        "motion.unsupported": "この端末またはブラウザはシェイク判定に対応していません。",
-        "motion.permission": "モーションセンサーを許可してください\n許可後にシェイク探索が使えます。",
-        "motion.denied": "モーションセンサーが許可されていません\nもう一度押して許可してください。",
-        "motion.needMore": "シェイク検知 1/2\nもう一度素早く振ると探索します。",
-        "settings.bgmVolume": "BGM 音量",
-        "settings.sfxVolume": "効果音 音量",
-        "settings.fontSize": "文字サイズ",
-        "settings.language": "言語",
-        "settings.default": "初期設定に戻す",
-        "settings.done": "完了",
-        "help.title": "遊び方",
-        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
-        "dex.title": "BRANCH EVOLUTION DEX",
-        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
-        "dex.hint": "再孵化と進化で外見を解放できます",
-        "mobile.feed": "ごはん",
-        "mobile.train": "訓練",
-        "mobile.clean": "掃除",
-        "mobile.sleep": "睡眠",
-        "mobile.search": "探索",
-        "mobile.status": "状態",
-        "mobile.systemToggle": "SYSTEM / その他",
-        "mobile.close": "閉じる"
-      },
-      "en": {
-        "btn.rename": "Rename",
-        "btn.dex": "Dex",
-        "btn.google": "Google Login",
-        "btn.logout": "Logout",
-        "btn.cloud": "Cloud Sync",
-        "btn.manualSync": "Manual Sync",
-        "btn.sound": "SFX ON",
-        "btn.soundShort": "SFX",
-        "btn.bgm": "BGM ON",
-        "btn.bgmShort": "BGM",
-        "btn.autocare": "AUTO CARE",
-        "btn.patrol": "PATROL",
-        "btn.motionOn": "Enable Shake",
-        "btn.motionOff": "Disable Shake",
-        "btn.rehatch": "Re-hatch",
-        "btn.system": "SYSTEM",
-        "btn.systemSettings": "System Settings",
-        "title.guest": "Start as guest",
-    "title.guest.desc": "Play with local browser save",
-    "title.google": "Google sign in",
-    "title.google.desc": "Use cloud save and cross-device sync",
-    "title.settings": "System settings",
-    "title.settings.desc": "Volume / language / opening",
-    "title.footer": "SELECT LOGIN MODE",
-    "cloud.dialog.title": "Cloud sync",
-    "cloud.dialog.text": "Choose the sync direction. These buttons clearly show what will happen.",
-    "cloud.upload.title": "Upload this device to cloud",
-    "cloud.upload.desc": "Overwrite the cloud save with the progress on this phone / browser.",
-    "cloud.download.title": "Download cloud to this device",
-    "cloud.download.desc": "Overwrite this phone / browser with the cloud save.",
-    "cloud.cancel.title": "Do not sync now",
-    "cloud.cancel.desc": "Keep the current state and make no changes.",
-    "cloud.local": "Local Save",
-        "cloud.signedOutHint": "Not signed in: local save only",
-        "cloud.signedInHint": "Signed in: cloud auto-save is on; manual sync is backup only",
-        "cloud.status.signedOut": "Cloud not signed in",
-        "cloud.status.signedIn": "Cloud signed in｜auto-sync on",
-        "cloud.status.saved": "Cloud auto-saved",
-        "cloud.status.loginFirst": "Please sign in with Google first",
-        "settings.title": "SYSTEM MENU",
-        "settings.subtitle": "OPTION",
-        "settings.animations": "Animations",
-        "settings.autoCare": "Auto Care",
-        "settings.autoPatrol": "Auto Patrol",
-
-        "settings.motionShake": "Phone Shake Search",
-        "settings.motionShakeNote": "On phones, shake quickly twice to search. iPhone requires motion permission the first time.",
-        "settings.motionSensitivity": "Shake sensitivity",
-        "settings.motionLow": "Low: avoid misfires",
-        "settings.motionMedium": "Medium: standard",
-        "settings.motionHigh": "High: easier trigger",
-        "settings.motionSensitivityNote": "Raise it if shaking does not trigger; lower it if it triggers too easily.",
-        "btn.debug": "Status Debug",
-        "debug.title": "Status Debug",
-        "motion.enabled": "Phone Shake Search: ON\nShake quickly twice to search.",
-        "motion.disabled": "Phone Shake Search: OFF\nShake detection is disabled.",
-        "motion.unsupported": "This device or browser does not support shake detection.",
-        "motion.permission": "Please allow motion sensing\nThen shake search will be available.",
-        "motion.denied": "Motion sensing was not allowed\nTap enable again and allow permission.",
-        "motion.needMore": "Shake detected 1/2\nShake quickly one more time to search.",
-        "settings.bgmVolume": "BGM Volume",
-        "settings.sfxVolume": "SFX Volume",
-        "settings.fontSize": "Font Size",
-        "settings.language": "Language",
-        "settings.default": "Reset Defaults",
-        "settings.done": "Done",
-        "help.title": "How to Play",
-        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
-        "dex.title": "BRANCH EVOLUTION DEX",
-        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
-        "dex.hint": "Re-hatch and evolve to unlock appearances",
-        "mobile.feed": "Feed",
-        "mobile.train": "Train",
-        "mobile.clean": "Clean",
-        "mobile.sleep": "Sleep",
-        "mobile.search": "Search",
-        "mobile.status": "Status",
-        "mobile.systemToggle": "SYSTEM / More",
-        "mobile.close": "Close"
-      }
-    };
-
-    function normalizeLanguage(code) {
-      const lang = String(code || "").toLowerCase();
-      if (lang === "zh-tw" || lang === "zh-hk" || lang === "zh-mo" || lang.startsWith("zh-hant")) return "zh-TW";
-      if (lang === "zh-cn" || lang === "zh-sg" || lang.startsWith("zh-hans") || lang === "zh") return "zh-CN";
-      if (lang.startsWith("ja")) return "ja";
-      if (lang.startsWith("en")) return "en";
-      return "";
-    }
-
-    function detectBrowserLanguage() {
-      const list = Array.isArray(navigator.languages) && navigator.languages.length ? navigator.languages : [navigator.language];
-      for (const code of list) {
-        const normalized = normalizeLanguage(code);
-        if (normalized) return normalized;
-      }
-      return "en";
-    }
-
-    function getCurrentLanguage() {
-      try {
-        const manual = localStorage.getItem(LANGUAGE_MANUAL_KEY) === "1";
-        const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-        if (manual && I18N[saved]) return saved;
-      } catch {}
-      return detectBrowserLanguage();
-    }
-
-    function t(key) {
-      const lang = getCurrentLanguage();
-      return (I18N[lang] && I18N[lang][key]) || (I18N["en"] && I18N["en"][key]) || (I18N["zh-TW"] && I18N["zh-TW"][key]) || key;
-    }
-
-    function applyLanguage() {
-      const lang = getCurrentLanguage();
-      document.documentElement.lang = lang === "zh-TW" ? "zh-Hant" : lang === "zh-CN" ? "zh-Hans" : lang;
-
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        const value = t(key);
-        if (value !== key) el.textContent = value;
-      });
-
-      document.querySelectorAll("[data-i18n-html]").forEach(el => {
-        const key = el.getAttribute("data-i18n-html");
-        const value = t(key);
-        if (value !== key) el.innerHTML = value;
-      });
-
-      const languageSelect = document.getElementById("languageSelect");
-      if (languageSelect) languageSelect.value = lang;
-
-      window.PixelPetCloudUI = { cloudSyncChoice: () => v3331OpenCloudSyncChoice() };
-window.PixelPetI18N = {
-        t,
-        currentLanguage: getCurrentLanguage,
-        applyLanguage
-      };
-
-      window.dispatchEvent(new CustomEvent("pixel-language-change", {
-        detail: { language: lang }
-      }));
-    }
-
-
-
-
-    function ensureMobileControlsVisible() {
-      const isMobile = window.matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (!isMobile) {
-        document.documentElement.classList.remove("mobile-ui");
-        return;
-      }
-      document.documentElement.classList.add("mobile-ui");
-      const controls = document.getElementById("mobileNativeControls");
-      if (controls) {
-        controls.style.display = "block";
-        controls.style.visibility = "visible";
-        controls.style.opacity = "1";
-      }
-    }
-
-
-/* V33.36 full i18n QA patch */
-const V3329_I18N = {
-  "zh-TW": {
-    "stat.hunger": "飽食",
-    "stat.mood": "心情",
-    "stat.energy": "體力",
-    "stat.clean": "清潔",
-    "btn.feed": "餵食",
-    "btn.train": "訓練",
-    "btn.clean": "清潔",
-    "btn.sleep": "睡眠",
-    "btn.search": "探索",
-    "btn.status": "狀態",
-    "btn.rename": "命名",
-    "btn.dex": "圖鑑",
-    "btn.rehatch": "重新孵化",
-    "btn.debug": "狀態診斷",
-    "btn.google": "Google登入",
-    "btn.logout": "登出",
-    "btn.manualSync": "手動同步",
-    "tabs.actions": "操作",
-    "tabs.settings": "設定",
-    "tabs.account": "帳號",
-    "settings.animations": "動畫效果",
-    "settings.autoCare": "自動照顧",
-    "settings.autoPatrol": "掛機巡邏",
-    "settings.motionShake": "手機搖動探索",
-    "settings.motionSensitivity": "搖動靈敏度",
-    "settings.motionLow": "低：避免誤觸",
-    "settings.motionMedium": "中：標準",
-    "settings.motionHigh": "高：較容易觸發",
-    "settings.motionShakeNote": "手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。",
-    "settings.motionSensitivityNote": "如果搖不出來請調高；如果太容易誤觸請調低。",
-    "settings.bgmVolume": "BGM 音量",
-    "settings.sfxVolume": "音效音量",
-    "settings.fontSize": "字體大小",
-    "settings.language": "語言",
-    "settings.default": "恢復預設",
-    "settings.done": "完成",
-    "system.note.actions": "主畫面只保留 A / B / C / D / E / F。其他低頻操作集中在這裡。",
-    "account.saveTitle": "存檔模式",
-    "account.saveText": "未登入時使用本機瀏覽器存檔。登入 Google 後會啟用雲端自動保存，手動同步只作備用。",
-    "account.checkTitle": "登入檢查",
-    "account.checkText": "如果登入沒有成功，請確認 Firebase Authentication 的 Authorized domains 包含 mikisuno2025-hash.github.io。",
-    "cloud.local": "未登入：僅使用本機存檔",
-    "msg.ready": "準備好了。",
-    "msg.feed": "{name} 吃了資料飯糰。\n飽食上升，螢幕有點髒。",
-    "msg.train": "{name} 完成訓練。\nEXP 上升，體力下降。",
-    "msg.clean": "螢幕被擦亮了。\n清潔度上升。",
-    "msg.sleep": "{name} 開始休息。\n體力慢慢恢復。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n飽食 {hunger} 心情 {mood}\n體力 {energy} 清潔 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n巡邏沒有遇怪。\n保底條 +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n發現野生訊號。",
-    "msg.login.loading": "正在開啟 Google 登入...",
-    "msg.login.moduleMissing": "Google登入模組尚未載入。\n請重新整理後再試。"
-  },
-  "zh-CN": {
-    "stat.hunger": "饱食",
-    "stat.mood": "心情",
-    "stat.energy": "体力",
-    "stat.clean": "清洁",
-    "btn.feed": "喂食",
-    "btn.train": "训练",
-    "btn.clean": "清洁",
-    "btn.sleep": "睡眠",
-    "btn.search": "探索",
-    "btn.status": "状态",
-    "btn.rename": "命名",
-    "btn.dex": "图鉴",
-    "btn.rehatch": "重新孵化",
-    "btn.debug": "状态诊断",
-    "btn.google": "Google登录",
-    "btn.logout": "登出",
-    "btn.manualSync": "手动同步",
-    "tabs.actions": "操作",
-    "tabs.settings": "设置",
-    "tabs.account": "账号",
-    "settings.animations": "动画效果",
-    "settings.autoCare": "自动照顾",
-    "settings.autoPatrol": "挂机巡逻",
-    "settings.motionShake": "手机摇动探索",
-    "settings.motionSensitivity": "摇动灵敏度",
-    "settings.motionLow": "低：避免误触",
-    "settings.motionMedium": "中：标准",
-    "settings.motionHigh": "高：较容易触发",
-    "settings.motionShakeNote": "手机版可快速摇动 2 下进行探索。iPhone 第一次启用需要允许动作感测。",
-    "settings.motionSensitivityNote": "如果摇不出来请调高；如果太容易误触请调低。",
-    "settings.bgmVolume": "BGM 音量",
-    "settings.sfxVolume": "音效音量",
-    "settings.fontSize": "字体大小",
-    "settings.language": "语言",
-    "settings.default": "恢复默认",
-    "settings.done": "完成",
-    "system.note.actions": "主画面只保留 A / B / C / D / E / F。其他低频操作集中在这里。",
-    "account.saveTitle": "存档模式",
-    "account.saveText": "未登录时使用本机浏览器存档。登录 Google 后会启用云端自动保存，手动同步只作备用。",
-    "account.checkTitle": "登录检查",
-    "account.checkText": "如果登录没有成功，请确认 Firebase Authentication 的 Authorized domains 包含 mikisuno2025-hash.github.io。",
-    "cloud.local": "未登录：仅使用本机存档",
-    "msg.ready": "准备好了。",
-    "msg.feed": "{name} 吃了资料饭团。\n饱食上升，屏幕有点脏。",
-    "msg.train": "{name} 完成训练。\nEXP 上升，体力下降。",
-    "msg.clean": "屏幕被擦亮了。\n清洁度上升。",
-    "msg.sleep": "{name} 开始休息。\n体力慢慢恢复。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n饱食 {hunger} 心情 {mood}\n体力 {energy} 清洁 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n巡逻没有遇怪。\n保底条 +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n发现野生信号。",
-    "msg.login.loading": "正在打开 Google 登录...",
-    "msg.login.moduleMissing": "Google登录模块尚未载入。\n请重新整理后再试。"
-  },
-  "ja": {
-    "stat.hunger": "満腹",
-    "stat.mood": "ごきげん",
-    "stat.energy": "体力",
-    "stat.clean": "清潔",
-    "btn.feed": "ごはん",
-    "btn.train": "トレーニング",
-    "btn.clean": "そうじ",
-    "btn.sleep": "ねむる",
-    "btn.search": "探索",
-    "btn.status": "ステータス",
-    "btn.rename": "名前変更",
-    "btn.dex": "図鑑",
-    "btn.rehatch": "再孵化",
-    "btn.debug": "診断",
-    "btn.google": "Googleログイン",
-    "btn.logout": "ログアウト",
-    "btn.manualSync": "手動同期",
-    "tabs.actions": "操作",
-    "tabs.settings": "設定",
-    "tabs.account": "アカウント",
-    "settings.animations": "アニメーション",
-    "settings.autoCare": "オートケア",
-    "settings.autoPatrol": "オート探索",
-    "settings.motionShake": "スマホ振動探索",
-    "settings.motionSensitivity": "振動感度",
-    "settings.motionLow": "低：誤作動を防ぐ",
-    "settings.motionMedium": "中：標準",
-    "settings.motionHigh": "高：反応しやすい",
-    "settings.motionShakeNote": "スマホを素早く2回振ると探索できます。iPhoneでは初回のみモーション許可が必要です。",
-    "settings.motionSensitivityNote": "反応しにくい時は高めに、誤作動が多い時は低めに調整してください。",
-    "settings.bgmVolume": "BGM音量",
-    "settings.sfxVolume": "効果音音量",
-    "settings.fontSize": "文字サイズ",
-    "settings.language": "言語",
-    "settings.default": "初期設定に戻す",
-    "settings.done": "完了",
-    "system.note.actions": "メイン画面は A / B / C / D / E / F の操作だけに整理しています。",
-    "account.saveTitle": "セーブ方式",
-    "account.saveText": "未ログイン時はブラウザ内に保存します。Googleログイン後はクラウド自動保存が有効になり、手動同期は補助機能として使います。",
-    "account.checkTitle": "ログイン確認",
-    "account.checkText": "ログインできない場合は、Firebase Authentication の Authorized domains に mikisuno2025-hash.github.io が含まれているか確認してください。",
-    "cloud.local": "未ログイン：ローカル保存のみ",
-    "msg.ready": "準備OK。",
-    "msg.feed": "{name} はデータおにぎりを食べた。\n満腹度が上がり、画面が少し汚れた。",
-    "msg.train": "{name} はトレーニングした。\nEXPが上がり、体力が下がった。",
-    "msg.clean": "画面をきれいにした。\n清潔度が上がった。",
-    "msg.sleep": "{name} は休み始めた。\n体力が少しずつ回復する。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n満腹 {hunger} ごきげん {mood}\n体力 {energy} 清潔 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n探索したが、何も現れなかった。\n保証ゲージ +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n野生シグナルを発見。",
-    "msg.login.loading": "Googleログインを開いています...",
-    "msg.login.moduleMissing": "Googleログイン機能を読み込めません。\nページを再読み込みしてからお試しください。"
-  },
-  "en": {
-    "stat.hunger": "Food",
-    "stat.mood": "Mood",
-    "stat.energy": "Energy",
-    "stat.clean": "Clean",
-    "btn.feed": "Feed",
-    "btn.train": "Train",
-    "btn.clean": "Clean",
-    "btn.sleep": "Sleep",
-    "btn.search": "Search",
-    "btn.status": "Status",
-    "btn.rename": "Rename",
-    "btn.dex": "Dex",
-    "btn.rehatch": "Rehatch",
-    "btn.debug": "Debug",
-    "btn.google": "Google sign in",
-    "btn.logout": "Sign out",
-    "btn.manualSync": "Manual sync",
-    "tabs.actions": "Actions",
-    "tabs.settings": "Settings",
-    "tabs.account": "Account",
-    "settings.animations": "Animations",
-    "settings.autoCare": "Auto care",
-    "settings.autoPatrol": "Auto patrol",
-    "settings.motionShake": "Shake search",
-    "settings.motionSensitivity": "Shake sensitivity",
-    "settings.motionLow": "Low: fewer false triggers",
-    "settings.motionMedium": "Medium: standard",
-    "settings.motionHigh": "High: easier to trigger",
-    "settings.motionShakeNote": "On mobile, shake twice quickly to search. iPhone requires motion permission the first time.",
-    "settings.motionSensitivityNote": "Raise it if shaking does not work; lower it if it triggers too easily.",
-    "settings.bgmVolume": "BGM volume",
-    "settings.sfxVolume": "SFX volume",
-    "settings.fontSize": "Font size",
-    "settings.language": "Language",
-    "settings.default": "Reset defaults",
-    "settings.done": "Done",
-    "system.note.actions": "The main screen keeps only A / B / C / D / E / F controls. Less-used actions are collected here.",
-    "account.saveTitle": "Save mode",
-    "account.saveText": "When signed out, progress is saved in this browser. After Google sign-in, cloud auto-save is enabled; manual sync is only a backup action.",
-    "account.checkTitle": "Login check",
-    "account.checkText": "If login fails, confirm Firebase Authentication Authorized domains includes mikisuno2025-hash.github.io.",
-    "cloud.local": "Signed out: local save only",
-    "msg.ready": "Ready.",
-    "msg.feed": "{name} ate a data rice ball.\nFood increased, and the screen got a little dirty.",
-    "msg.train": "{name} trained.\nEXP increased, energy decreased.",
-    "msg.clean": "The screen was wiped clean.\nCleanliness increased.",
-    "msg.sleep": "{name} started resting.\nEnergy will recover gradually.",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\nFood {hunger} Mood {mood}\nEnergy {energy} Clean {clean}",
-    "msg.patrol.none": "AUTO PATROL\nNo encounter this time.\nPity gauge +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\nA wild signal appeared.",
-    "msg.login.loading": "Opening Google sign-in...",
-    "msg.login.moduleMissing": "Google sign-in has not loaded.\nPlease refresh and try again."
-  }
-};
 
 function v3329Lang() {
   try {
@@ -1862,7 +363,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.36 live volume patch */
+/* V33.37 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1938,9 +439,9 @@ function v3330SetSfxVolumeDisplay() {
 }
 
 function v3330ApplyVolumes() {
+  try { if (window.PixelPetAudioFlow) window.PixelPetAudioFlow.applyVolumes(); } catch {}
   try { if (window.PixelPetOpening) window.PixelPetOpening.applyVolumes(); } catch {}
   try { if (window.PixelPetTitleMenu) window.PixelPetTitleMenu.prepareAudio(); } catch {}
-  try { if (window.PixelPetAudioFlow) window.PixelPetAudioFlow.applyVolumes(); } catch {}
   v3330SetAudioElementVolume();
   v3330SetSfxVolumeDisplay();
 }
@@ -2028,7 +529,7 @@ function v3330PatchSfxVolume() {
 
 
 
-/* V33.36 mobile bottom auto hide controller */
+/* V33.37 mobile bottom auto hide controller */
 function v3332IsMobileUi() {
   return document.documentElement.classList.contains("mobile-ui") ||
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
@@ -2109,14 +610,14 @@ function v3332BindMobileBottomControls() {
   mo.observe(document.documentElement, { attributes:true, attributeFilter:["class"] });
   mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "hidden", "aria-hidden"] });
 
-  setInterval(v3332SetMobileControlsMode, 800);
+  setTimeout(v3332SetMobileControlsMode, 800);
   v3332SetMobileControlsMode();
 }
 
 
 
-/* V33.36 Opening Intro + Dual 8bit BGM */
-const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3335FixedGate";
+/* V33.37 Opening Intro + Dual 8bit BGM */
+const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3337Stable";
 
 function v3333IntroEnabled() {
   try {
@@ -2158,8 +659,6 @@ function v3333PrepareAudio() {
 }
 
 function v3333StartMainBgm() {
-  // V33.36: direct auto-start is disabled.
-  // Game BGM starts only after Loading completes via v3334PlayGameBgmAfterLoad().
   return;
 }
 
@@ -2170,7 +669,7 @@ function v3333StopMainBgm() {
 }
 
 function v3333PlayIntroBgm() {
-  v3336PlayIntroMusic();
+  v3337PlayIntro();
 }
 
 function v3333CloseOpening() {
@@ -2319,7 +818,7 @@ window.PixelPetOpening = {
 
 
 
-/* V33.36 Title Menu + Login Flow */
+/* V33.37 Title Menu + Login Flow */
 function v3334AudioVol() {
   try {
     if (typeof v3330ReadVolumeSetting === "function") return v3330ReadVolumeSetting("bgmVolume", 0.38);
@@ -2344,15 +843,15 @@ function v3334StopAudio(id) {
 }
 
 function v3334StopAllBgm() {
-  v3336StopAllMusic();
+  v3337StopAll(true);
 }
 
 function v3334PlayMenuBgm() {
-  v3336PlayTitleMenuMusic();
+  v3337PlayMenu();
 }
 
 function v3334PlayGameBgmAfterLoad() {
-  v3336PlayGameMusicAfterLoading();
+  v3337PlayGame();
 }
 
 function v3334OpenTitleMenu() {
@@ -2396,7 +895,7 @@ function v3334CloseLoading() {
 function v3334EnterGame(mode = "guest") {
   v3334CloseTitleMenu();
   v3334OpenLoading(mode === "google" ? "正在確認 Google 登入..." : "正在載入訪客資料...");
-  v3336StopTitleMenuMusicForLoading();
+  v3337StartLoadingAudioState();
   setTimeout(() => {
     v3334CloseLoading();
     v3334PlayGameBgmAfterLoad();
@@ -2407,7 +906,7 @@ function v3334EnterGame(mode = "guest") {
 async function v3334GoogleLoginFromTitle() {
   v3334CloseTitleMenu();
   v3334OpenLoading("正在開啟 Google 登入...");
-  v3336StopTitleMenuMusicForLoading();
+  v3337StartLoadingAudioState();
   try {
     if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.signInOrOut === "function") {
       await window.PixelPetCloudAuth.signInOrOut();
@@ -2811,7 +1310,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.36",
+        "Mikisun Pixel Guardian V33.37",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -4056,7 +2555,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.36: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.37: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
