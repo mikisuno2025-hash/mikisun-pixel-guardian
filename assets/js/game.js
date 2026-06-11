@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.32",
+        "pixelPetRetroGuardianV33.33",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.32",
+        "pixelPetOwnedAppearancesV33.33",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1263,7 +1263,7 @@ window.PixelPetI18N = {
     }
 
 
-/* V33.32 full i18n QA patch */
+/* V33.33 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1703,7 +1703,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.32 live volume patch */
+/* V33.33 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1779,6 +1779,7 @@ function v3330SetSfxVolumeDisplay() {
 }
 
 function v3330ApplyVolumes() {
+  try { if (window.PixelPetOpening) window.PixelPetOpening.applyVolumes(); } catch {}
   v3330SetAudioElementVolume();
   v3330SetSfxVolumeDisplay();
 }
@@ -1866,7 +1867,7 @@ function v3330PatchSfxVolume() {
 
 
 
-/* V33.32 mobile bottom auto hide controller */
+/* V33.33 mobile bottom auto hide controller */
 function v3332IsMobileUi() {
   return document.documentElement.classList.contains("mobile-ui") ||
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
@@ -1952,6 +1953,219 @@ function v3332BindMobileBottomControls() {
 }
 
 
+
+/* V33.33 Opening Intro + Dual 8bit BGM */
+const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3333";
+
+function v3333IntroEnabled() {
+  try {
+    if (settings && settings.openingEnabled === false) return false;
+  } catch {}
+  return true;
+}
+
+function v3333SetOpeningStage(stage) {
+  document.querySelectorAll("[data-opening-stage]").forEach(el => {
+    el.classList.toggle("active", el.dataset.openingStage === stage);
+  });
+}
+
+function v3333AudioVolume(key, fallback) {
+  try {
+    if (typeof v3330ReadVolumeSetting === "function") return v3330ReadVolumeSetting(key, fallback);
+  } catch {}
+  try {
+    return Math.max(0, Math.min(1, Number(settings[key] ?? fallback)));
+  } catch {
+    return fallback;
+  }
+}
+
+function v3333PrepareAudio() {
+  const intro = document.getElementById("introBgmAudio");
+  const main = document.getElementById("mainBgmAudio");
+  const bgmVol = v3333AudioVolume("bgmVolume", 0.38);
+  if (intro) {
+    intro.volume = bgmVol;
+    intro.muted = bgmVol <= 0;
+  }
+  if (main) {
+    main.volume = bgmVol;
+    main.muted = bgmVol <= 0;
+    main.loop = true;
+  }
+}
+
+function v3333StartMainBgm() {
+  const main = document.getElementById("mainBgmAudio");
+  if (!main) return;
+  v3333PrepareAudio();
+  try {
+    if (settings && settings.bgmEnabled === false) return;
+  } catch {}
+  main.play().catch(() => {});
+}
+
+function v3333StopMainBgm() {
+  const main = document.getElementById("mainBgmAudio");
+  if (!main) return;
+  try { main.pause(); } catch {}
+}
+
+function v3333PlayIntroBgm() {
+  const intro = document.getElementById("introBgmAudio");
+  if (!intro) return;
+  v3333PrepareAudio();
+  try {
+    intro.currentTime = 0;
+    intro.play().catch(() => {});
+  } catch {}
+}
+
+function v3333CloseOpening() {
+  const backdrop = document.getElementById("openingIntroBackdrop");
+  const intro = document.getElementById("introBgmAudio");
+  if (intro) {
+    try { intro.pause(); intro.currentTime = 0; } catch {}
+  }
+  if (backdrop) {
+    backdrop.classList.add("closed");
+    backdrop.setAttribute("aria-hidden", "true");
+  }
+  document.body.classList.remove("opening-active");
+  try { localStorage.setItem(OPENING_STORAGE_KEY, "1"); } catch {}
+  v3333StartMainBgm();
+  if (typeof v3332SetMobileControlsMode === "function") setTimeout(v3332SetMobileControlsMode, 60);
+}
+
+function v3333RunOpeningSequence() {
+  const stages = [
+    ["boot", 0],
+    ["scan", 1600],
+    ["hatch", 3600],
+    ["pet", 6000],
+    ["ready", 7300]
+  ];
+  stages.forEach(([stage, ms]) => {
+    setTimeout(() => v3333SetOpeningStage(stage), ms);
+  });
+  setTimeout(v3333CloseOpening, 8000);
+}
+
+function v3333StartOpening() {
+  const backdrop = document.getElementById("openingIntroBackdrop");
+  if (!backdrop) return;
+  document.body.classList.add("opening-active");
+  backdrop.classList.remove("closed");
+  backdrop.setAttribute("aria-hidden", "false");
+  v3333SetOpeningStage("title");
+  v3333StopMainBgm();
+  v3333PlayIntroBgm();
+  if (typeof sfx === "function") {
+    try { sfx("click"); } catch {}
+  }
+  v3333RunOpeningSequence();
+}
+
+
+function v3333BindOpeningSettings() {
+  if (window.__v3333OpeningSettingsBound) return;
+  window.__v3333OpeningSettingsBound = true;
+
+  const openingToggle = document.getElementById("settingOpeningEnabled");
+  const replayBtn = document.getElementById("replayOpeningBtn");
+
+  if (openingToggle) {
+    try {
+      openingToggle.checked = settings.openingEnabled !== false;
+    } catch {}
+    openingToggle.addEventListener("change", () => {
+      try {
+        settings.openingEnabled = openingToggle.checked;
+        if (typeof saveSettings === "function") saveSettings();
+      } catch {}
+    });
+  }
+
+  if (replayBtn) {
+    replayBtn.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const settingsBackdrop = document.getElementById("settingsBackdrop");
+      if (settingsBackdrop) {
+        settingsBackdrop.classList.remove("open");
+        settingsBackdrop.setAttribute("aria-hidden", "true");
+      }
+      setTimeout(v3333ReplayOpening, 120);
+    });
+  }
+}
+
+function v3333BindOpeningIntro() {
+  if (window.__v3333OpeningBound) return;
+  window.__v3333OpeningBound = true;
+
+  const backdrop = document.getElementById("openingIntroBackdrop");
+  const skip = document.getElementById("openingSkipBtn");
+  if (!backdrop) return;
+
+  const firstStart = ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    v3333StartOpening();
+  };
+
+  backdrop.addEventListener("click", ev => {
+    if (ev.target && ev.target.closest && ev.target.closest("#openingSkipBtn")) return;
+    const active = backdrop.querySelector(".opening-screen-title.active");
+    if (active) firstStart(ev);
+  }, { passive:false });
+
+  if (skip) {
+    skip.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      v3333CloseOpening();
+    }, { passive:false });
+  }
+
+  document.addEventListener("keydown", ev => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      if (!backdrop.classList.contains("closed")) {
+        ev.preventDefault();
+        const active = backdrop.querySelector(".opening-screen-title.active");
+        if (active) v3333StartOpening();
+        else v3333CloseOpening();
+      }
+    }
+  });
+
+  let seen = false;
+  try { seen = localStorage.getItem(OPENING_STORAGE_KEY) === "1"; } catch {}
+  if (!v3333IntroEnabled()) seen = true;
+
+  if (seen) {
+    backdrop.classList.add("closed");
+    backdrop.setAttribute("aria-hidden", "true");
+    setTimeout(v3333StartMainBgm, 300);
+  } else {
+    document.body.classList.add("opening-active");
+    v3333SetOpeningStage("title");
+  }
+}
+
+function v3333ReplayOpening() {
+  try { localStorage.removeItem(OPENING_STORAGE_KEY); } catch {}
+  v3333StartOpening();
+}
+
+window.PixelPetOpening = {
+  replay: () => v3333ReplayOpening(),
+  startMainBgm: () => v3333StartMainBgm(),
+  applyVolumes: () => v3333PrepareAudio()
+};
+
+
     function updateUI() {
       syncPetAppearanceStage();
       const evo = currentEvolution();
@@ -2001,6 +2215,8 @@ function v3332BindMobileBottomControls() {
       ensureMobileControlsVisible();
       applyLanguage();
       v3330PatchSfxVolume();
+      v3333BindOpeningIntro();
+      v3333BindOpeningSettings();
       v3332BindMobileBottomControls();
       v3330BindVolumeSliders();
       v3330BindVolumeResetHook();
@@ -2285,7 +2501,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.32",
+        "Mikisun Pixel Guardian V33.33",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -3530,7 +3746,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.32: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.33: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
