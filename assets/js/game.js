@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.14",
+        "pixelPetRetroGuardianV33.15",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.14",
+        "pixelPetOwnedAppearancesV33.15",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -661,7 +661,7 @@ const canvas = document.getElementById("petCanvas");
 
 
     function applyLanguage() {
-      // V33.14 safe fallback: older mobile builds still call applyLanguage(),
+      // V33.15 safe fallback: older mobile builds still call applyLanguage(),
       // but this public build keeps current labels static to avoid runtime crashes.
     }
 
