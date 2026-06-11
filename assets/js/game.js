@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.32",
+        "pixelPetRetroGuardianV33.31",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.32",
+        "pixelPetOwnedAppearancesV33.31",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1263,7 +1263,7 @@ window.PixelPetI18N = {
     }
 
 
-/* V33.32 full i18n QA patch */
+/* V33.31 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1703,7 +1703,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.32 live volume patch */
+/* V33.31 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1865,93 +1865,6 @@ function v3330PatchSfxVolume() {
 }
 
 
-
-/* V33.32 mobile bottom auto hide controller */
-function v3332IsMobileUi() {
-  return document.documentElement.classList.contains("mobile-ui") ||
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
-    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-}
-
-function v3332AnyOverlayOpen() {
-  const selectors = [
-    "#settingsBackdrop.open",
-    "#dexBackdrop.open",
-    ".dex-backdrop.open",
-    "#cloudSyncChoiceBackdrop.open",
-    ".cloud-sync-backdrop.open",
-    ".battle-backdrop.open",
-    ".modal.open"
-  ];
-  return selectors.some(sel => document.querySelector(sel));
-}
-
-function v3332SetMobileControlsMode() {
-  if (!v3332IsMobileUi()) {
-    document.documentElement.classList.remove("mobile-controls-collapsed", "mobile-controls-suspended");
-    return;
-  }
-
-  const overlayOpen = v3332AnyOverlayOpen();
-  document.documentElement.classList.toggle("mobile-controls-suspended", overlayOpen);
-
-  if (overlayOpen) {
-    document.documentElement.classList.remove("mobile-controls-collapsed");
-    return;
-  }
-
-  const y = window.scrollY || document.documentElement.scrollTop || 0;
-  const shouldCollapse = y > 12 || window.__v3332ManualCollapsed === true;
-  document.documentElement.classList.toggle("mobile-controls-collapsed", shouldCollapse);
-}
-
-function v3332BindMobileBottomControls() {
-  if (window.__v3332MobileBottomBound) return;
-  window.__v3332MobileBottomBound = true;
-
-  const handle = document.getElementById("mobileControlCollapseHandle");
-  if (handle) {
-    handle.addEventListener("click", ev => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      window.__v3332ManualCollapsed = !document.documentElement.classList.contains("mobile-controls-collapsed");
-      v3332SetMobileControlsMode();
-    }, { passive:false });
-  }
-
-  let touchStartY = 0;
-  const controls = document.getElementById("mobileNativeControls");
-  if (controls) {
-    controls.addEventListener("touchstart", ev => {
-      touchStartY = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
-    }, { passive:true });
-
-    controls.addEventListener("touchmove", ev => {
-      const y = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
-      if (touchStartY && Math.abs(y - touchStartY) > 18) {
-        window.__v3332ManualCollapsed = true;
-        document.documentElement.classList.add("mobile-controls-collapsed");
-      }
-    }, { passive:true });
-  }
-
-  window.addEventListener("scroll", () => {
-    window.__v3332ManualCollapsed = false;
-    v3332SetMobileControlsMode();
-  }, { passive:true });
-
-  window.addEventListener("resize", v3332SetMobileControlsMode, { passive:true });
-  window.addEventListener("orientationchange", () => setTimeout(v3332SetMobileControlsMode, 350), { passive:true });
-
-  const mo = new MutationObserver(() => v3332SetMobileControlsMode());
-  mo.observe(document.documentElement, { attributes:true, attributeFilter:["class"] });
-  mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "hidden", "aria-hidden"] });
-
-  setInterval(v3332SetMobileControlsMode, 800);
-  v3332SetMobileControlsMode();
-}
-
-
     function updateUI() {
       syncPetAppearanceStage();
       const evo = currentEvolution();
@@ -2001,7 +1914,6 @@ function v3332BindMobileBottomControls() {
       ensureMobileControlsVisible();
       applyLanguage();
       v3330PatchSfxVolume();
-      v3332BindMobileBottomControls();
       v3330BindVolumeSliders();
       v3330BindVolumeResetHook();
       v3330ApplyVolumes();
@@ -2285,7 +2197,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.32",
+        "Mikisun Pixel Guardian V33.31",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -3246,7 +3158,6 @@ LV 回到 1。
 
 
     function openSettings() {
-      setTimeout(v3332SetMobileControlsMode, 0);
       applyLanguage();
       setSystemTab("actions");
       setSystemTab("actions");
@@ -3530,7 +3441,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.32: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.31: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
