@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.6.6</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-6-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.8</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-8-20260611">
 
 
-<style id="v336-mobile-stable">
+<style id="v337-mobile-native">
 @media (max-width:820px){
-html,body{width:100%!important;min-height:100dvh!important;height:auto!important;margin:0!important;padding:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:manipulation!important;background:#e9e1cf!important}
-body{display:block!important;padding-bottom:140px!important}
+html,body{width:100%!important;min-height:100dvh!important;height:auto!important;margin:0!important;padding:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:auto!important;background:#e9e1cf!important}
+body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bottom))!important}
 *,*:before,*:after{box-sizing:border-box!important}
-.app{width:100%!important;max-width:100%!important;min-height:0!important;margin:0!important;padding:0!important;display:block!important;overflow:visible!important}
+.app{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;display:block!important;overflow:visible!important}
 .device{width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:8px!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;transform:none!important;background:#d8cfba!important}
 .device:before,.device:after,.screw,.speaker-row,.notice{display:none!important}
 .top-strip{margin:0 0 6px!important;padding:0!important}
@@ -30,37 +30,30 @@ body{display:block!important;padding-bottom:140px!important}
 #petCanvas{width:100%!important;height:100%!important;display:block!important;touch-action:auto!important;pointer-events:none!important}
 .shake-ui{height:26px!important;min-height:26px!important;padding:0 8px!important;font-size:10px!important}
 .message{min-height:44px!important;max-height:62px!important;overflow:auto!important;padding:6px 8px!important;font-size:11px!important;line-height:1.22!important}
-.control-side{display:flex!important;flex-direction:column!important;gap:8px!important;z-index:20!important}
 .info-card{padding:8px!important;border-radius:16px!important;border-width:2px!important}
 .stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;font-size:12px!important}
 .bar{height:9px!important;margin-top:3px!important}
-.control-panel{padding:8px!important;border-radius:18px!important;border-width:3px!important;position:relative!important;z-index:30!important}
-.control-header{display:none!important}
-.button-cluster{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important}
-.retro-btn-wrap{width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:3px!important}
-.retro-btn,button.retro-btn{width:100%!important;height:54px!important;min-height:54px!important;border-radius:14px!important;border-width:3px!important;font-size:15px!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;-webkit-tap-highlight-color:rgba(255,255,255,.3)!important}
-.btn-label{font-size:10px!important;line-height:1.1!important;letter-spacing:.04em!important;min-height:23px!important}
-.tiny-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;margin-top:8px!important;position:relative!important;z-index:35!important}
-.tiny,.cloud-btn,.system-btn,button[data-action],#googleLoginBtn,#cloudSyncBtn{width:100%!important;min-height:46px!important;height:auto!important;padding:10px 8px!important;border-radius:13px!important;font-size:13px!important;line-height:1.1!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;position:relative!important;z-index:40!important}
-.system-button-row{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;margin-top:8px!important}
-.cloud-status{grid-column:1/-1!important;display:block!important;font-size:11px!important;line-height:1.2!important;min-height:18px!important}
-button:active{transform:translateY(2px)!important;filter:brightness(1.08)!important}
-.settings-backdrop,.dex-backdrop{align-items:flex-start!important;padding:12px!important;overflow:auto!important}
+.control-panel{display:none!important}
+.tiny-row,.system-button-row{display:none!important}
+.mobile-native-controls{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:999999!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;padding:10px 10px calc(10px + env(safe-area-inset-bottom))!important;background:rgba(34,32,28,.94)!important;backdrop-filter:blur(10px)!important;border-top:2px solid rgba(255,255,255,.18)!important;box-shadow:0 -8px 24px rgba(0,0,0,.28)!important;pointer-events:auto!important}
+.mobile-native-controls button{appearance:none!important;-webkit-appearance:none!important;width:100%!important;min-height:54px!important;border:2px solid rgba(255,255,255,.28)!important;border-radius:14px!important;background:#e9dec4!important;color:#2e2b25!important;font-weight:900!important;font-size:15px!important;line-height:1!important;touch-action:manipulation!important;pointer-events:auto!important;user-select:none!important;-webkit-user-select:none!important;-webkit-tap-highlight-color:rgba(255,255,255,.35)!important}
+.mobile-native-controls button:active,.mobile-native-controls button.is-pressing{transform:translateY(3px) scale(.98)!important;filter:brightness(1.12)!important;background:#fff1cf!important}
+.settings-backdrop,.dex-backdrop{align-items:flex-start!important;padding:12px!important;overflow:auto!important;z-index:1000000!important}
 .settings-panel,.dex-panel{max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important}
 }
+@media (min-width:821px){.mobile-native-controls{display:none!important}}
 @media (max-width:430px){
-.device{padding:6px!important}
-.brand{font-size:18px!important}.subbrand{font-size:9px!important}
+.device{padding:6px!important}.brand{font-size:18px!important}.subbrand{font-size:9px!important}
 .screen-side{padding:5px!important}.screen-wrap{padding:5px!important}
 .game-area{height:min(27dvh,205px)!important;min-height:135px!important}
 .message{min-height:42px!important;max-height:58px!important;font-size:11px!important}
-.retro-btn,button.retro-btn{height:50px!important;min-height:50px!important;font-size:14px!important}
-.tiny,.cloud-btn,.system-btn,button[data-action],#googleLoginBtn,#cloudSyncBtn{min-height:44px!important;font-size:13px!important}
+.mobile-native-controls{gap:6px!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important}
+.mobile-native-controls button{min-height:50px!important;font-size:14px!important;border-radius:13px!important}
 }
 </style>
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.6 Web Release.
+  <!-- Pixel Pet Retro Guardian V33.8 Web Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -72,7 +65,7 @@ button:active{transform:translateY(2px)!important;filter:brightness(1.08)!import
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.6</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.8</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -309,8 +302,19 @@ button:active{transform:translateY(2px)!important;filter:brightness(1.08)!import
 
 
 
-  <script defer src="assets/js/game.js?v=33-6-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-6-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-8-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-8-20260611"></script>
 
+
+<div id="mobileNativeControls" class="mobile-native-controls" aria-label="手機操作列">
+  <button type="button" data-mobile-action="feed">餵食</button>
+  <button type="button" data-mobile-action="train">訓練</button>
+  <button type="button" data-mobile-action="clean">清潔</button>
+  <button type="button" data-mobile-action="sleep">睡眠</button>
+  <button type="button" data-mobile-action="status">狀態</button>
+  <button type="button" data-mobile-action="dex">圖鑑</button>
+  <button type="button" data-mobile-action="login">登入</button>
+  <button type="button" data-mobile-action="sync">同步</button>
+</div>
 </body>
 </html>

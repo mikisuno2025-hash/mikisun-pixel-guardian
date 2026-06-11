@@ -4,6 +4,9 @@ const canvas = document.getElementById("petCanvas");
     const $ = id => document.getElementById(id);
 
     const SAVE_KEY = "pixelPetSave";
+    const SAVE_VERSION = 8;
+    const OWNED_APPEARANCE_KEY = "pixelPetDex";
+    const MIGRATION_FLAG_KEY = "pixelPetMigrationV30Done";
     const COLLECTION_KEY = "pixelPetAppearanceCollectionV24";
 
     const clamp = (n, min = 0, max = 100) => Math.max(min, Math.min(max, n));
@@ -55,7 +58,7 @@ const canvas = document.getElementById("petCanvas");
 
     function saveOwnedAppearances(list) {
       const clean = Array.from(new Set(list.map(Number).filter(n => Number.isInteger(n) && n >= 1 && n <= 100)));
-      localStorage.setItem(OWNED_APPEARANCE_KEY, JSON.stringify(clean));
+      try { localStorage.setItem(OWNED_APPEARANCE_KEY, JSON.stringify(clean)); } catch (e) { console.warn("dex save failed", e); }
       return clean;
     }
 
@@ -71,7 +74,7 @@ const canvas = document.getElementById("petCanvas");
     }
 
     function resetAppearanceCollection() {
-      localStorage.removeItem(OWNED_APPEARANCE_KEY);
+      try { localStorage.removeItem(OWNED_APPEARANCE_KEY); } catch (e) { console.warn("dex reset failed", e); }
     }
 
     function appearanceIdFromFamilyBranchStage(familyId, branchId, stageIndex) {
@@ -183,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.6",
+        "pixelPetRetroGuardianV33.8",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -192,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.6",
+        "pixelPetOwnedAppearancesV33.8",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -235,7 +238,7 @@ const canvas = document.getElementById("petCanvas");
       const familyId = forcedFamilyId || randomStarterFamily(window.__lastFamilyId || 0);
       const appearanceId = appearanceIdFromFamilyBranchStage(familyId, 0, 0);
       window.__lastFamilyId = familyId;
-      markAppearanceOwned(appearanceId);
+      try { markAppearanceOwned(appearanceId); } catch (e) { console.warn('dex mark failed', e); }
       return {
         saveVersion: SAVE_VERSION,
         name: "PICO",
@@ -268,6 +271,7 @@ const canvas = document.getElementById("petCanvas");
 
     migrateLegacyStorage();
     let pet = load();
+    window.__PIXEL_BOOT_OK__ = true;
     let frame = 0;
     let flash = 0;
     let rehatchPendingUntil = 0;
@@ -595,7 +599,7 @@ const canvas = document.getElementById("petCanvas");
       pet.saveVersion = SAVE_VERSION;
       pet.lastTick = Date.now();
       pet.updatedAt = Date.now();
-      localStorage.setItem(SAVE_KEY, JSON.stringify(pet));
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(pet)); } catch (e) { console.warn("local save failed", e); }
     }
 
     function offlineDecay(p) {
@@ -1862,49 +1866,72 @@ LV 回到 1。
     });
 
 
-    function bindMobileStableButtons() {
-      const isTouchDevice = typeof window !== "undefined" && (
-        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0
-      );
-      if (!isTouchDevice) return;
-      document.documentElement.classList.add("mobile-stable-buttons");
+    function runMobileAction(action) {
+      try { initAudio(); } catch {}
+      if (action === "feed") feedPet();
+      else if (action === "train") trainPet();
+      else if (action === "clean") cleanPet();
+      else if (action === "sleep") sleepPet();
+      else if (action === "status") showStatus();
+      else if (action === "dex") openDex();
+      else if (action === "login") {
+        const btn = document.getElementById("googleLoginBtn");
+        if (btn) btn.click();
+        else setMessage("請稍候，登入模組尚未載入。");
+      } else if (action === "sync") {
+        const btn = document.getElementById("cloudSyncBtn");
+        if (btn) btn.click();
+        else setMessage("請稍候，雲端同步模組尚未載入。");
+      }
+      updateUI();
+    }
 
-      let lastPointerButton = null;
-      let lastPointerAt = 0;
+    function bindMobileNativeControls() {
+      const bar = document.getElementById("mobileNativeControls");
+      if (!bar || bar.dataset.bound === "1") return;
+      bar.dataset.bound = "1";
 
-      document.querySelectorAll("button").forEach(btn => {
-        if (btn.dataset.mobileStableBound === "1") return;
-        btn.dataset.mobileStableBound = "1";
+      bar.querySelectorAll("button[data-mobile-action]").forEach(btn => {
+        let pressed = false;
+        const act = btn.dataset.mobileAction;
 
-        btn.addEventListener("pointerdown", () => {
-          btn.classList.add("touching");
+        const press = ev => {
+          pressed = true;
+          btn.classList.add("is-pressing");
+          if (ev.cancelable) ev.preventDefault();
+          ev.stopPropagation();
+        };
+
+        const release = ev => {
+          if (!pressed) return;
+          pressed = false;
+          btn.classList.remove("is-pressing");
+          if (ev.cancelable) ev.preventDefault();
+          ev.stopPropagation();
+          runMobileAction(act);
+        };
+
+        btn.addEventListener("touchstart", press, { passive: false });
+        btn.addEventListener("touchend", release, { passive: false });
+        btn.addEventListener("touchcancel", () => {
+          pressed = false;
+          btn.classList.remove("is-pressing");
         }, { passive: true });
 
-        btn.addEventListener("pointercancel", () => {
-          btn.classList.remove("touching");
-        }, { passive: true });
-
+        btn.addEventListener("pointerdown", ev => {
+          if (ev.pointerType === "mouse") btn.classList.add("is-pressing");
+        });
         btn.addEventListener("pointerup", ev => {
-          btn.classList.remove("touching");
-          if (ev.pointerType !== "touch" && ev.pointerType !== "pen") return;
-          lastPointerButton = btn;
-          lastPointerAt = Date.now();
-          try { initAudio(); } catch {}
-          setTimeout(() => {
-            try { btn.dispatchEvent(new MouseEvent("click", {bubbles:true, cancelable:true, view:window})); } catch {}
-          }, 0);
-        }, { passive: true });
+          if (ev.pointerType === "mouse") {
+            btn.classList.remove("is-pressing");
+            runMobileAction(act);
+          }
+        });
 
         btn.addEventListener("click", ev => {
-          if (lastPointerButton === btn && Date.now() - lastPointerAt < 450) {
-            // Let the synthetic click run, but block the delayed native duplicate.
-            if (!ev.isTrusted) return;
-            ev.stopImmediatePropagation();
-            ev.preventDefault();
-          }
-        }, true);
+          ev.preventDefault();
+          ev.stopPropagation();
+        });
       });
     }
 
@@ -2004,7 +2031,7 @@ LV 回到 1。
     bindBgmAutoStart();
     bindDex();
     bindSettingsMenu();
-    bindMobileStableButtons();
+    bindMobileNativeControls();
     applyLanguage();
     applySystemSettings();
     tryAutoStartBgm();
