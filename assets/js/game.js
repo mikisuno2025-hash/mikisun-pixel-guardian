@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.13",
+        "pixelPetRetroGuardianV33.14",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.13",
+        "pixelPetOwnedAppearancesV33.14",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -657,6 +657,12 @@ const canvas = document.getElementById("petCanvas");
       } catch (e) {
         console.warn("fallback draw failed", e);
       }
+    }
+
+
+    function applyLanguage() {
+      // V33.14 safe fallback: older mobile builds still call applyLanguage(),
+      // but this public build keeps current labels static to avoid runtime crashes.
     }
 
     function updateUI() {
@@ -1921,7 +1927,7 @@ LV 回到 1。
 
 
 
-    function runMobileClassicAction(actionName) {
+    function runMobileV28Action(actionName) {
       try {
         if (actionName === "login") {
           const btn = document.getElementById("googleLoginBtn");
@@ -1946,7 +1952,7 @@ LV 回到 1。
         action(actionName);
         try { forcePetVisibleFallback(); } catch {}
       } catch (err) {
-        console.error("mobile action failed", err);
+        console.error("mobile v28 action failed", err);
         try {
           setMessage("手機按鈕執行失敗：\n" + (err && err.message ? err.message : String(err)));
           updateUI();
@@ -1954,9 +1960,9 @@ LV 回到 1。
       }
     }
 
-    function bindMobileClassicControls() {
-      if (window.__mobileClassicControlsBound) return;
-      window.__mobileClassicControlsBound = true;
+    function bindMobileV28Controls() {
+      if (window.__mobileV28ControlsBound) return;
+      window.__mobileV28ControlsBound = true;
 
       const getButton = target => {
         if (!target || !target.closest) return null;
@@ -1977,7 +1983,7 @@ LV 回到 1。
         btn.classList.remove("is-pressing");
         if (ev.cancelable) ev.preventDefault();
         ev.stopPropagation();
-        runMobileClassicAction(btn.dataset.mobileAction);
+        runMobileV28Action(btn.dataset.mobileAction);
       }, { passive: false, capture: true });
 
       document.addEventListener("touchcancel", ev => {
@@ -1993,7 +1999,7 @@ LV 回到 1。
 
         const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
         if (!isTouchDevice) {
-          runMobileClassicAction(btn.dataset.mobileAction);
+          runMobileV28Action(btn.dataset.mobileAction);
         }
       }, { capture: true });
     }
@@ -2095,7 +2101,7 @@ LV 回到 1。
     bindBgmAutoStart();
     bindDex();
     bindSettingsMenu();
-    bindMobileClassicControls();
+    bindMobileV28Controls();
     applyLanguage();
     applySystemSettings();
     tryAutoStartBgm();
