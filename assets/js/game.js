@@ -1,3 +1,14 @@
+/* v3323 force mobile-ui */
+
+(function(){
+  try {
+    var isMobile = window.matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) document.documentElement.classList.add("mobile-ui");
+  } catch (e) {
+    document.documentElement.classList.add("mobile-ui");
+  }
+})();
+
 const canvas = document.getElementById("petCanvas");
     const ctx = canvas.getContext("2d");
     const screenEl = document.getElementById("screen");
@@ -186,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.22",
+        "pixelPetRetroGuardianV33.24",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.22",
+        "pixelPetOwnedAppearancesV33.24",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -421,7 +432,8 @@ const canvas = document.getElementById("petCanvas");
         stopBgm();
         setMessage("BGM：OFF\\n背景音樂已靜音。");
       }
-      updateUI();
+      ensureMobileControlsVisible();
+    updateUI();
     try { forcePetVisibleFallback(); } catch {}
     }
 
@@ -922,7 +934,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "恢復預設",
         "settings.done": "完成",
         "help.title": "使用說明",
-        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>滑動 LCD 區域完成左右往返，或手機快速搖動 2 下，可探索遇敵。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
+        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "重新孵化與進化可解鎖外觀",
@@ -988,7 +1000,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "恢复默认",
         "settings.done": "完成",
         "help.title": "使用说明",
-        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>滑动 LCD 区域完成左右往返，或手机快速摇动 2 下，可探索遇敌。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
+        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "重新孵化与进化可解锁外观",
@@ -1054,7 +1066,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "初期設定に戻す",
         "settings.done": "完了",
         "help.title": "遊び方",
-        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>LCD エリアを左右に往復スワイプ、またはスマホを素早く 2 回振ると探索できます。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
+        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "再孵化と進化で外見を解放できます",
@@ -1120,7 +1132,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "Reset Defaults",
         "settings.done": "Done",
         "help.title": "How to Play",
-        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Swipe left and right across the LCD area, or shake your phone quickly twice, to search.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
+        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "Re-hatch and evolve to unlock appearances",
@@ -1199,6 +1211,22 @@ const canvas = document.getElementById("petCanvas");
 
 
 
+
+    function ensureMobileControlsVisible() {
+      const isMobile = window.matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        document.documentElement.classList.remove("mobile-ui");
+        return;
+      }
+      document.documentElement.classList.add("mobile-ui");
+      const controls = document.getElementById("mobileNativeControls");
+      if (controls) {
+        controls.style.display = "block";
+        controls.style.visibility = "visible";
+        controls.style.opacity = "1";
+      }
+    }
+
     function updateUI() {
       syncPetAppearanceStage();
       const evo = currentEvolution();
@@ -1245,6 +1273,7 @@ const canvas = document.getElementById("petCanvas");
       applySystemSettings();
       const led = $("powerLed");
       if (led) led.classList.toggle("on", true);
+      ensureMobileControlsVisible();
       applyLanguage();
       updateMotionShakeControls();
       save();
@@ -1322,12 +1351,12 @@ const canvas = document.getElementById("petCanvas");
         return;
       }
 
-      // V10：一次完整左右往返，只抽 10% 遇怪。
+      // V10：一次完整左右往返，只抽 
       const encounterRate = 0.10;
 
       if (Math.random() < encounterRate) {
         scan = 0;
-        setMessage(`左右往返完成！\n10% 遭遇成功，保底條歸零。`);
+        setMessage(`READY`);
         sfx("scanFull");
         updateUI();
 
@@ -1357,7 +1386,7 @@ const canvas = document.getElementById("petCanvas");
         return;
       }
 
-      setMessage(`左右往返完成。\n沒有遇到怪物。\n保底條 +1% → ${Math.floor(scan)}%`);
+      setMessage(`READY`);
       updateUI();
     }
 
@@ -1524,7 +1553,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.22",
+        "Mikisun Pixel Guardian V33.24",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -1649,7 +1678,7 @@ LV 回到 1。
       }
 
       if (type === "patrol") {
-        setMessage("不用按對戰。\n左右往返一次抽10%，\n失敗保底 +1%。");
+        setMessage("不用按對戰。\n左右往返一次抽10%，\n");
       }
 
       if (type === "status") {
