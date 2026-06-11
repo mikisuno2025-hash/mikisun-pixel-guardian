@@ -1,0 +1,3 @@
+V33.15 手機按鈕不遮擋版：請上傳本資料夾全部內容到 GitHub Pages。
+修正：手機底部操作列改為正常頁面區塊，不再 fixed 浮在畫面上，因此不會遮住 LCD。
+測試網址：https://mikisuno2025-hash.github.io/mikisun-pixel-guardian/?v=33-15
