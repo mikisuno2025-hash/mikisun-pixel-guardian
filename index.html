@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.37</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-37-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.38</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-38-safe-20260611">
 <style id="v3324-mobile-desktop-fix">
 #mobileNativeControls,
 .mobile-system-drawer,
@@ -180,7 +180,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.37 Emergency Mobile Stable Release.
+  <!-- Pixel Pet Retro Guardian V33.38 Safe Boot Rollback Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -192,7 +192,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.37</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.38</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -418,26 +418,6 @@ html.mobile-ui .mobile-debug-panel[hidden]{
               <input class="setting-slider" id="settingFontSize" type="range" min="85" max="130" step="5">
             </div>
 
-
-            <div class="setting-row">
-              <div class="setting-label">
-                <span>開場動畫</span>
-                <label class="switch">
-                  <input type="checkbox" id="settingOpeningEnabled" checked>
-                  <span class="switch-slider"></span>
-                </label>
-              </div>
-              <div class="setting-note">開啟後第一次進入會播放 8 秒片頭，可隨時重新觀看。</div>
-            </div>
-
-            <div class="setting-row">
-              <div class="setting-label">
-                <span>重新觀看開場</span>
-                <button type="button" class="settings-action-btn" id="replayOpeningBtn">播放片頭</button>
-              </div>
-              <div class="setting-note">播放蛋孵化、掃描與像素怪登場動畫。</div>
-            </div>
-
             <div class="setting-row">
               <div class="setting-label">
                 <span data-i18n="settings.language">語言</span>
@@ -500,8 +480,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 
-  <script defer src="assets/js/game.js?v=33-37-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-37-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-38-safe-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-38-safe-20260611"></script>
 
 
 
@@ -560,92 +540,6 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       </div>
     </section>
   </div>
-
-
-  <div class="opening-intro-backdrop" id="openingIntroBackdrop" aria-hidden="false">
-    <section class="opening-lcd" id="openingLcd" role="dialog" aria-modal="true" aria-label="Opening Intro">
-      <div class="opening-scanlines"></div>
-      <div class="opening-noise"></div>
-
-      <div class="opening-screen opening-screen-title active" data-opening-stage="title">
-        <div class="opening-logo">PIXEL PET</div>
-        <div class="opening-subtitle">RETRO LCD MONSTER</div>
-        <div class="opening-start">TAP TO START</div>
-        <div class="opening-hint">8-BIT OPENING / 4:3 LCD MODE</div>
-      </div>
-
-      <div class="opening-screen opening-screen-boot" data-opening-stage="boot">
-        <div class="opening-small">SYSTEM BOOT</div>
-        <div class="opening-big">PIXEL PET</div>
-        <div class="opening-bars"><i></i><i></i><i></i><i></i></div>
-      </div>
-
-      <div class="opening-screen opening-screen-scan" data-opening-stage="scan">
-        <div class="opening-small">SCANNING...</div>
-        <div class="opening-egg opening-egg-scan"></div>
-        <div class="opening-scanbeam"></div>
-        <div class="opening-lcd-text">LIFE SIGNAL DETECTED</div>
-      </div>
-
-      <div class="opening-screen opening-screen-hatch" data-opening-stage="hatch">
-        <div class="opening-egg opening-egg-hatch"></div>
-        <div class="opening-flash">HATCHING</div>
-        <div class="opening-pixels"><b></b><b></b><b></b><b></b><b></b><b></b></div>
-      </div>
-
-      <div class="opening-screen opening-screen-pet" data-opening-stage="pet">
-        <div class="opening-pet"></div>
-        <div class="opening-lcd-text">No.001 / GUARDIAN ONLINE</div>
-      </div>
-
-      <div class="opening-screen opening-screen-ready" data-opening-stage="ready">
-        <div class="opening-logo">PIXEL PET</div>
-        <div class="opening-pet mini"></div>
-        <div class="opening-start">PRESS A / TAP START</div>
-      </div>
-
-      <button type="button" class="opening-skip" id="openingSkipBtn">SKIP</button>
-    </section>
-  </div>
-
-  <audio id="introBgmAudio" preload="none" src="assets/audio/intro_8bit.wav?v=33-37"></audio>
-  <audio id="mainBgmAudio" preload="none" loop src="assets/audio/bgm.mp3?v=33-37"></audio>
-
-
-  <div class="title-menu-backdrop closed" id="titleMenuBackdrop" aria-hidden="true">
-    <section class="title-menu-lcd title-menu-fullscreen" role="dialog" aria-modal="true" aria-label="Title Menu">
-      <div class="title-menu-scanlines"></div>
-      <div class="title-menu-logo">PIXEL PET</div>
-      <div class="title-menu-subtitle">GUARDIAN SYSTEM</div>
-      <div class="title-menu-pet"></div>
-      <div class="title-menu-actions">
-        <button type="button" id="titleGuestBtn" class="title-menu-btn primary">
-          <strong>訪客開始</strong>
-          <span>使用本機存檔進入遊戲</span>
-        </button>
-        <button type="button" id="titleGoogleBtn" class="title-menu-btn">
-          <strong>Google登入</strong>
-          <span>雲端保存與跨裝置同步</span>
-        </button>
-        <button type="button" id="titleSettingsBtn" class="title-menu-btn quiet">
-          <strong>系統設定</strong>
-          <span>音量 / 語言 / 開場動畫</span>
-        </button>
-      </div>
-      <div class="title-menu-footer">SELECT LOGIN MODE</div>
-      <div class="title-menu-version">V33.35 / LOCAL + CLOUD SAVE</div>
-    </section>
-  </div>
-
-  <div class="login-loading-backdrop closed" id="loginLoadingBackdrop" aria-hidden="true">
-    <section class="login-loading-lcd" role="dialog" aria-modal="true" aria-label="Loading">
-      <div class="login-loading-title" id="loginLoadingTitle">LOADING</div>
-      <div class="login-loading-bars"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="login-loading-text" id="loginLoadingText">正在載入遊戲資料...</div>
-    </section>
-  </div>
-
-  <audio id="menuBgmAudio" preload="none" loop src="assets/audio/main_loop_8bit.wav?v=33-37"></audio>
 
 </body>
 </html>
