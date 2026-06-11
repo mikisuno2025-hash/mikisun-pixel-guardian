@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.28</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-28-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.32</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-32-20260611">
 <style id="v3324-mobile-desktop-fix">
 #mobileNativeControls,
 .mobile-system-drawer,
@@ -180,7 +180,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.28 All Device Button Check Release.
+  <!-- Pixel Pet Retro Guardian V33.32 Mobile Bottom Auto Hide Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -192,7 +192,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.28</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.32</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -480,8 +480,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 
-  <script defer src="assets/js/game.js?v=33-28-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-28-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-32-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-32-20260611"></script>
 
 
 
@@ -489,11 +489,12 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 <div id="mobileNativeControls" class="mobile-native-controls mobile-force-controls" aria-label="手機固定操作列">
+  <button type="button" id="mobileControlCollapseHandle" class="mobile-control-collapse-handle" aria-label="收合操作列">A-F</button>
   <div class="mobile-mini-stats" aria-label="手機狀態條">
-    <div class="mobile-mini-stat"><span>飽食</span><i><b id="mobileHungerBar"></b></i></div>
-    <div class="mobile-mini-stat"><span>心情</span><i><b id="mobileMoodBar"></b></i></div>
-    <div class="mobile-mini-stat"><span>體力</span><i><b id="mobileEnergyBar"></b></i></div>
-    <div class="mobile-mini-stat"><span>清潔</span><i><b id="mobileCleanBar"></b></i></div>
+    <div class="mobile-mini-stat"><span data-stat-label="hunger">飽食</span><i><b id="mobileHungerBar"></b></i></div>
+    <div class="mobile-mini-stat"><span data-stat-label="mood">心情</span><i><b id="mobileMoodBar"></b></i></div>
+    <div class="mobile-mini-stat"><span data-stat-label="energy">體力</span><i><b id="mobileEnergyBar"></b></i></div>
+    <div class="mobile-mini-stat"><span data-stat-label="clean">清潔</span><i><b id="mobileCleanBar"></b></i></div>
   </div>
   <div class="mobile-compact-grid">
     <button type="button" class="mobile-compact-btn red" data-mobile-action="feed"><b>A</b><small data-i18n="mobile.feed">餵食</small></button>
@@ -515,6 +516,30 @@ html.mobile-ui .mobile-debug-panel[hidden]{
     <pre id="mobileDebugText">Debug loading...</pre>
   </div>
 </div>
+
+
+  <div class="cloud-sync-backdrop" id="cloudSyncChoiceBackdrop" aria-hidden="true">
+    <section class="cloud-sync-panel" role="dialog" aria-modal="true" aria-labelledby="cloudSyncChoiceTitle">
+      <button type="button" class="cloud-sync-close" id="cloudSyncChoiceClose" aria-label="Close">×</button>
+      <h2 id="cloudSyncChoiceTitle">雲端同步</h2>
+      <p id="cloudSyncChoiceText">請選擇同步方向。</p>
+
+      <div class="cloud-sync-options">
+        <button type="button" class="cloud-sync-option primary" id="cloudSyncUploadBtn">
+          <strong>上傳本機到雲端</strong>
+          <span>用目前手機 / 瀏覽器的進度覆蓋雲端存檔。</span>
+        </button>
+        <button type="button" class="cloud-sync-option" id="cloudSyncDownloadBtn">
+          <strong>下載雲端到本機</strong>
+          <span>用雲端存檔覆蓋目前手機 / 瀏覽器的進度。</span>
+        </button>
+        <button type="button" class="cloud-sync-option quiet" id="cloudSyncCancelBtn">
+          <strong>先不要同步</strong>
+          <span>保留目前狀態，不做任何更動。</span>
+        </button>
+      </div>
+    </section>
+  </div>
 
 </body>
 </html>
