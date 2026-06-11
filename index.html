@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.18</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-18-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.19</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-19-20260611">
 
 <style id="v3316-mobile-no-scroll-controls">
 @media (max-width:820px){
@@ -227,7 +227,7 @@
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.18 Auto Language Release.
+  <!-- Pixel Pet Retro Guardian V33.19 Mobile Shake Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -239,7 +239,7 @@
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.18</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.19</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -403,6 +403,18 @@
 
         <div class="setting-row">
           <div class="setting-label">
+            <span data-i18n="settings.motionShake">手機搖動探索</span>
+            <label class="switch">
+              <input type="checkbox" id="settingMotionShake">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <div class="setting-note" data-i18n="settings.motionShakeNote">手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。</div>
+        </div>
+
+
+        <div class="setting-row">
+          <div class="setting-label">
             <span data-i18n="settings.bgmVolume">BGM 音量</span>
             <span class="setting-value" id="bgmVolValue">38%</span>
           </div>
@@ -476,8 +488,8 @@
 
 
 
-  <script defer src="assets/js/game.js?v=33-18-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-18-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-19-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-19-20260611"></script>
 
 
 
@@ -507,6 +519,7 @@
       <button type="button" data-mobile-action="bgm" data-i18n="btn.bgmShort">BGM</button>
       <button type="button" data-mobile-action="autocare" data-i18n="btn.autocare">AUTO CARE</button>
       <button type="button" data-mobile-action="autopatrol" data-i18n="btn.patrol">PATROL</button>
+      <button type="button" data-mobile-action="motion">啟用搖動</button>
       <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
       <button type="button" data-mobile-action="system" data-i18n="btn.systemSettings">系統設定</button>
       <button type="button" data-mobile-action="login" data-i18n="btn.google">Google登入</button>

@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.18",
+        "pixelPetRetroGuardianV33.19",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.18",
+        "pixelPetOwnedAppearancesV33.19",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -308,6 +308,12 @@ const canvas = document.getElementById("petCanvas");
     let animationsEnabled = localStorage.getItem("pixelPetAnimationsEnabled") !== "false";
     let autoCareEnabled = localStorage.getItem("pixelPetAutoCareEnabledV16") !== "false";
     let autoPatrolEnabled = localStorage.getItem("pixelPetAutoPatrolEnabledV16") !== "false";
+    let motionShakeEnabled = localStorage.getItem("pixelPetMotionShakeEnabledV33") === "true";
+    let motionListenerBound = false;
+    let lastMotionMagnitude = null;
+    let lastMotionPeakAt = 0;
+    let motionShakeCount = 0;
+    let motionShakeWindowUntil = 0;
     let lastAutoCareAt = 0;
     let lastAutoPatrolAt = 0;
     let bgmVolume = Number(localStorage.getItem("pixelPetBgmVolume") ?? "38");
@@ -334,6 +340,7 @@ const canvas = document.getElementById("petCanvas");
       const animInput = document.getElementById("settingAnimations");
       const autoCareInput = document.getElementById("settingAutoCare");
       const autoPatrolInput = document.getElementById("settingAutoPatrol");
+      const motionShakeInput = document.getElementById("settingMotionShake");
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
@@ -342,6 +349,7 @@ const canvas = document.getElementById("petCanvas");
       if (animInput) animInput.checked = animationsEnabled;
       if (autoCareInput) autoCareInput.checked = autoCareEnabled;
       if (autoPatrolInput) autoPatrolInput.checked = autoPatrolEnabled;
+      if (motionShakeInput) motionShakeInput.checked = motionShakeEnabled;
       if (bgmSlider) bgmSlider.value = bgmVolume;
       if (sfxSlider) sfxSlider.value = sfxVolume;
       if (fontSlider) fontSlider.value = fontSizePercent;
@@ -358,6 +366,7 @@ const canvas = document.getElementById("petCanvas");
       localStorage.setItem("pixelPetAnimationsEnabled", String(animationsEnabled));
       localStorage.setItem("pixelPetAutoCareEnabledV16", String(autoCareEnabled));
       localStorage.setItem("pixelPetAutoPatrolEnabledV16", String(autoPatrolEnabled));
+      localStorage.setItem("pixelPetMotionShakeEnabledV33", String(motionShakeEnabled));
       localStorage.setItem("pixelPetBgmVolume", String(Math.round(bgmVolume)));
       localStorage.setItem("pixelPetSfxVolume", String(Math.round(sfxVolume)));
       localStorage.setItem("pixelPetFontSize", String(Math.round(fontSizePercent)));
@@ -433,6 +442,178 @@ const canvas = document.getElementById("petCanvas");
         : "AUTO PATROL：OFF\\n掛機巡邏已停止。");
       updateUI();
     }
+
+
+    function updateMotionShakeControls() {
+      const input = document.getElementById("settingMotionShake");
+      if (input) input.checked = motionShakeEnabled;
+
+      document.querySelectorAll("[data-mobile-action='motion']").forEach(btn => {
+        btn.textContent = motionShakeEnabled ? t("btn.motionOff") : t("btn.motionOn");
+      });
+    }
+
+    function bindMotionShake() {
+      if (motionListenerBound) return;
+      if (typeof window.DeviceMotionEvent === "undefined") return;
+      window.addEventListener("devicemotion", onDeviceMotionShake, { passive: true });
+      motionListenerBound = true;
+    }
+
+    async function enableMotionShake() {
+      initAudio();
+
+      if (typeof window.DeviceMotionEvent === "undefined") {
+        motionShakeEnabled = false;
+        saveSystemSettings();
+        setMessage(t("motion.unsupported"));
+        updateUI();
+        return;
+      }
+
+      try {
+        if (typeof window.DeviceMotionEvent.requestPermission === "function") {
+          setMessage(t("motion.permission"));
+          updateUI();
+
+          const result = await window.DeviceMotionEvent.requestPermission();
+          if (result !== "granted") {
+            motionShakeEnabled = false;
+            saveSystemSettings();
+            setMessage(t("motion.denied"));
+            updateUI();
+            return;
+          }
+        }
+
+        motionShakeEnabled = true;
+        lastMotionMagnitude = null;
+        motionShakeCount = 0;
+        motionShakeWindowUntil = 0;
+        bindMotionShake();
+        saveSystemSettings();
+        sfx("care");
+        setMessage(t("motion.enabled"));
+        updateUI();
+      } catch (err) {
+        console.error("motion permission failed", err);
+        motionShakeEnabled = false;
+        saveSystemSettings();
+        setMessage(t("motion.denied"));
+        updateUI();
+      }
+    }
+
+    function disableMotionShake() {
+      motionShakeEnabled = false;
+      motionShakeCount = 0;
+      motionShakeWindowUntil = 0;
+      saveSystemSettings();
+      sfx("click");
+      setMessage(t("motion.disabled"));
+      updateUI();
+    }
+
+    async function toggleMotionShake() {
+      if (motionShakeEnabled) {
+        disableMotionShake();
+      } else {
+        await enableMotionShake();
+      }
+    }
+
+    function rollEncounterByMotionShake() {
+      if (!canEncounter() || gameMode !== "idle") return;
+
+      lastShakeAt = now();
+
+      if (scan >= 100) {
+        scan = 0;
+        setMessage(`保底條滿格！\n搖動探索保證遇怪，條歸零。`);
+        sfx("scanFull");
+        updateUI();
+        setTimeout(() => {
+          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
+        }, 220);
+        return;
+      }
+
+      const encounterRate = 0.10;
+
+      if (Math.random() < encounterRate) {
+        scan = 0;
+        setMessage(`搖動探索完成！\n10% 遭遇成功，保底條歸零。`);
+        sfx("scanFull");
+        updateUI();
+        setTimeout(() => {
+          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
+        }, 180);
+        return;
+      }
+
+      scan = clamp(scan + 1);
+      sfx("scan");
+
+      if (scan >= 100) {
+        scan = 0;
+        setMessage(`搖動探索失敗，但保底條滿格！\n這次保證遇怪，條歸零。`);
+        sfx("scanFull");
+        updateUI();
+        setTimeout(() => {
+          if (gameMode === "idle" && !pet.asleep && pet.hp > 2) startTransition();
+        }, 220);
+        return;
+      }
+
+      setMessage(`搖動探索完成。\n沒有遇到怪物。\n保底條 +1% → ${Math.floor(scan)}%`);
+      updateUI();
+    }
+
+    function onDeviceMotionShake(ev) {
+      if (!motionShakeEnabled || !canEncounter()) return;
+
+      const a = ev.accelerationIncludingGravity || ev.acceleration;
+      if (!a) return;
+
+      const x = Number(a.x) || 0;
+      const y = Number(a.y) || 0;
+      const z = Number(a.z) || 0;
+      const mag = Math.sqrt(x * x + y * y + z * z);
+      const tNow = now();
+
+      if (lastMotionMagnitude === null) {
+        lastMotionMagnitude = mag;
+        return;
+      }
+
+      const delta = Math.abs(mag - lastMotionMagnitude);
+      lastMotionMagnitude = mag;
+
+      // 門檻偏保守，避免拿起手機或輕微晃動就誤觸。
+      if (delta < 9.5) return;
+      if (tNow - lastMotionPeakAt < 260) return;
+
+      lastMotionPeakAt = tNow;
+
+      if (tNow > motionShakeWindowUntil) {
+        motionShakeCount = 1;
+        motionShakeWindowUntil = tNow + 1500;
+        setMessage(t("motion.needMore"));
+        sfx("scan");
+        updateUI();
+        return;
+      }
+
+      motionShakeCount += 1;
+
+      if (motionShakeCount >= 2) {
+        motionShakeCount = 0;
+        motionShakeWindowUntil = 0;
+        pet.energy = clamp(pet.energy - 0.35);
+        rollEncounterByMotionShake();
+      }
+    }
+
 
     function initAudio() {
       if (!soundEnabled) return;
@@ -679,6 +860,8 @@ const canvas = document.getElementById("petCanvas");
         "btn.bgmShort": "BGM",
         "btn.autocare": "AUTO CARE",
         "btn.patrol": "PATROL",
+        "btn.motionOn": "啟用搖動",
+        "btn.motionOff": "關閉搖動",
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系統設定",
@@ -694,6 +877,15 @@ const canvas = document.getElementById("petCanvas");
         "settings.animations": "動畫效果",
         "settings.autoCare": "自動照顧",
         "settings.autoPatrol": "掛機巡邏",
+
+        "settings.motionShake": "手機搖動探索",
+        "settings.motionShakeNote": "手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。",
+        "motion.enabled": "手機搖動探索：ON\n快速搖動 2 下即可探索。",
+        "motion.disabled": "手機搖動探索：OFF\n已關閉搖動判定。",
+        "motion.unsupported": "此裝置或瀏覽器不支援搖動判定。",
+        "motion.permission": "請允許動作感測\n允許後即可用搖動探索。",
+        "motion.denied": "尚未允許動作感測\n請重新按啟用並允許權限。",
+        "motion.needMore": "搖動偵測 1/2\n再快速搖一下即可探索。",
         "settings.bgmVolume": "BGM 音量",
         "settings.sfxVolume": "音效音量",
         "settings.fontSize": "字體大小",
@@ -701,7 +893,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "恢復預設",
         "settings.done": "完成",
         "help.title": "使用說明",
-        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>滑動 LCD 區域完成左右往返可探索遇敵。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
+        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>滑動 LCD 區域完成左右往返，或手機快速搖動 2 下，可探索遇敵。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "重新孵化與進化可解鎖外觀",
@@ -727,6 +919,8 @@ const canvas = document.getElementById("petCanvas");
         "btn.bgmShort": "BGM",
         "btn.autocare": "AUTO CARE",
         "btn.patrol": "PATROL",
+        "btn.motionOn": "启用摇动",
+        "btn.motionOff": "关闭摇动",
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系统设置",
@@ -742,6 +936,15 @@ const canvas = document.getElementById("petCanvas");
         "settings.animations": "动画效果",
         "settings.autoCare": "自动照顾",
         "settings.autoPatrol": "挂机巡逻",
+
+        "settings.motionShake": "手机摇动探索",
+        "settings.motionShakeNote": "手机版可快速摇动 2 下进行探索。iPhone 第一次启用需要允许动作感测。",
+        "motion.enabled": "手机摇动探索：ON\n快速摇动 2 下即可探索。",
+        "motion.disabled": "手机摇动探索：OFF\n已关闭摇动判定。",
+        "motion.unsupported": "此设备或浏览器不支持摇动判定。",
+        "motion.permission": "请允许动作感测\n允许后即可用摇动探索。",
+        "motion.denied": "尚未允许动作感测\n请重新按启用并允许权限。",
+        "motion.needMore": "摇动侦测 1/2\n再快速摇一下即可探索。",
         "settings.bgmVolume": "BGM 音量",
         "settings.sfxVolume": "音效音量",
         "settings.fontSize": "字体大小",
@@ -749,7 +952,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "恢复默认",
         "settings.done": "完成",
         "help.title": "使用说明",
-        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>滑动 LCD 区域完成左右往返可探索遇敌。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
+        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>滑动 LCD 区域完成左右往返，或手机快速摇动 2 下，可探索遇敌。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "重新孵化与进化可解锁外观",
@@ -775,6 +978,8 @@ const canvas = document.getElementById("petCanvas");
         "btn.bgmShort": "BGM",
         "btn.autocare": "AUTO CARE",
         "btn.patrol": "PATROL",
+        "btn.motionOn": "シェイクON",
+        "btn.motionOff": "シェイクOFF",
         "btn.rehatch": "再孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "システム設定",
@@ -790,6 +995,15 @@ const canvas = document.getElementById("petCanvas");
         "settings.animations": "アニメ効果",
         "settings.autoCare": "自動お世話",
         "settings.autoPatrol": "自動パトロール",
+
+        "settings.motionShake": "スマホシェイク探索",
+        "settings.motionShakeNote": "スマホでは素早く 2 回振ると探索できます。iPhone は初回にモーション許可が必要です。",
+        "motion.enabled": "スマホシェイク探索：ON\n素早く 2 回振ると探索できます。",
+        "motion.disabled": "スマホシェイク探索：OFF\nシェイク判定を停止しました。",
+        "motion.unsupported": "この端末またはブラウザはシェイク判定に対応していません。",
+        "motion.permission": "モーションセンサーを許可してください\n許可後にシェイク探索が使えます。",
+        "motion.denied": "モーションセンサーが許可されていません\nもう一度押して許可してください。",
+        "motion.needMore": "シェイク検知 1/2\nもう一度素早く振ると探索します。",
         "settings.bgmVolume": "BGM 音量",
         "settings.sfxVolume": "効果音 音量",
         "settings.fontSize": "文字サイズ",
@@ -797,7 +1011,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "初期設定に戻す",
         "settings.done": "完了",
         "help.title": "遊び方",
-        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>LCD エリアを左右に往復スワイプすると探索できます。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
+        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>LCD エリアを左右に往復スワイプ、またはスマホを素早く 2 回振ると探索できます。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "再孵化と進化で外見を解放できます",
@@ -823,6 +1037,8 @@ const canvas = document.getElementById("petCanvas");
         "btn.bgmShort": "BGM",
         "btn.autocare": "AUTO CARE",
         "btn.patrol": "PATROL",
+        "btn.motionOn": "Enable Shake",
+        "btn.motionOff": "Disable Shake",
         "btn.rehatch": "Re-hatch",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "System Settings",
@@ -838,6 +1054,15 @@ const canvas = document.getElementById("petCanvas");
         "settings.animations": "Animations",
         "settings.autoCare": "Auto Care",
         "settings.autoPatrol": "Auto Patrol",
+
+        "settings.motionShake": "Phone Shake Search",
+        "settings.motionShakeNote": "On phones, shake quickly twice to search. iPhone requires motion permission the first time.",
+        "motion.enabled": "Phone Shake Search: ON\nShake quickly twice to search.",
+        "motion.disabled": "Phone Shake Search: OFF\nShake detection is disabled.",
+        "motion.unsupported": "This device or browser does not support shake detection.",
+        "motion.permission": "Please allow motion sensing\nThen shake search will be available.",
+        "motion.denied": "Motion sensing was not allowed\nTap enable again and allow permission.",
+        "motion.needMore": "Shake detected 1/2\nShake quickly one more time to search.",
         "settings.bgmVolume": "BGM Volume",
         "settings.sfxVolume": "SFX Volume",
         "settings.fontSize": "Font Size",
@@ -845,7 +1070,7 @@ const canvas = document.getElementById("petCanvas");
         "settings.default": "Reset Defaults",
         "settings.done": "Done",
         "help.title": "How to Play",
-        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Swipe left and right across the LCD area to search.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
+        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Swipe left and right across the LCD area, or shake your phone quickly twice, to search.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
         "dex.title": "BRANCH EVOLUTION DEX",
         "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
         "dex.hint": "Re-hatch and evolve to unlock appearances",
@@ -962,6 +1187,7 @@ const canvas = document.getElementById("petCanvas");
       const led = $("powerLed");
       if (led) led.classList.toggle("on", true);
       applyLanguage();
+      updateMotionShakeControls();
       save();
     }
 
@@ -2086,6 +2312,7 @@ LV 回到 1。
       const animInput = document.getElementById("settingAnimations");
       const autoCareInput = document.getElementById("settingAutoCare");
       const autoPatrolInput = document.getElementById("settingAutoPatrol");
+      const motionShakeInput = document.getElementById("settingMotionShake");
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
@@ -2148,6 +2375,16 @@ LV 回到 1。
         });
       }
 
+      if (motionShakeInput) {
+        motionShakeInput.addEventListener("change", () => {
+          if (motionShakeInput.checked) {
+            enableMotionShake();
+          } else {
+            disableMotionShake();
+          }
+        });
+      }
+
       if (bgmSlider) {
         bgmSlider.addEventListener("input", () => {
           bgmVolume = Number(bgmSlider.value);
@@ -2182,6 +2419,7 @@ LV 回到 1。
           animationsEnabled = true;
           autoCareEnabled = true;
           autoPatrolEnabled = true;
+          motionShakeEnabled = false;
           bgmVolume = 38;
           sfxVolume = 70;
           fontSizePercent = 100;
@@ -2222,6 +2460,11 @@ LV 回到 1。
           return;
         }
 
+        if (actionName === "motion") {
+          toggleMotionShake();
+          return;
+        }
+
         action(actionName);
         try { forcePetVisibleFallback(); } catch {}
       } catch (err) {
@@ -2239,7 +2482,7 @@ LV 回到 1。
 
       const getButton = target => {
         if (!target || !target.closest) return null;
-        return target.closest("#mobileNativeControls [data-mobile-action]");
+        return target.closest("#mobileNativeControls [data-mobile-action], #mobileSystemDrawer [data-mobile-action]");
       };
 
       document.addEventListener("touchstart", ev => {
@@ -2435,6 +2678,8 @@ LV 回到 1。
     bindMobileSystemDrawer();
     applyLanguage();
     applySystemSettings();
+    updateMotionShakeControls();
+    if (motionShakeEnabled) bindMotionShake();
     tryAutoStartBgm();
     updateUI();
     loop();
