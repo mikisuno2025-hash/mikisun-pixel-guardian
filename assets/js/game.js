@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.9",
+        "pixelPetRetroGuardianV33.10",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.9",
+        "pixelPetOwnedAppearancesV33.10",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1920,73 +1920,80 @@ LV 回到 1。
     });
 
 
+
     function runMobileAction(action) {
       try { initAudio(); } catch {}
-      if (action === "feed") feedPet();
-      else if (action === "train") trainPet();
-      else if (action === "clean") cleanPet();
-      else if (action === "sleep") sleepPet();
-      else if (action === "status") showStatus();
-      else if (action === "dex") openDex();
-      else if (action === "login") {
+      if (action === "feed") {
+        feedPet();
+      } else if (action === "train") {
+        trainPet();
+      } else if (action === "clean") {
+        cleanPet();
+      } else if (action === "sleep") {
+        sleepPet();
+      } else if (action === "status") {
+        showStatus();
+      } else if (action === "dex") {
+        openDex();
+      } else if (action === "rename") {
+        renamePet();
+      } else if (action === "scan") {
+        setMessage("請在 LCD 畫面左右滑動或搖晃，累積搜索值。");
+      } else if (action === "login") {
         const btn = document.getElementById("googleLoginBtn");
         if (btn) btn.click();
-        else setMessage("請稍候，登入模組尚未載入。");
+        else setMessage("登入模組尚未載入。");
       } else if (action === "sync") {
         const btn = document.getElementById("cloudSyncBtn");
         if (btn) btn.click();
-        else setMessage("請稍候，雲端同步模組尚未載入。");
+        else setMessage("雲端同步模組尚未載入。");
       }
       updateUI();
+      try { forcePetVisibleFallback(); } catch {}
     }
 
     function bindMobileNativeControls() {
-      const bar = document.getElementById("mobileNativeControls");
-      if (!bar || bar.dataset.bound === "1") return;
-      bar.dataset.bound = "1";
+      if (window.__mobileNativeDelegationBound) return;
+      window.__mobileNativeDelegationBound = true;
 
-      bar.querySelectorAll("button[data-mobile-action]").forEach(btn => {
-        let pressed = false;
-        const act = btn.dataset.mobileAction;
+      const isTouchLike = () => (
+        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0
+      );
 
-        const press = ev => {
-          pressed = true;
-          btn.classList.add("is-pressing");
-          if (ev.cancelable) ev.preventDefault();
-          ev.stopPropagation();
-        };
+      const findButton = target => target && target.closest ? target.closest("[data-mobile-action]") : null;
 
-        const release = ev => {
-          if (!pressed) return;
-          pressed = false;
-          btn.classList.remove("is-pressing");
-          if (ev.cancelable) ev.preventDefault();
-          ev.stopPropagation();
-          runMobileAction(act);
-        };
+      document.addEventListener("touchstart", ev => {
+        const btn = findButton(ev.target);
+        if (!btn) return;
+        btn.classList.add("is-pressing");
+        if (ev.cancelable) ev.preventDefault();
+        ev.stopPropagation();
+      }, { passive: false, capture: true });
 
-        btn.addEventListener("touchstart", press, { passive: false });
-        btn.addEventListener("touchend", release, { passive: false });
-        btn.addEventListener("touchcancel", () => {
-          pressed = false;
-          btn.classList.remove("is-pressing");
-        }, { passive: true });
+      document.addEventListener("touchcancel", ev => {
+        const btn = findButton(ev.target);
+        if (btn) btn.classList.remove("is-pressing");
+      }, { passive: true, capture: true });
 
-        btn.addEventListener("pointerdown", ev => {
-          if (ev.pointerType === "mouse") btn.classList.add("is-pressing");
-        });
-        btn.addEventListener("pointerup", ev => {
-          if (ev.pointerType === "mouse") {
-            btn.classList.remove("is-pressing");
-            runMobileAction(act);
-          }
-        });
+      document.addEventListener("touchend", ev => {
+        const btn = findButton(ev.target);
+        if (!btn) return;
+        btn.classList.remove("is-pressing");
+        if (ev.cancelable) ev.preventDefault();
+        ev.stopPropagation();
+        runMobileAction(btn.dataset.mobileAction);
+      }, { passive: false, capture: true });
 
-        btn.addEventListener("click", ev => {
-          ev.preventDefault();
-          ev.stopPropagation();
-        });
-      });
+      document.addEventListener("click", ev => {
+        const btn = findButton(ev.target);
+        if (!btn) return;
+        // Desktop click support; on touch devices the touchend already handles it.
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (!isTouchLike()) runMobileAction(btn.dataset.mobileAction);
+      }, { capture: true });
     }
 
 

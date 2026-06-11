@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.9</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-9-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.10</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-10-20260611">
 
 
 <style id="v337-mobile-native">
@@ -53,10 +53,7 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
 </style>
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.9 Web Release.
-       Static web builds expose front-end code by nature.
-       For stronger protection, move hatch/evolution/save logic to a backend API. -->
-  <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
+  <!-- Pixel Pet Retro Guardian V33.10 Mobile Classic Buttons<audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
   <main class="app">
     <section class="device" aria-label="懷舊橫式方塊機遊戲主機">
       <span class="screw tl"></span><span class="screw tr"></span>
@@ -65,7 +62,7 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.9</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.10</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -302,19 +299,26 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
 
 
 
-  <script defer src="assets/js/game.js?v=33-9-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-9-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-10-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-10-20260611"></script>
 
 
-<div id="mobileNativeControls" class="mobile-native-controls" aria-label="手機操作列">
-  <button type="button" data-mobile-action="feed">餵食</button>
-  <button type="button" data-mobile-action="train">訓練</button>
-  <button type="button" data-mobile-action="clean">清潔</button>
-  <button type="button" data-mobile-action="sleep">睡眠</button>
-  <button type="button" data-mobile-action="status">狀態</button>
-  <button type="button" data-mobile-action="dex">圖鑑</button>
-  <button type="button" data-mobile-action="login">登入</button>
-  <button type="button" data-mobile-action="sync">同步</button>
+
+<div id="mobileNativeControls" class="mobile-native-controls mobile-classic-controls" aria-label="手機經典操作列">
+  <div class="mobile-classic-grid">
+    <button type="button" class="mobile-classic-btn red" data-mobile-action="feed"><span>A</span><small>FEED<br>餵食</small></button>
+    <button type="button" class="mobile-classic-btn blue" data-mobile-action="train"><span>B</span><small>TRAIN<br>訓練</small></button>
+    <button type="button" class="mobile-classic-btn green" data-mobile-action="clean"><span>C</span><small>CLEAN<br>清潔</small></button>
+    <button type="button" class="mobile-classic-btn orange" data-mobile-action="sleep"><span>D</span><small>SLEEP<br>睡眠</small></button>
+    <button type="button" class="mobile-classic-btn slate" data-mobile-action="scan"><span>E</span><small>SCAN<br>搜索</small></button>
+    <button type="button" class="mobile-classic-btn gray" data-mobile-action="status"><span>F</span><small>STATUS<br>狀態</small></button>
+  </div>
+  <div class="mobile-utility-grid">
+    <button type="button" data-mobile-action="rename">命名</button>
+    <button type="button" data-mobile-action="dex">圖鑑</button>
+    <button type="button" data-mobile-action="login">Google登入</button>
+    <button type="button" data-mobile-action="sync">雲端同步</button>
+  </div>
 </div>
 </body>
 </html>
