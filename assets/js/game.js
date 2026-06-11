@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.15",
+        "pixelPetRetroGuardianV33.18",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.15",
+        "pixelPetOwnedAppearancesV33.18",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -337,6 +337,7 @@ const canvas = document.getElementById("petCanvas");
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
+      const languageSelect = document.getElementById("languageSelect");
 
       if (animInput) animInput.checked = animationsEnabled;
       if (autoCareInput) autoCareInput.checked = autoCareEnabled;
@@ -660,10 +661,268 @@ const canvas = document.getElementById("petCanvas");
     }
 
 
-    function applyLanguage() {
-      // V33.15 safe fallback: older mobile builds still call applyLanguage(),
-      // but this public build keeps current labels static to avoid runtime crashes.
+
+    const LANGUAGE_STORAGE_KEY = "pixelPetLanguage";
+    const LANGUAGE_MANUAL_KEY = "pixelPetLanguageManual";
+
+    const I18N = {
+      "zh-TW": {
+        "btn.rename": "命名",
+        "btn.dex": "圖鑑",
+        "btn.google": "Google登入",
+        "btn.logout": "登出",
+        "btn.cloud": "雲端同步",
+        "btn.manualSync": "手動同步",
+        "btn.sound": "音效 ON",
+        "btn.soundShort": "音效",
+        "btn.bgm": "BGM ON",
+        "btn.bgmShort": "BGM",
+        "btn.autocare": "AUTO CARE",
+        "btn.patrol": "PATROL",
+        "btn.rehatch": "重新孵化",
+        "btn.system": "SYSTEM",
+        "btn.systemSettings": "系統設定",
+        "cloud.local": "本機存檔",
+        "cloud.signedOutHint": "未登入：僅使用本機存檔",
+        "cloud.signedInHint": "已登入：雲端會自動保存，手動同步只作備用",
+        "cloud.status.signedOut": "未登入雲端",
+        "cloud.status.signedIn": "已登入雲端｜自動同步中",
+        "cloud.status.saved": "雲端已自動保存",
+        "cloud.status.loginFirst": "請先登入Google",
+        "settings.title": "SYSTEM MENU",
+        "settings.subtitle": "OPTION",
+        "settings.animations": "動畫效果",
+        "settings.autoCare": "自動照顧",
+        "settings.autoPatrol": "掛機巡邏",
+        "settings.bgmVolume": "BGM 音量",
+        "settings.sfxVolume": "音效音量",
+        "settings.fontSize": "字體大小",
+        "settings.language": "語言",
+        "settings.default": "恢復預設",
+        "settings.done": "完成",
+        "help.title": "使用說明",
+        "help.copy": "<p>照顧、訓練、清潔與睡眠會影響進化分支。</p><p>滑動 LCD 區域完成左右往返可探索遇敵。</p><p>重新孵化會 LV 歸零並重抽初始家族。</p><p>圖鑑可查看家族、分支與進化階段。</p>",
+        "dex.title": "BRANCH EVOLUTION DEX",
+        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
+        "dex.hint": "重新孵化與進化可解鎖外觀",
+        "mobile.feed": "餵食",
+        "mobile.train": "訓練",
+        "mobile.clean": "清潔",
+        "mobile.sleep": "睡眠",
+        "mobile.search": "搜索",
+        "mobile.status": "狀態",
+        "mobile.systemToggle": "SYSTEM / 其他功能",
+        "mobile.close": "關閉"
+      },
+      "zh-CN": {
+        "btn.rename": "命名",
+        "btn.dex": "图鉴",
+        "btn.google": "Google登录",
+        "btn.logout": "登出",
+        "btn.cloud": "云端同步",
+        "btn.manualSync": "手动同步",
+        "btn.sound": "音效 ON",
+        "btn.soundShort": "音效",
+        "btn.bgm": "BGM ON",
+        "btn.bgmShort": "BGM",
+        "btn.autocare": "AUTO CARE",
+        "btn.patrol": "PATROL",
+        "btn.rehatch": "重新孵化",
+        "btn.system": "SYSTEM",
+        "btn.systemSettings": "系统设置",
+        "cloud.local": "本机存档",
+        "cloud.signedOutHint": "未登录：仅使用本机存档",
+        "cloud.signedInHint": "已登录：云端会自动保存，手动同步仅作备用",
+        "cloud.status.signedOut": "未登录云端",
+        "cloud.status.signedIn": "已登录云端｜自动同步中",
+        "cloud.status.saved": "云端已自动保存",
+        "cloud.status.loginFirst": "请先登录 Google",
+        "settings.title": "SYSTEM MENU",
+        "settings.subtitle": "OPTION",
+        "settings.animations": "动画效果",
+        "settings.autoCare": "自动照顾",
+        "settings.autoPatrol": "挂机巡逻",
+        "settings.bgmVolume": "BGM 音量",
+        "settings.sfxVolume": "音效音量",
+        "settings.fontSize": "字体大小",
+        "settings.language": "语言",
+        "settings.default": "恢复默认",
+        "settings.done": "完成",
+        "help.title": "使用说明",
+        "help.copy": "<p>照顾、训练、清洁与睡眠会影响进化分支。</p><p>滑动 LCD 区域完成左右往返可探索遇敌。</p><p>重新孵化会 LV 归零并重抽初始家族。</p><p>图鉴可查看家族、分支与进化阶段。</p>",
+        "dex.title": "BRANCH EVOLUTION DEX",
+        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
+        "dex.hint": "重新孵化与进化可解锁外观",
+        "mobile.feed": "喂食",
+        "mobile.train": "训练",
+        "mobile.clean": "清洁",
+        "mobile.sleep": "睡眠",
+        "mobile.search": "搜索",
+        "mobile.status": "状态",
+        "mobile.systemToggle": "SYSTEM / 其他功能",
+        "mobile.close": "关闭"
+      },
+      "ja": {
+        "btn.rename": "名前",
+        "btn.dex": "図鑑",
+        "btn.google": "Googleログイン",
+        "btn.logout": "ログアウト",
+        "btn.cloud": "クラウド同期",
+        "btn.manualSync": "手動同期",
+        "btn.sound": "効果音 ON",
+        "btn.soundShort": "効果音",
+        "btn.bgm": "BGM ON",
+        "btn.bgmShort": "BGM",
+        "btn.autocare": "AUTO CARE",
+        "btn.patrol": "PATROL",
+        "btn.rehatch": "再孵化",
+        "btn.system": "SYSTEM",
+        "btn.systemSettings": "システム設定",
+        "cloud.local": "ローカル保存",
+        "cloud.signedOutHint": "未ログイン：ローカル保存のみ",
+        "cloud.signedInHint": "ログイン中：クラウドは自動保存、手動同期は予備用",
+        "cloud.status.signedOut": "クラウド未ログイン",
+        "cloud.status.signedIn": "クラウドログイン中｜自動同期中",
+        "cloud.status.saved": "クラウド自動保存済み",
+        "cloud.status.loginFirst": "先に Google でログインしてください",
+        "settings.title": "SYSTEM MENU",
+        "settings.subtitle": "OPTION",
+        "settings.animations": "アニメ効果",
+        "settings.autoCare": "自動お世話",
+        "settings.autoPatrol": "自動パトロール",
+        "settings.bgmVolume": "BGM 音量",
+        "settings.sfxVolume": "効果音 音量",
+        "settings.fontSize": "文字サイズ",
+        "settings.language": "言語",
+        "settings.default": "初期設定に戻す",
+        "settings.done": "完了",
+        "help.title": "遊び方",
+        "help.copy": "<p>お世話・訓練・清掃・睡眠が進化分岐に影響します。</p><p>LCD エリアを左右に往復スワイプすると探索できます。</p><p>再孵化すると LV が 1 に戻り、初期ファミリーを再抽選します。</p><p>図鑑でファミリー・分岐・進化段階を確認できます。</p>",
+        "dex.title": "BRANCH EVOLUTION DEX",
+        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
+        "dex.hint": "再孵化と進化で外見を解放できます",
+        "mobile.feed": "ごはん",
+        "mobile.train": "訓練",
+        "mobile.clean": "掃除",
+        "mobile.sleep": "睡眠",
+        "mobile.search": "探索",
+        "mobile.status": "状態",
+        "mobile.systemToggle": "SYSTEM / その他",
+        "mobile.close": "閉じる"
+      },
+      "en": {
+        "btn.rename": "Rename",
+        "btn.dex": "Dex",
+        "btn.google": "Google Login",
+        "btn.logout": "Logout",
+        "btn.cloud": "Cloud Sync",
+        "btn.manualSync": "Manual Sync",
+        "btn.sound": "SFX ON",
+        "btn.soundShort": "SFX",
+        "btn.bgm": "BGM ON",
+        "btn.bgmShort": "BGM",
+        "btn.autocare": "AUTO CARE",
+        "btn.patrol": "PATROL",
+        "btn.rehatch": "Re-hatch",
+        "btn.system": "SYSTEM",
+        "btn.systemSettings": "System Settings",
+        "cloud.local": "Local Save",
+        "cloud.signedOutHint": "Not signed in: local save only",
+        "cloud.signedInHint": "Signed in: cloud auto-save is on; manual sync is backup only",
+        "cloud.status.signedOut": "Cloud not signed in",
+        "cloud.status.signedIn": "Cloud signed in｜auto-sync on",
+        "cloud.status.saved": "Cloud auto-saved",
+        "cloud.status.loginFirst": "Please sign in with Google first",
+        "settings.title": "SYSTEM MENU",
+        "settings.subtitle": "OPTION",
+        "settings.animations": "Animations",
+        "settings.autoCare": "Auto Care",
+        "settings.autoPatrol": "Auto Patrol",
+        "settings.bgmVolume": "BGM Volume",
+        "settings.sfxVolume": "SFX Volume",
+        "settings.fontSize": "Font Size",
+        "settings.language": "Language",
+        "settings.default": "Reset Defaults",
+        "settings.done": "Done",
+        "help.title": "How to Play",
+        "help.copy": "<p>Care, training, cleaning, and sleep affect evolution branches.</p><p>Swipe left and right across the LCD area to search.</p><p>Re-hatch resets LV to 1 and rolls a new starter family.</p><p>The Dex shows families, branches, and evolution stages.</p>",
+        "dex.title": "BRANCH EVOLUTION DEX",
+        "dex.subtitle": "10 FAMILIES × 2 BRANCHES × 5 STAGES",
+        "dex.hint": "Re-hatch and evolve to unlock appearances",
+        "mobile.feed": "Feed",
+        "mobile.train": "Train",
+        "mobile.clean": "Clean",
+        "mobile.sleep": "Sleep",
+        "mobile.search": "Search",
+        "mobile.status": "Status",
+        "mobile.systemToggle": "SYSTEM / More",
+        "mobile.close": "Close"
+      }
+    };
+
+    function normalizeLanguage(code) {
+      const lang = String(code || "").toLowerCase();
+      if (lang === "zh-tw" || lang === "zh-hk" || lang === "zh-mo" || lang.startsWith("zh-hant")) return "zh-TW";
+      if (lang === "zh-cn" || lang === "zh-sg" || lang.startsWith("zh-hans") || lang === "zh") return "zh-CN";
+      if (lang.startsWith("ja")) return "ja";
+      if (lang.startsWith("en")) return "en";
+      return "";
     }
+
+    function detectBrowserLanguage() {
+      const list = Array.isArray(navigator.languages) && navigator.languages.length ? navigator.languages : [navigator.language];
+      for (const code of list) {
+        const normalized = normalizeLanguage(code);
+        if (normalized) return normalized;
+      }
+      return "en";
+    }
+
+    function getCurrentLanguage() {
+      try {
+        const manual = localStorage.getItem(LANGUAGE_MANUAL_KEY) === "1";
+        const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (manual && I18N[saved]) return saved;
+      } catch {}
+      return detectBrowserLanguage();
+    }
+
+    function t(key) {
+      const lang = getCurrentLanguage();
+      return (I18N[lang] && I18N[lang][key]) || (I18N["en"] && I18N["en"][key]) || (I18N["zh-TW"] && I18N["zh-TW"][key]) || key;
+    }
+
+    function applyLanguage() {
+      const lang = getCurrentLanguage();
+      document.documentElement.lang = lang === "zh-TW" ? "zh-Hant" : lang === "zh-CN" ? "zh-Hans" : lang;
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        const value = t(key);
+        if (value !== key) el.textContent = value;
+      });
+
+      document.querySelectorAll("[data-i18n-html]").forEach(el => {
+        const key = el.getAttribute("data-i18n-html");
+        const value = t(key);
+        if (value !== key) el.innerHTML = value;
+      });
+
+      const languageSelect = document.getElementById("languageSelect");
+      if (languageSelect) languageSelect.value = lang;
+
+      window.PixelPetI18N = {
+        t,
+        currentLanguage: getCurrentLanguage,
+        applyLanguage
+      };
+
+      window.dispatchEvent(new CustomEvent("pixel-language-change", {
+        detail: { language: lang }
+      }));
+    }
+
+
 
     function updateUI() {
       syncPetAppearanceStage();
@@ -1830,9 +2089,23 @@ LV 回到 1。
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
+      const languageSelect = document.getElementById("languageSelect");
 
       if (closeBtn) closeBtn.addEventListener("click", closeSettings);
       if (doneBtn) doneBtn.addEventListener("click", closeSettings);
+      if (languageSelect) {
+        languageSelect.value = getCurrentLanguage();
+        languageSelect.addEventListener("change", () => {
+          try {
+            localStorage.setItem(LANGUAGE_STORAGE_KEY, languageSelect.value);
+            localStorage.setItem(LANGUAGE_MANUAL_KEY, "1");
+          } catch {}
+          applyLanguage();
+          sfx("click");
+          setMessage("SYSTEM MENU\nLanguage updated.");
+          updateUI();
+        });
+      }
       if (backdrop) {
         backdrop.addEventListener("click", e => {
           if (e.target === backdrop) closeSettings();
@@ -2005,6 +2278,63 @@ LV 回到 1。
     }
 
 
+
+    function bindMobileSystemDrawer() {
+      if (window.__mobileSystemDrawerBound) return;
+      window.__mobileSystemDrawerBound = true;
+
+      const drawer = () => document.getElementById("mobileSystemDrawer");
+
+      document.addEventListener("click", ev => {
+        const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
+        const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
+
+        if (openBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const d = drawer();
+          if (d) d.hidden = false;
+          return;
+        }
+
+        if (closeBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const d = drawer();
+          if (d) d.hidden = true;
+          return;
+        }
+
+        const d = drawer();
+        if (d && !d.hidden && ev.target === d) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          d.hidden = true;
+        }
+      }, { capture: true });
+
+      document.addEventListener("touchend", ev => {
+        const openBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-toggle='system']") : null;
+        const closeBtn = ev.target && ev.target.closest ? ev.target.closest("[data-mobile-drawer-close='system']") : null;
+
+        if (openBtn) {
+          if (ev.cancelable) ev.preventDefault();
+          ev.stopPropagation();
+          const d = drawer();
+          if (d) d.hidden = false;
+          return;
+        }
+
+        if (closeBtn) {
+          if (ev.cancelable) ev.preventDefault();
+          ev.stopPropagation();
+          const d = drawer();
+          if (d) d.hidden = true;
+        }
+      }, { passive: false, capture: true });
+    }
+
+
     setInterval(tick, 15000);
     setInterval(() => { try { forcePetVisibleFallback(); } catch {} }, 1200);
 
@@ -2102,6 +2432,7 @@ LV 回到 1。
     bindDex();
     bindSettingsMenu();
     bindMobileV28Controls();
+    bindMobileSystemDrawer();
     applyLanguage();
     applySystemSettings();
     tryAutoStartBgm();

@@ -1,3 +1,6 @@
+/* V33.18 auto language stylesheet */
+/* V33.17 cloud login UX stylesheet */
+/* V33.16 mobile no-scroll controls stylesheet */
 /* V33.15 mobile no-overlap stylesheet */
 /* V33.14 V28 buttons restored stylesheet */
 /* V33.9 pet visible external stylesheet */
@@ -1128,4 +1131,30 @@
     visibility:visible!important;
     pointer-events:none!important;
   }
+}
+
+/* V33.17 cloud login state UX */
+[data-cloud-state="signed-out"] [data-cloud-only="signed-in"]{
+  display:none!important;
+}
+
+[data-cloud-state="signed-in"] [data-cloud-hint]{
+  color:#cfe8c4!important;
+}
+
+.mobile-cloud-hint{
+  grid-column:1/-1!important;
+  margin-top:8px!important;
+  padding:8px 10px!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#e9dec4!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  text-align:center!important;
+  line-height:1.25!important;
+}
+
+#cloudSyncBtn[hidden]{
+  display:none!important;
 }

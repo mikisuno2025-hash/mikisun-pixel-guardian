@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.15</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-15-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.18</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-18-20260611">
 
-<style id="v3315-mobile-no-overlap-controls">
+<style id="v3316-mobile-no-scroll-controls">
 @media (max-width:820px){
   html,body{
     width:100%!important;
@@ -21,142 +21,205 @@
   }
 
   body{
-    padding-bottom:calc(88px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(185px + env(safe-area-inset-bottom))!important;
   }
 
   .device{
     transform:none!important;
   }
 
-  .mobile-native-controls.mobile-v28-controls{
-    position:relative!important;
-    left:auto!important;
-    right:auto!important;
-    bottom:auto!important;
-    z-index:10!important;
+  .mobile-native-controls.mobile-compact-controls{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    z-index:999999!important;
     display:block!important;
-    width:100%!important;
-    margin:10px 0 0!important;
-    padding:10px 10px calc(10px + env(safe-area-inset-bottom))!important;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
     background:rgba(34,32,28,.96)!important;
+    backdrop-filter:blur(10px)!important;
     border-top:2px solid rgba(255,255,255,.18)!important;
-    box-shadow:0 -4px 16px rgba(0,0,0,.18)!important;
+    box-shadow:0 -8px 24px rgba(0,0,0,.30)!important;
     pointer-events:auto!important;
   }
 
-  .mobile-v28-title{
-    color:#e9dec4!important;
-    font-weight:900!important;
-    font-size:12px!important;
-    letter-spacing:.12em!important;
-    margin:0 0 6px!important;
-    opacity:.9!important;
-  }
-
-  .mobile-classic-grid{
+  .mobile-compact-grid{
     display:grid!important;
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:7px!important;
+    gap:6px!important;
     margin-bottom:7px!important;
   }
 
-  .mobile-classic-btn{
+  .mobile-compact-btn{
     appearance:none!important;
     -webkit-appearance:none!important;
     width:100%!important;
-    min-height:66px!important;
-    padding:6px 4px 4px!important;
-    border-radius:15px!important;
-    border:3px solid rgba(0,0,0,.35)!important;
-    color:#f8f1df!important;
+    min-height:54px!important;
+    padding:5px 4px!important;
+    border-radius:13px!important;
+    border:2px solid rgba(0,0,0,.35)!important;
+    color:#fff!important;
     font-weight:900!important;
     touch-action:manipulation!important;
     pointer-events:auto!important;
     user-select:none!important;
     -webkit-user-select:none!important;
     -webkit-tap-highlight-color:rgba(255,255,255,.35)!important;
-    box-shadow:inset 0 7px 8px rgba(255,255,255,.20), inset 0 -8px 8px rgba(0,0,0,.22), 0 4px 0 rgba(0,0,0,.38)!important;
+    box-shadow:inset 0 5px 7px rgba(255,255,255,.18), inset 0 -6px 7px rgba(0,0,0,.22), 0 3px 0 rgba(0,0,0,.38)!important;
   }
 
-  .mobile-classic-btn span{
+  .mobile-compact-btn b{
     display:block!important;
-    font-size:20px!important;
+    font-size:18px!important;
     line-height:1!important;
-    margin-bottom:4px!important;
-    color:#fff!important;
+    margin-bottom:2px!important;
     text-shadow:0 2px 2px rgba(0,0,0,.45)!important;
   }
 
-  .mobile-classic-btn small{
+  .mobile-compact-btn small{
     display:block!important;
-    font-size:9px!important;
-    line-height:1.05!important;
-    letter-spacing:.04em!important;
+    font-size:12px!important;
+    line-height:1!important;
     color:#2f2c25!important;
-    text-shadow:none!important;
-    background:rgba(255,244,210,.72)!important;
+    background:rgba(255,244,210,.75)!important;
     border-radius:7px!important;
     padding:3px 2px!important;
   }
 
-  .mobile-classic-btn.red{background:#b84d54!important}
-  .mobile-classic-btn.blue{background:#54617d!important}
-  .mobile-classic-btn.green{background:#50694f!important}
-  .mobile-classic-btn.orange{background:#a46a2e!important}
-  .mobile-classic-btn.slate{background:#51616e!important}
-  .mobile-classic-btn.gray{background:#535351!important}
+  .mobile-compact-btn.red{background:#b84d54!important}
+  .mobile-compact-btn.blue{background:#54617d!important}
+  .mobile-compact-btn.green{background:#50694f!important}
+  .mobile-compact-btn.orange{background:#a46a2e!important}
+  .mobile-compact-btn.slate{background:#51616e!important}
+  .mobile-compact-btn.gray{background:#535351!important}
 
-  .mobile-utility-grid{
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:7px!important;
-  }
-
-  .mobile-utility-grid button{
+  .mobile-system-toggle{
     appearance:none!important;
     -webkit-appearance:none!important;
     width:100%!important;
     min-height:42px!important;
     border-radius:13px!important;
-    border:2px solid rgba(255,255,255,.24)!important;
+    border:2px solid rgba(255,255,255,.25)!important;
     background:#e9dec4!important;
     color:#2e2b25!important;
     font-weight:900!important;
-    font-size:13px!important;
+    font-size:15px!important;
     touch-action:manipulation!important;
     pointer-events:auto!important;
     box-shadow:0 3px 0 rgba(0,0,0,.42)!important;
   }
 
   .mobile-native-controls button.is-pressing,
-  .mobile-native-controls button:active{
+  .mobile-native-controls button:active,
+  .mobile-system-drawer button.is-pressing,
+  .mobile-system-drawer button:active{
     transform:translateY(3px)!important;
-    box-shadow:inset 0 5px 8px rgba(0,0,0,.22)!important;
     filter:brightness(1.1)!important;
+  }
+
+  .mobile-system-drawer{
+    position:fixed!important;
+    inset:0!important;
+    z-index:1000000!important;
+    background:rgba(0,0,0,.42)!important;
+    display:flex!important;
+    align-items:flex-end!important;
+    justify-content:center!important;
+    padding:12px!important;
+    box-sizing:border-box!important;
+  }
+
+  .mobile-system-drawer[hidden]{
+    display:none!important;
+  }
+
+  .mobile-system-sheet{
+    width:100%!important;
+    max-height:min(78dvh,620px)!important;
+    overflow:auto!important;
+    background:#211f1b!important;
+    border:2px solid rgba(255,255,255,.18)!important;
+    border-radius:18px!important;
+    padding:12px!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.45)!important;
+  }
+
+  .mobile-system-head{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    color:#e9dec4!important;
+    margin-bottom:10px!important;
+    font-weight:900!important;
+    letter-spacing:.08em!important;
+  }
+
+  .mobile-system-head button{
+    min-height:38px!important;
+    padding:8px 14px!important;
+    border-radius:12px!important;
+    border:1px solid rgba(255,255,255,.25)!important;
+    background:#e9dec4!important;
+    color:#2e2b25!important;
+    font-weight:900!important;
+  }
+
+  .mobile-system-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .mobile-system-grid button{
+    min-height:50px!important;
+    border-radius:14px!important;
+    border:2px solid rgba(255,255,255,.24)!important;
+    background:#e9dec4!important;
+    color:#2e2b25!important;
+    font-weight:900!important;
+    font-size:14px!important;
+    touch-action:manipulation!important;
+    pointer-events:auto!important;
+    box-shadow:0 3px 0 rgba(0,0,0,.42)!important;
   }
 }
 
 @media (max-width:430px){
   body{
-    padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(178px + env(safe-area-inset-bottom))!important;
   }
-  .mobile-native-controls.mobile-v28-controls{
+
+  .mobile-native-controls.mobile-compact-controls{
     padding:7px 7px calc(7px + env(safe-area-inset-bottom))!important;
   }
-  .mobile-classic-btn{
-    min-height:62px!important;
+
+  .mobile-compact-grid{
+    gap:5px!important;
+    margin-bottom:6px!important;
   }
-  .mobile-classic-btn span{
-    font-size:19px!important;
+
+  .mobile-compact-btn{
+    min-height:50px!important;
   }
-  .mobile-utility-grid button{
+
+  .mobile-compact-btn b{
+    font-size:17px!important;
+  }
+
+  .mobile-compact-btn small{
+    font-size:11px!important;
+  }
+
+  .mobile-system-toggle{
     min-height:40px!important;
-    font-size:12px!important;
+    font-size:14px!important;
   }
 }
 
 @media (min-width:821px){
-  .mobile-native-controls{
+  .mobile-native-controls,
+  .mobile-system-drawer{
     display:none!important;
   }
 }
@@ -164,7 +227,7 @@
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.15 Mobile No Overlap Release.
+  <!-- Pixel Pet Retro Guardian V33.18 Auto Language Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -176,7 +239,7 @@
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.15</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.18</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -305,7 +368,7 @@
       <div class="setting-list">
         <div class="setting-row">
           <div class="setting-label">
-            <span>動畫效果</span>
+            <span data-i18n="settings.animations">動畫效果</span>
             <label class="switch">
               <input type="checkbox" id="settingAnimations">
               <span class="switch-slider"></span>
@@ -329,7 +392,7 @@
 
         <div class="setting-row">
           <div class="setting-label">
-            <span>掛機巡邏</span>
+            <span data-i18n="settings.autoPatrol">掛機巡邏</span>
             <label class="switch">
               <input type="checkbox" id="settingAutoPatrol">
               <span class="switch-slider"></span>
@@ -358,7 +421,7 @@
 
         <div class="setting-row">
           <div class="setting-label">
-            <span>字體大小</span>
+            <span data-i18n="settings.fontSize">字體大小</span>
             <span class="setting-value" id="fontSizeValue">100%</span>
           </div>
           <input class="setting-slider" id="settingFontSize" type="range" min="85" max="130" step="5">
@@ -388,8 +451,8 @@
         </details>
 
         <div class="settings-actions">
-        <button class="settings-action-btn" id="settingsDefault">恢復預設</button>
-        <button class="settings-action-btn" id="settingsDone">完成</button>
+        <button class="settings-action-btn" id="settingsDefault" data-i18n="settings.default">恢復預設</button>
+        <button class="settings-action-btn" id="settingsDone" data-i18n="settings.done">完成</button>
       </div>
     </section>
   </div>
@@ -413,32 +476,43 @@
 
 
 
-  <script defer src="assets/js/game.js?v=33-15-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-15-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-18-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-18-20260611"></script>
 
 
 
-<div id="mobileNativeControls" class="mobile-native-controls mobile-v28-controls" aria-label="手機 V28 操作列">
-  <div class="mobile-v28-title">CLASSIC BUTTONS　A / B / C</div>
-  <div class="mobile-classic-grid">
-    <button type="button" class="mobile-classic-btn red" data-mobile-action="feed"><span>A</span><small>FEED<br>餵食</small></button>
-    <button type="button" class="mobile-classic-btn blue" data-mobile-action="train"><span>B</span><small>TRAIN<br>訓練</small></button>
-    <button type="button" class="mobile-classic-btn green" data-mobile-action="clean"><span>C</span><small>CLEAN<br>清潔</small></button>
-    <button type="button" class="mobile-classic-btn orange" data-mobile-action="sleep"><span>D</span><small>SLEEP<br>睡眠</small></button>
-    <button type="button" class="mobile-classic-btn slate" data-mobile-action="patrol"><span>E</span><small>SCAN<br>搜索</small></button>
-    <button type="button" class="mobile-classic-btn gray" data-mobile-action="status"><span>F</span><small>STATUS<br>狀態</small></button>
+
+<div id="mobileNativeControls" class="mobile-native-controls mobile-compact-controls" aria-label="手機固定操作列">
+  <div class="mobile-compact-grid">
+    <button type="button" class="mobile-compact-btn red" data-mobile-action="feed"><b>A</b><small data-i18n="mobile.feed">餵食</small></button>
+    <button type="button" class="mobile-compact-btn blue" data-mobile-action="train"><b>B</b><small data-i18n="mobile.train">訓練</small></button>
+    <button type="button" class="mobile-compact-btn green" data-mobile-action="clean"><b>C</b><small data-i18n="mobile.clean">清潔</small></button>
+    <button type="button" class="mobile-compact-btn orange" data-mobile-action="sleep"><b>D</b><small data-i18n="mobile.sleep">睡眠</small></button>
+    <button type="button" class="mobile-compact-btn slate" data-mobile-action="patrol"><b>E</b><small data-i18n="mobile.search">搜索</small></button>
+    <button type="button" class="mobile-compact-btn gray" data-mobile-action="status"><b>F</b><small data-i18n="mobile.status">狀態</small></button>
   </div>
-  <div class="mobile-utility-grid">
-    <button type="button" data-mobile-action="rename">命名</button>
-    <button type="button" data-mobile-action="dex">圖鑑</button>
-    <button type="button" data-mobile-action="sound">音效</button>
-    <button type="button" data-mobile-action="bgm">BGM</button>
-    <button type="button" data-mobile-action="autocare">AUTO CARE</button>
-    <button type="button" data-mobile-action="autopatrol">PATROL</button>
-    <button type="button" data-mobile-action="reset">重新孵化</button>
-    <button type="button" data-mobile-action="system">SYSTEM</button>
-    <button type="button" data-mobile-action="login">Google登入</button>
-    <button type="button" data-mobile-action="sync">雲端同步</button>
+  <button type="button" class="mobile-system-toggle" data-mobile-drawer-toggle="system" data-i18n="mobile.systemToggle">SYSTEM / 其他功能</button>
+</div>
+
+<div id="mobileSystemDrawer" class="mobile-system-drawer" aria-label="手機系統功能面板" hidden>
+  <div class="mobile-system-sheet">
+    <div class="mobile-system-head">
+      <strong data-i18n="settings.title">SYSTEM</strong>
+      <button type="button" data-mobile-drawer-close="system" data-i18n="mobile.close">關閉</button>
+    </div>
+    <div class="mobile-system-grid">
+      <button type="button" data-mobile-action="rename" data-i18n="btn.rename">命名</button>
+      <button type="button" data-mobile-action="dex" data-i18n="btn.dex">圖鑑</button>
+      <button type="button" data-mobile-action="sound" data-i18n="btn.soundShort">音效</button>
+      <button type="button" data-mobile-action="bgm" data-i18n="btn.bgmShort">BGM</button>
+      <button type="button" data-mobile-action="autocare" data-i18n="btn.autocare">AUTO CARE</button>
+      <button type="button" data-mobile-action="autopatrol" data-i18n="btn.patrol">PATROL</button>
+      <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
+      <button type="button" data-mobile-action="system" data-i18n="btn.systemSettings">系統設定</button>
+      <button type="button" data-mobile-action="login" data-i18n="btn.google">Google登入</button>
+      <button type="button" data-mobile-action="sync" data-cloud-only="signed-in" data-i18n="btn.manualSync">手動同步</button>
+    </div>
+    <div class="mobile-cloud-hint" data-cloud-hint>未登入：僅使用本機存檔</div>
   </div>
 </div>
 

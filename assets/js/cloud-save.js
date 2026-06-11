@@ -12,11 +12,73 @@ let firebaseApi = null;
 let isReady = false;
 let autoSaveTimer = null;
 
+function cloudT(key) {
+  try {
+    if (window.PixelPetI18N && typeof window.PixelPetI18N.t === "function") {
+      return window.PixelPetI18N.t(key);
+    }
+  } catch {}
+  const fallback = {
+    "btn.google": "Google登入",
+    "btn.logout": "登出",
+    "btn.manualSync": "手動同步",
+    "cloud.signedOutHint": "未登入：僅使用本機存檔",
+    "cloud.signedInHint": "已登入：雲端會自動保存，手動同步只作備用",
+    "cloud.status.signedOut": "未登入雲端",
+    "cloud.status.signedIn": "已登入雲端｜自動同步中",
+    "cloud.status.saved": "雲端已自動保存",
+    "cloud.status.loginFirst": "請先登入Google"
+  };
+  return fallback[key] || key;
+}
+
 function setStatus(text, mode = "") {
   if (!statusEl) return;
   statusEl.textContent = text;
   statusEl.classList.remove("online", "warn", "error");
   if (mode) statusEl.classList.add(mode);
+}
+
+
+function updateCloudLoginUi(user) {
+  const signedIn = !!user;
+  document.documentElement.dataset.cloudState = signedIn ? "signed-in" : "signed-out";
+
+  const loginText = signedIn ? cloudT("btn.logout") : cloudT("btn.google");
+  const syncText = cloudT("btn.manualSync");
+  const hintText = signedIn
+    ? cloudT("cloud.signedInHint")
+    : cloudT("cloud.signedOutHint");
+
+  if (loginBtn) loginBtn.textContent = loginText;
+  if (syncBtn) {
+    syncBtn.textContent = syncText;
+    syncBtn.hidden = !signedIn;
+    syncBtn.disabled = !signedIn;
+  }
+
+  document.querySelectorAll("[data-mobile-action='login']").forEach(btn => {
+    btn.textContent = loginText;
+  });
+
+  document.querySelectorAll("[data-mobile-action='sync']").forEach(btn => {
+    btn.textContent = syncText;
+    btn.hidden = !signedIn;
+    btn.disabled = !signedIn;
+  });
+
+  document.querySelectorAll("[data-cloud-hint]").forEach(el => {
+    el.textContent = hintText;
+  });
+
+  window.dispatchEvent(new CustomEvent("pixel-cloud-auth-change", {
+    detail: {
+      signedIn,
+      uid: user ? user.uid : null,
+      email: user ? user.email : null,
+      displayName: user ? user.displayName : null
+    }
+  }));
 }
 
 function gameApi() {
@@ -41,7 +103,9 @@ function waitForGameApi(timeoutMs = 5000) {
 async function initFirebase() {
   if (!FIREBASE_CONFIG_READY) {
     setStatus("Firebase未設定", "warn");
+    updateCloudLoginUi(null);
     if (loginBtn) loginBtn.textContent = "設定Firebase";
+    document.querySelectorAll("[data-mobile-action='login']").forEach(btn => { btn.textContent = "設定Firebase"; });
     return false;
   }
 
@@ -70,14 +134,14 @@ async function initFirebase() {
       currentUser = user || null;
       if (currentUser) {
         isReady = true;
-        setStatus("已登入雲端", "online");
-        if (loginBtn) loginBtn.textContent = "登出";
+        setStatus(cloudT("cloud.status.signedIn"), "online");
+        updateCloudLoginUi(currentUser);
         await handleInitialCloudMerge();
         startAutoSave();
       } else {
         isReady = false;
-        setStatus("未登入雲端", "warn");
-        if (loginBtn) loginBtn.textContent = "Google登入";
+        setStatus(cloudT("cloud.status.signedOut"), "warn");
+        updateCloudLoginUi(null);
         stopAutoSave();
       }
     });
@@ -101,7 +165,13 @@ async function signInOrOut() {
   }
 
   if (!auth) {
-    const ok = await initFirebase();
+    const ok = await window.addEventListener("pixel-language-change", () => {
+  try {
+    updateCloudLoginUi(currentUser);
+    if (!currentUser && FIREBASE_CONFIG_READY) setStatus(cloudT("cloud.status.signedOut"), "warn");
+  } catch {}
+});
+initFirebase();
     if (!ok) return;
   }
 
@@ -139,7 +209,7 @@ async function uploadCloudSave(showAlert = false) {
   try {
     const payload = buildCloudPayload();
     await firebaseApi.setDoc(saveDocRef(), payload, { merge: true });
-    setStatus("雲端已保存", "online");
+    setStatus(cloudT("cloud.status.saved"), "online");
     if (showAlert) alert("已上傳本機存檔到雲端。");
     return true;
   } catch (error) {
@@ -241,7 +311,8 @@ async function manualSync() {
     return;
   }
   if (!currentUser) {
-    await signInOrOut();
+    setStatus(cloudT("cloud.status.loginFirst"), "warn");
+    alert(cloudT("cloud.status.loginFirst"));
     return;
   }
 
@@ -253,6 +324,23 @@ async function manualSync() {
   }
 }
 
+window.PixelPetCloudAuth = {
+  isSignedIn() {
+    return !!currentUser;
+  },
+  currentUser() {
+    return currentUser ? {
+      uid: currentUser.uid,
+      email: currentUser.email,
+      displayName: currentUser.displayName
+    } : null;
+  },
+  signInOrOut,
+  manualSync,
+  uploadCloudSave,
+  loadCloudSave
+};
+
 if (loginBtn) loginBtn.addEventListener("click", signInOrOut);
 if (syncBtn) syncBtn.addEventListener("click", manualSync);
 
@@ -262,5 +350,12 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-setStatus(FIREBASE_CONFIG_READY ? "雲端待登入" : "Firebase未設定", FIREBASE_CONFIG_READY ? "warn" : "warn");
+updateCloudLoginUi(null);
+setStatus(FIREBASE_CONFIG_READY ? cloudT("cloud.status.signedOut") : "Firebase未設定", FIREBASE_CONFIG_READY ? "warn" : "warn");
+window.addEventListener("pixel-language-change", () => {
+  try {
+    updateCloudLoginUi(currentUser);
+    if (!currentUser && FIREBASE_CONFIG_READY) setStatus(cloudT("cloud.status.signedOut"), "warn");
+  } catch {}
+});
 initFirebase();
