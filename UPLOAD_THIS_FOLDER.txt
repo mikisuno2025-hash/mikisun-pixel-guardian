@@ -1,0 +1,3 @@
+V33.14 V28按鈕功能復原版：請上傳本資料夾全部內容到 GitHub Pages。
+修正：SYSTEM 設定回到手機底部按鈕；恢復音效/BGM/AUTO CARE/PATROL/重新孵化；補 applyLanguage fallback，避免按鈕觸發後中斷。
+測試網址：https://mikisuno2025-hash.github.io/mikisun-pixel-guardian/?v=33-14
