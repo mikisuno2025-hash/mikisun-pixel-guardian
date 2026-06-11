@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.25",
+        "pixelPetRetroGuardianV33.27",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.25",
+        "pixelPetOwnedAppearancesV33.27",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1553,7 +1553,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.25",
+        "Mikisun Pixel Guardian V33.27",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2446,8 +2446,42 @@ LV 回到 1。
       });
     }
 
+
+    function setSystemTab(tabName = "actions") {
+      const allowed = ["actions", "settings", "account"];
+      const activeName = allowed.includes(tabName) ? tabName : "actions";
+
+      document.querySelectorAll("[data-system-tab]").forEach(btn => {
+        const active = btn.dataset.systemTab === activeName;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      document.querySelectorAll("[data-system-panel]").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.systemPanel === activeName);
+      });
+    }
+
+    function bindSystemTabs() {
+      if (window.__systemTabsBound) return;
+      window.__systemTabsBound = true;
+
+      document.addEventListener("click", ev => {
+        const btn = ev.target && ev.target.closest ? ev.target.closest("[data-system-tab]") : null;
+        if (!btn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        setSystemTab(btn.dataset.systemTab || "actions");
+        sfx("click");
+      }, { capture: true });
+    }
+
+
     function openSettings() {
       applyLanguage();
+      setSystemTab("actions");
+      setSystemTab("actions");
+      setSystemTab("actions");
       initAudio();
       sfx("click");
       applySystemSettings();
@@ -2620,7 +2654,7 @@ LV 回到 1。
 
 
     function closeSettingsForQuickAction(actionName) {
-      if (!["rename", "dex", "reset", "debug", "login", "sync", "sound", "bgm", "autocare", "autopatrol", "motion"].includes(actionName)) return;
+      if (!["rename", "dex", "reset", "debug"].includes(actionName)) return;
       const backdrop = document.getElementById("settingsBackdrop");
       if (backdrop && backdrop.classList.contains("open")) {
         backdrop.classList.remove("open");
@@ -2727,7 +2761,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.25: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.27: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
@@ -2830,6 +2864,7 @@ LV 回到 1。
     bindBgmAutoStart();
     bindDex();
     bindSettingsMenu();
+    bindSystemTabs();
     bindMobileV28Controls();
     bindMobileSystemDrawer();
     bindDebugPanel();

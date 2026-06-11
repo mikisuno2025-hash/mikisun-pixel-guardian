@@ -16,6 +16,56 @@ let lastCloudSaveAt = 0;
 let lastCloudLoadAt = 0;
 let lastStatusText = "";
 
+
+function cloudGameMessage(text) {
+  try {
+    if (window.PixelPetGame && typeof window.PixelPetGame.setCloudMessage === "function") {
+      window.PixelPetGame.setCloudMessage(text);
+    }
+  } catch {}
+}
+
+function isMobileAuthEnvironment() {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+}
+
+function rememberLoginPending(value) {
+  try {
+    if (value) sessionStorage.setItem("pixelPetGoogleLoginPending", String(Date.now()));
+    else sessionStorage.removeItem("pixelPetGoogleLoginPending");
+  } catch {}
+}
+
+function hasLoginPending() {
+  try {
+    return !!sessionStorage.getItem("pixelPetGoogleLoginPending");
+  } catch {
+    return false;
+  }
+}
+
+function formatAuthError(error) {
+  const code = error && error.code ? String(error.code) : "";
+  const message = error && error.message ? String(error.message) : String(error || "");
+  if (code.includes("unauthorized-domain")) {
+    return "Google登入失敗：Firebase 授權網域未設定。請到 Firebase Authentication → Settings → Authorized domains 加入 mikisuno2025-hash.github.io。";
+  }
+  if (code.includes("popup-blocked")) return "Google登入被瀏覽器阻擋，請改用跳轉登入或允許彈出視窗。";
+  if (code.includes("popup-closed-by-user")) return "Google登入視窗被關閉，尚未完成登入。";
+  if (code.includes("network-request-failed")) return "Google登入失敗：網路連線異常。";
+  return "Google登入失敗：" + (code ? code + " " : "") + message;
+}
+
+function reportAuthError(error) {
+  const text = formatAuthError(error);
+  rememberLoginPending(false);
+  setStatus(text, "error");
+  cloudGameMessage(text);
+  try { alert(text); } catch {}
+}
+
+
 function cloudT(key) {
   try {
     if (window.PixelPetI18N && typeof window.PixelPetI18N.t === "function") {
@@ -145,15 +195,39 @@ async function initFirebase() {
     db = firebaseApi.getFirestore(app);
 
     if (firebaseApi.getRedirectResult) {
-      firebaseApi.getRedirectResult(auth).catch(error => {
-        console.warn("redirect result error", error);
-        if (error) setStatus("登入跳轉確認失敗", "error");
-      });
+      if (hasLoginPending()) {
+        setStatus("正在確認 Google 登入結果...", "warn");
+        cloudGameMessage("正在確認 Google 登入結果...");
+      }
+
+      firebaseApi.getRedirectResult(auth)
+        .then(result => {
+          if (result && result.user) {
+            rememberLoginPending(false);
+            setStatus("Google登入成功", "online");
+            cloudGameMessage("Google登入成功。
+正在同步雲端存檔...");
+          }
+        })
+        .catch(error => {
+          console.warn("redirect result error", error);
+          if (error) reportAuthError(error);
+        });
+
+      setTimeout(() => {
+        if (hasLoginPending() && !currentUser) {
+          rememberLoginPending(false);
+          const text = "Google登入未完成。若沒有看到帳號選擇畫面，請確認 Firebase 授權網域，或改用 Safari / Chrome 開啟。";
+          setStatus(text, "error");
+          cloudGameMessage(text);
+        }
+      }, 4200);
     }
 
     firebaseApi.onAuthStateChanged(auth, async user => {
       currentUser = user || null;
       if (currentUser) {
+        rememberLoginPending(false);
         isReady = true;
         setStatus(cloudT("cloud.status.signedIn"), "online");
         updateCloudLoginUi(currentUser);
@@ -187,7 +261,9 @@ async function signInOrOut() {
     }
 
     if (currentUser) {
+      rememberLoginPending(false);
       setStatus("正在登出...", "warn");
+      cloudGameMessage("正在登出 Google...");
       await firebaseApi.signOut(auth);
       return;
     }
@@ -197,22 +273,32 @@ async function signInOrOut() {
       provider.setCustomParameters({ prompt: "select_account" });
     }
 
+    if (isMobileAuthEnvironment() && firebaseApi.signInWithRedirect) {
+      rememberLoginPending(true);
+      setStatus("正在前往 Google 登入...", "warn");
+      cloudGameMessage("正在前往 Google 登入...\n返回遊戲後會自動確認登入結果。");
+      await firebaseApi.signInWithRedirect(auth, provider);
+      return;
+    }
+
     setStatus("正在開啟 Google 登入...", "warn");
+    cloudGameMessage("正在開啟 Google 登入...");
 
     try {
       await firebaseApi.signInWithPopup(auth, provider);
+      rememberLoginPending(false);
     } catch (popupError) {
       console.warn("Google popup sign-in failed, trying redirect", popupError);
-
       const code = popupError && popupError.code ? String(popupError.code) : "";
       const canRedirect =
         code.includes("popup-blocked") ||
         code.includes("popup-closed-by-user") ||
-        code.includes("cancelled-popup-request") ||
-        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        code.includes("cancelled-popup-request");
 
       if (canRedirect && firebaseApi.signInWithRedirect) {
+        rememberLoginPending(true);
         setStatus("改用跳轉登入...", "warn");
+        cloudGameMessage("改用跳轉登入...\n返回遊戲後會自動確認登入結果。");
         await firebaseApi.signInWithRedirect(auth, provider);
         return;
       }
@@ -221,10 +307,7 @@ async function signInOrOut() {
     }
   } catch (error) {
     console.error(error);
-    const message = error && error.message ? error.message : String(error);
-    setStatus("Google登入失敗", "error");
-    alert("Google 登入失敗：
-" + message);
+    reportAuthError(error);
   }
 }
 

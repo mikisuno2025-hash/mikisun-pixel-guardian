@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.25</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-25-20260611">
-\n
-\n
-
+  <title>Pixel Pet 方塊機 Prototype V33.27</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-27-20260611">
 <style id="v3324-mobile-desktop-fix">
 #mobileNativeControls,
 .mobile-system-drawer,
@@ -183,7 +180,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.25 Unified System Menu Release.
+  <!-- Pixel Pet Retro Guardian V33.27 Login Feedback System Clean Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -195,7 +192,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.25</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.27</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -236,10 +233,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
               <i></i><i></i><i></i><i></i><i></i><i></i>
               <i></i><i></i><i></i><i></i><i></i><i></i>
             </div>
-            <div class="notice">
-              SHAKE THE POINTER LEFT / RIGHT<br>
-              ROUND TRIP = 10% ENCOUNTER
-            </div>
+            <div class="notice"></div>
           </div>
         </div>
 
@@ -302,9 +296,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
             <div class="system-button-row">
               <button class="system-btn" data-action="system" data-i18n="btn.system">SYSTEM</button>
             </div>
-<div>・完成一次左右往返才抽 10% 遇怪。</div>
-              <div>・失敗保底 +1%，滿 100% 保證遇怪。</div>
-            </div>
+</div>
           </div>
         </div>
       </div>
@@ -321,150 +313,149 @@ html.mobile-ui .mobile-debug-panel[hidden]{
         <button class="settings-close" id="settingsClose" aria-label="關閉設定">×</button>
       </div>
 
-      <div class="settings-quick" id="settingsQuickActions">
-        <div class="settings-quick-section">
-          <h3>GAME</h3>
-          <div class="settings-quick-grid">
-            <button type="button" data-mobile-action="rename" data-i18n="btn.rename">命名</button>
-            <button type="button" data-mobile-action="dex" data-i18n="btn.dex">圖鑑</button>
-            <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
-            <button type="button" data-mobile-action="debug" data-i18n="btn.debug">狀態診斷</button>
-          </div>
-        </div>
-
-        <div class="settings-quick-section">
-          <h3>AUTO / SOUND</h3>
-          <div class="settings-quick-grid">
-            <button type="button" data-mobile-action="sound" data-i18n="btn.soundShort">音效</button>
-            <button type="button" data-mobile-action="bgm" data-i18n="btn.bgmShort">BGM</button>
-            <button type="button" data-mobile-action="autocare" data-i18n="btn.autocare">AUTO CARE</button>
-            <button type="button" data-mobile-action="autopatrol" data-i18n="btn.patrol">PATROL</button>
-            <button type="button" data-mobile-action="motion" id="settingsMotionQuick">啟用搖動</button>
-          </div>
-        </div>
-
-        <div class="settings-quick-section">
-          <h3>ACCOUNT</h3>
-          <div class="settings-quick-grid">
-            <button type="button" data-mobile-action="login" data-cloud-login-trigger="1" data-i18n="btn.google">Google登入</button>
-            <button type="button" data-mobile-action="sync" data-cloud-only="signed-in" data-i18n="btn.manualSync">手動同步</button>
-          </div>
-          <div class="settings-cloud-hint" data-cloud-hint>未登入：僅使用本機存檔</div>
-        </div>
-      </div>
-
-      <div class="setting-list">
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.animations">動畫效果</span>
-            <label class="switch">
-              <input type="checkbox" id="settingAnimations">
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <div class="setting-note">關閉後會停止 LCD 轉場、按鈕與畫面閃動動畫，適合想要穩定畫面的時候。</div>
-        </div>
-
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.autoCare">自動照顧</span>
-            <label class="switch">
-              <input type="checkbox" id="settingAutoCare">
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <div class="setting-note">全自動模式預設開啟。會自動餵食、清潔、休息與起床；睡覺中會主動補體力與 HP。</div>
-        </div>
-
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.autoPatrol">掛機巡邏</span>
-            <label class="switch">
-              <input type="checkbox" id="settingAutoPatrol">
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <div class="setting-note">全自動模式預設開啟。會定時自動抽遇怪；失敗保底 +1%，成功或保底條滿格會遇怪並歸零。</div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.motionShake">手機搖動探索</span>
-            <label class="switch">
-              <input type="checkbox" id="settingMotionShake">
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <div class="setting-note" data-i18n="settings.motionShakeNote">手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。</div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.motionSensitivity">搖動靈敏度</span>
-            <select class="setting-select" id="settingMotionSensitivity">
-              <option value="low" data-i18n="settings.motionLow">低：避免誤觸</option>
-              <option value="medium" data-i18n="settings.motionMedium">中：標準</option>
-              <option value="high" data-i18n="settings.motionHigh">高：較容易觸發</option>
-            </select>
-          </div>
-          <div class="setting-note" data-i18n="settings.motionSensitivityNote">如果搖不出來請調高；如果太容易誤觸請調低。</div>
-        </div>
-
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.bgmVolume">BGM 音量</span>
-            <span class="setting-value" id="bgmVolValue">38%</span>
-          </div>
-          <input class="setting-slider" id="settingBgmVolume" type="range" min="0" max="100" step="1">
-          <div class="setting-note">調整背景音樂大小。</div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.sfxVolume">音效音量</span>
-            <span class="setting-value" id="sfxVolValue">70%</span>
-          </div>
-          <input class="setting-slider" id="settingSfxVolume" type="range" min="0" max="100" step="1">
-          <div class="setting-note">調整按鈕音、遇怪音、攻擊音等 8-bit 音效大小。</div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-label">
-            <span data-i18n="settings.fontSize">字體大小</span>
-            <span class="setting-value" id="fontSizeValue">100%</span>
-          </div>
-          <input class="setting-slider" id="settingFontSize" type="range" min="85" max="130" step="5">
-          <div class="setting-note">調整螢幕訊息、狀態文字與說明文字大小。</div>
-        </div>
-      </div>
-
       
-        <label>
-          <span data-i18n="settings.language">語言</span>
-          <select id="languageSelect">
-            <option value="zh-TW">繁體中文</option>
-            <option value="zh-CN">简体中文</option>
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-          </select>
-        </label>
+      
+      <div class="system-tabs" role="tablist" aria-label="SYSTEM MENU 分頁">
+        <button type="button" class="system-tab active" data-system-tab="actions" role="tab" aria-selected="true">操作</button>
+        <button type="button" class="system-tab" data-system-tab="settings" role="tab" aria-selected="false">設定</button>
+        <button type="button" class="system-tab" data-system-tab="account" role="tab" aria-selected="false">帳號</button>
+      </div>
 
-        <details class="help-details" open>
-          <summary data-i18n="help.title">使用說明</summary>
-          <div class="help-copy" data-i18n-html="help.copy">
-            <p>照顧、訓練、清潔與睡眠會影響進化分支。</p>
-            <p>滑動 LCD 區域完成左右往返可探索遇敵。</p>
-            <p>重新孵化會 LV 歸零並重抽初始家族。</p>
-            <p>圖鑑可查看家族、分支與進化階段。</p>
+      <div class="system-tab-panels">
+        <div class="system-tab-panel active" data-system-panel="actions" role="tabpanel">
+          <div class="settings-quick-section">
+            <h3>GAME</h3>
+            <div class="settings-quick-grid">
+              <button type="button" data-mobile-action="rename" data-i18n="btn.rename">命名</button>
+              <button type="button" data-mobile-action="dex" data-i18n="btn.dex">圖鑑</button>
+              <button type="button" data-mobile-action="reset" data-i18n="btn.rehatch">重新孵化</button>
+              <button type="button" data-mobile-action="debug" data-i18n="btn.debug">狀態診斷</button>
+            </div>
           </div>
-        </details>
+          <div class="system-tab-note">主畫面只保留 A / B / C / D / E / F。其他低頻操作集中在這裡。</div>
+        </div>
 
-        <div class="settings-actions">
-        <button class="settings-action-btn" id="settingsDefault" data-i18n="settings.default">恢復預設</button>
-        <button class="settings-action-btn" id="settingsDone" data-i18n="settings.done">完成</button>
+        <div class="system-tab-panel" data-system-panel="settings" role="tabpanel">
+          <div class="setting-list">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.animations">動畫效果</span>
+                <label class="switch">
+                  <input type="checkbox" id="settingAnimations">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="setting-note">關閉後會停止 LCD 轉場、按鈕與畫面閃動動畫。</div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.autoCare">自動照顧</span>
+                <label class="switch">
+                  <input type="checkbox" id="settingAutoCare">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="setting-note">自動餵食、清潔、休息與起床。</div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.autoPatrol">掛機巡邏</span>
+                <label class="switch">
+                  <input type="checkbox" id="settingAutoPatrol">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="setting-note">定時自動抽遇怪；失敗保底 +1%，成功或保底滿格會遇怪並歸零。</div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.motionShake">手機搖動探索</span>
+                <label class="switch">
+                  <input type="checkbox" id="settingMotionShake">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="setting-note" data-i18n="settings.motionShakeNote">手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。</div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.motionSensitivity">搖動靈敏度</span>
+                <select class="setting-select" id="settingMotionSensitivity">
+                  <option value="low" data-i18n="settings.motionLow">低：避免誤觸</option>
+                  <option value="medium" data-i18n="settings.motionMedium">中：標準</option>
+                  <option value="high" data-i18n="settings.motionHigh">高：較容易觸發</option>
+                </select>
+              </div>
+              <div class="setting-note" data-i18n="settings.motionSensitivityNote">如果搖不出來請調高；如果太容易誤觸請調低。</div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.bgmVolume">BGM 音量</span>
+                <span class="setting-value" id="bgmVolValue">38%</span>
+              </div>
+              <input class="setting-slider" id="settingBgmVolume" type="range" min="0" max="100" step="1">
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.sfxVolume">音效音量</span>
+                <span class="setting-value" id="sfxVolValue">70%</span>
+              </div>
+              <input class="setting-slider" id="settingSfxVolume" type="range" min="0" max="100" step="1">
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.fontSize">字體大小</span>
+                <span class="setting-value" id="fontSizeValue">100%</span>
+              </div>
+              <input class="setting-slider" id="settingFontSize" type="range" min="85" max="130" step="5">
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span data-i18n="settings.language">語言</span>
+                <select class="setting-select" id="languageSelect">
+                  <option value="zh-TW">繁體中文</option>
+                  <option value="zh-CN">简体中文</option>
+                  <option value="ja">日本語</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="settings-action-btn" id="settingsDefault" data-i18n="settings.default">恢復預設</button>
+            <button class="settings-action-btn" id="settingsDone" data-i18n="settings.done">完成</button>
+          </div>
+        </div>
+
+        <div class="system-tab-panel" data-system-panel="account" role="tabpanel">
+          <div class="settings-quick-section">
+            <h3>ACCOUNT</h3>
+            <div class="settings-quick-grid">
+              <button type="button" data-mobile-action="login" data-cloud-login-trigger="1" data-i18n="btn.google">Google登入</button>
+              <button type="button" data-mobile-action="sync" data-cloud-only="signed-in" data-i18n="btn.manualSync">手動同步</button>
+            </div>
+            <div class="settings-cloud-hint" data-cloud-hint>未登入：僅使用本機存檔</div>
+          </div>
+
+          <div class="account-save-card">
+            <strong>Save Mode</strong>
+            <p>未登入時使用本機瀏覽器存檔。登入 Google 後會啟用雲端自動保存，手動同步只作備用。</p>
+          </div>
+
+          <div class="account-save-card">
+            <strong>Login Check</strong>
+            <p>若點擊登入後回到頁面但沒有登入，請確認 Firebase Authentication 的 Authorized domains 是否包含 mikisuno2025-hash.github.io。</p>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -488,8 +479,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 
-  <script defer src="assets/js/game.js?v=33-25-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-25-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-27-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-27-20260611"></script>
 
 
 
