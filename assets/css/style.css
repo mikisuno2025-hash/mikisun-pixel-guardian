@@ -1,7 +1,3 @@
-/* V34.0 core repair stylesheet */
-/* V33.40 action animation stylesheet */
-/* V33.39 deep restore controls stylesheet */
-/* V33.28 all device button check stylesheet */
 /* V33.27 login feedback system clean stylesheet */
 /* V33.26 system tabs stylesheet */
 /* V33.26 system tabs stylesheet */
@@ -1172,7 +1168,7 @@
   display:none!important;
 }
 
-/* V33.28 all device button check */
+/* V33.27 login feedback system clean */
 .system-tabs{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1372,64 +1368,4 @@ html.mobile-ui .settings-actions{
   background:linear-gradient(180deg,rgba(205,189,162,0),#cdbda2 28%)!important;
   padding-top:14px!important;
   padding-bottom:4px!important;
-}
-
-/* V33.39 Deep Restore: kill startup blockers */
-.opening-intro-backdrop,
-.title-menu-backdrop,
-.login-loading-backdrop{
-  display:none!important;
-  pointer-events:none!important;
-}
-
-body.opening-active,
-body.title-menu-active,
-body.login-loading-active{
-  overflow:auto!important;
-}
-
-button,
-[data-action],
-[data-mobile-action]{
-  pointer-events:auto!important;
-}
-
-/* V33.40 action animation */
-.lcd-action-animating #screen{
-  box-shadow:0 0 0 3px rgba(31,43,33,.18), 0 0 18px rgba(31,43,33,.22)!important;
-}
-
-.lcd-action-animating [data-action],
-.lcd-action-animating [data-mobile-action]{
-  filter:saturate(.85);
-}
-
-button.action-locked,
-[data-action].action-locked,
-[data-mobile-action].action-locked{
-  opacity:.72;
-}
-
-/* V34.0 Core Repair safety */
-.opening-intro-backdrop,
-.title-menu-backdrop,
-.login-loading-backdrop{
-  display:none!important;
-  pointer-events:none!important;
-}
-
-body.opening-active,
-body.title-menu-active,
-body.login-loading-active{
-  overflow:auto!important;
-}
-
-button,
-[data-action],
-[data-mobile-action]{
-  pointer-events:auto!important;
-}
-
-.lcd-action-animating #screen{
-  box-shadow:0 0 0 3px rgba(31,43,33,.18), 0 0 18px rgba(31,43,33,.22)!important;
 }

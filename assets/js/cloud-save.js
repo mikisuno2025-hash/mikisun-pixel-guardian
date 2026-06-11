@@ -205,7 +205,8 @@ async function initFirebase() {
           if (result && result.user) {
             rememberLoginPending(false);
             setStatus("Google登入成功", "online");
-            cloudGameMessage("Google登入成功。\n正在同步雲端存檔...");
+            cloudGameMessage("Google登入成功。
+正在同步雲端存檔...");
           }
         })
         .catch(error => {
@@ -243,8 +244,7 @@ async function initFirebase() {
     return true;
   } catch (error) {
     console.error(error);
-    setStatus("Firebase錯誤，請檢查網路或 Firebase 設定", "error");
-    cloudGameMessage("Firebase 載入失敗。\n請檢查網路或 Firebase 設定。");
+    setStatus("Firebase錯誤", "error");
     return false;
   }
 }
@@ -370,7 +370,8 @@ async function handleInitialCloudMerge() {
 
     if (!snap.exists()) {
       await uploadCloudSave(false);
-      gameApi().setCloudMessage("Google 登入成功。\n沒有雲端存檔，已建立第一份雲端存檔。");
+      gameApi().setCloudMessage("Google 登入成功。
+沒有雲端存檔，已建立第一份雲端存檔。");
       return;
     }
 
@@ -379,15 +380,21 @@ async function handleInitialCloudMerge() {
     const diff = Math.abs(cloudUpdated - localUpdated);
 
     if (cloudUpdated && localUpdated && diff < 10000) {
-      gameApi().setCloudMessage("Google 登入成功。\n本機與雲端存檔時間接近，已保留目前資料並啟用自動同步。");
+      gameApi().setCloudMessage("Google 登入成功。
+本機與雲端存檔時間接近，已保留目前資料並啟用自動同步。");
       setStatus(cloudT("cloud.status.signedIn"), "online");
       return;
     }
 
-    let question = "偵測到本機與雲端都有存檔。\n\n";
+    let question = "偵測到本機與雲端都有存檔。
+
+";
     if (cloudUpdated > localUpdated) {
-      question += "雲端存檔看起來較新。\n\n";
-      question += "按「確定」：載入雲端\n按「取消」：保留本機並上傳";
+      question += "雲端存檔看起來較新。
+
+";
+      question += "按「確定」：載入雲端
+按「取消」：保留本機並上傳";
       if (confirm(question)) {
         await loadCloudSave(false);
         gameApi().setCloudMessage("已載入雲端存檔。");
@@ -399,8 +406,11 @@ async function handleInitialCloudMerge() {
     }
 
     if (localUpdated > cloudUpdated) {
-      question += "本機存檔看起來較新。\n\n";
-      question += "按「確定」：上傳本機\n按「取消」：載入雲端";
+      question += "本機存檔看起來較新。
+
+";
+      question += "按「確定」：上傳本機
+按「取消」：載入雲端";
       if (confirm(question)) {
         await uploadCloudSave(false);
         gameApi().setCloudMessage("已上傳本機存檔到雲端。");
@@ -411,7 +421,10 @@ async function handleInitialCloudMerge() {
       return;
     }
 
-    question += "無法判斷哪份比較新。\n\n按「確定」：保留本機並上傳\n按「取消」：載入雲端";
+    question += "無法判斷哪份比較新。
+
+按「確定」：保留本機並上傳
+按「取消」：載入雲端";
     if (confirm(question)) {
       await uploadCloudSave(false);
       gameApi().setCloudMessage("已保留本機存檔並上傳雲端。");
