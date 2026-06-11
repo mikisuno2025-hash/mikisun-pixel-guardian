@@ -1,3 +1,133 @@
+
+/* V33.36 Correct Audio Flow */
+function v3336SetAudioVolumeAll() {
+  const vol = (typeof v3330ReadVolumeSetting === "function")
+    ? v3330ReadVolumeSetting("bgmVolume", 0.38)
+    : Math.max(0, Math.min(1, Number(settings?.bgmVolume ?? 0.38)));
+
+  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(id => {
+    const audio = document.getElementById(id);
+    if (!audio) return;
+    audio.volume = vol;
+    audio.muted = vol <= 0;
+  });
+}
+
+function v3336StopAudio(id, reset = true) {
+  const audio = document.getElementById(id);
+  if (!audio) return;
+  try {
+    audio.pause();
+    if (reset) audio.currentTime = 0;
+  } catch {}
+}
+
+function v3336StopAllMusic() {
+  v3336StopAudio("introBgmAudio");
+  v3336StopAudio("menuBgmAudio");
+  v3336StopAudio("mainBgmAudio");
+}
+
+function v3336PlayIntroMusic() {
+  v3336SetAudioVolumeAll();
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
+  v3336StopAudio("menuBgmAudio");
+  v3336StopAudio("mainBgmAudio");
+  const intro = document.getElementById("introBgmAudio");
+  if (intro) {
+    try { intro.currentTime = 0; } catch {}
+    intro.play().catch(() => {});
+  }
+}
+
+function v3336PlayTitleMenuMusic() {
+  v3336SetAudioVolumeAll();
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
+  v3336StopAudio("introBgmAudio");
+  v3336StopAudio("mainBgmAudio");
+  const menu = document.getElementById("menuBgmAudio");
+  if (menu) {
+    try { menu.currentTime = 0; } catch {}
+    menu.play().catch(() => {});
+  }
+}
+
+function v3336StopTitleMenuMusicForLoading() {
+  v3336StopAudio("menuBgmAudio");
+}
+
+function v3336PlayGameMusicAfterLoading() {
+  v3336SetAudioVolumeAll();
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
+  v3336StopAudio("introBgmAudio");
+  v3336StopAudio("menuBgmAudio");
+  const gameBgm = document.getElementById("mainBgmAudio");
+  if (gameBgm) {
+    try { gameBgm.currentTime = 0; } catch {}
+    gameBgm.play().catch(() => {});
+  }
+}
+
+window.PixelPetAudioFlow = {
+  intro: () => v3336PlayIntroMusic(),
+  menu: () => v3336PlayTitleMenuMusic(),
+  loading: () => v3336StopTitleMenuMusicForLoading(),
+  game: () => v3336PlayGameMusicAfterLoading(),
+  stopAll: () => v3336StopAllMusic(),
+  applyVolumes: () => v3336SetAudioVolumeAll()
+};
+
+
+/* V33.36 Correct Intro Gate */
+function v3335IsOpeningVisible() {
+  const opening = document.getElementById("openingIntroBackdrop");
+  return !!opening && !opening.classList.contains("closed");
+}
+
+function v3335HideTitleMenuHard() {
+  const menu = document.getElementById("titleMenuBackdrop");
+  if (!menu) return;
+  menu.classList.add("closed");
+  menu.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("title-menu-active");
+}
+
+function v3335ShowOnlyOpeningTap() {
+  const opening = document.getElementById("openingIntroBackdrop");
+  if (!opening) return;
+  v3335HideTitleMenuHard();
+  opening.classList.remove("closed");
+  opening.setAttribute("aria-hidden", "false");
+  document.body.classList.add("opening-active");
+  if (typeof v3333SetOpeningStage === "function") v3333SetOpeningStage("title");
+  try {
+    const menuBgm = document.getElementById("menuBgmAudio");
+    if (menuBgm) { menuBgm.pause(); menuBgm.currentTime = 0; }
+    const mainBgm = document.getElementById("mainBgmAudio");
+    if (mainBgm) { mainBgm.pause(); mainBgm.currentTime = 0; }
+  } catch {}
+}
+
+function v3335BindIntroGateGuard() {
+  if (window.__v3335IntroGateGuardBound) return;
+  window.__v3335IntroGateGuardBound = true;
+
+  const mo = new MutationObserver(() => {
+    if (v3335IsOpeningVisible()) v3335HideTitleMenuHard();
+  });
+  mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "aria-hidden"] });
+  const opening = document.getElementById("openingIntroBackdrop");
+  if (opening) mo.observe(opening, { attributes:true, attributeFilter:["class", "aria-hidden"] });
+
+  // On this corrected version, first entry must be opening tap screen, not title menu.
+  let seen = false;
+  try { seen = localStorage.getItem(OPENING_STORAGE_KEY) === "1"; } catch {}
+  if (!seen && typeof v3335ShowOnlyOpeningTap === "function") {
+    setTimeout(v3335ShowOnlyOpeningTap, 0);
+    setTimeout(v3335ShowOnlyOpeningTap, 120);
+  }
+}
+
 /* v3323 force mobile-ui */
 
 (function(){
@@ -197,7 +327,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.34",
+        "pixelPetRetroGuardianV33.36",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +336,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.34",
+        "pixelPetOwnedAppearancesV33.36",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1292,7 +1422,7 @@ window.PixelPetI18N = {
     }
 
 
-/* V33.34 full i18n QA patch */
+/* V33.36 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1732,7 +1862,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.34 live volume patch */
+/* V33.36 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1810,6 +1940,7 @@ function v3330SetSfxVolumeDisplay() {
 function v3330ApplyVolumes() {
   try { if (window.PixelPetOpening) window.PixelPetOpening.applyVolumes(); } catch {}
   try { if (window.PixelPetTitleMenu) window.PixelPetTitleMenu.prepareAudio(); } catch {}
+  try { if (window.PixelPetAudioFlow) window.PixelPetAudioFlow.applyVolumes(); } catch {}
   v3330SetAudioElementVolume();
   v3330SetSfxVolumeDisplay();
 }
@@ -1897,7 +2028,7 @@ function v3330PatchSfxVolume() {
 
 
 
-/* V33.34 mobile bottom auto hide controller */
+/* V33.36 mobile bottom auto hide controller */
 function v3332IsMobileUi() {
   return document.documentElement.classList.contains("mobile-ui") ||
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
@@ -1984,8 +2115,8 @@ function v3332BindMobileBottomControls() {
 
 
 
-/* V33.34 Opening Intro + Dual 8bit BGM */
-const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3333";
+/* V33.36 Opening Intro + Dual 8bit BGM */
+const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3335FixedGate";
 
 function v3333IntroEnabled() {
   try {
@@ -2027,13 +2158,9 @@ function v3333PrepareAudio() {
 }
 
 function v3333StartMainBgm() {
-  // V33.34: game BGM starts only after title-menu login/loading flow.
-  if (!document.body.classList.contains("login-loading-active")) return;
-  const main = document.getElementById("mainBgmAudio");
-  if (!main) return;
-  v3333PrepareAudio();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  main.play().catch(() => {});
+  // V33.36: direct auto-start is disabled.
+  // Game BGM starts only after Loading completes via v3334PlayGameBgmAfterLoad().
+  return;
 }
 
 function v3333StopMainBgm() {
@@ -2043,13 +2170,7 @@ function v3333StopMainBgm() {
 }
 
 function v3333PlayIntroBgm() {
-  const intro = document.getElementById("introBgmAudio");
-  if (!intro) return;
-  v3333PrepareAudio();
-  try {
-    intro.currentTime = 0;
-    intro.play().catch(() => {});
-  } catch {}
+  v3336PlayIntroMusic();
 }
 
 function v3333CloseOpening() {
@@ -2185,6 +2306,7 @@ function v3333BindOpeningIntro() {
 }
 
 function v3333ReplayOpening() {
+  v3335HideTitleMenuHard();
   try { localStorage.removeItem(OPENING_STORAGE_KEY); } catch {}
   v3333StartOpening();
 }
@@ -2197,7 +2319,7 @@ window.PixelPetOpening = {
 
 
 
-/* V33.34 Title Menu + Login Flow */
+/* V33.36 Title Menu + Login Flow */
 function v3334AudioVol() {
   try {
     if (typeof v3330ReadVolumeSetting === "function") return v3330ReadVolumeSetting("bgmVolume", 0.38);
@@ -2222,30 +2344,19 @@ function v3334StopAudio(id) {
 }
 
 function v3334StopAllBgm() {
-  v3334StopAudio("introBgmAudio");
-  v3334StopAudio("menuBgmAudio");
-  v3334StopAudio("mainBgmAudio");
+  v3336StopAllMusic();
 }
 
 function v3334PlayMenuBgm() {
-  v3334PrepareAllBgm();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  v3334StopAudio("introBgmAudio");
-  v3334StopAudio("mainBgmAudio");
-  const menu = document.getElementById("menuBgmAudio");
-  if (menu) menu.play().catch(() => {});
+  v3336PlayTitleMenuMusic();
 }
 
 function v3334PlayGameBgmAfterLoad() {
-  v3334PrepareAllBgm();
-  try { if (settings && settings.bgmEnabled === false) return; } catch {}
-  v3334StopAudio("introBgmAudio");
-  v3334StopAudio("menuBgmAudio");
-  const main = document.getElementById("mainBgmAudio");
-  if (main) main.play().catch(() => {});
+  v3336PlayGameMusicAfterLoading();
 }
 
 function v3334OpenTitleMenu() {
+  if (v3335IsOpeningVisible()) return;
   const menu = document.getElementById("titleMenuBackdrop");
   if (!menu) return;
   document.body.classList.add("title-menu-active");
@@ -2285,7 +2396,7 @@ function v3334CloseLoading() {
 function v3334EnterGame(mode = "guest") {
   v3334CloseTitleMenu();
   v3334OpenLoading(mode === "google" ? "正在確認 Google 登入..." : "正在載入訪客資料...");
-  v3334StopAudio("menuBgmAudio");
+  v3336StopTitleMenuMusicForLoading();
   setTimeout(() => {
     v3334CloseLoading();
     v3334PlayGameBgmAfterLoad();
@@ -2296,7 +2407,7 @@ function v3334EnterGame(mode = "guest") {
 async function v3334GoogleLoginFromTitle() {
   v3334CloseTitleMenu();
   v3334OpenLoading("正在開啟 Google 登入...");
-  v3334StopAudio("menuBgmAudio");
+  v3336StopTitleMenuMusicForLoading();
   try {
     if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.signInOrOut === "function") {
       await window.PixelPetCloudAuth.signInOrOut();
@@ -2412,6 +2523,7 @@ window.PixelPetTitleMenu = {
       ensureMobileControlsVisible();
       applyLanguage();
       v3330PatchSfxVolume();
+      v3335BindIntroGateGuard();
       v3334BindTitleMenu();
       v3333BindOpeningIntro();
       v3333BindOpeningSettings();
@@ -2699,7 +2811,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.34",
+        "Mikisun Pixel Guardian V33.36",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -3944,7 +4056,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.34: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.36: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 

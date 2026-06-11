@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.34</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-34-20260611">
+  <title>Pixel Pet 方塊機 Prototype V33.36</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-36-20260611">
 <style id="v3324-mobile-desktop-fix">
 #mobileNativeControls,
 .mobile-system-drawer,
@@ -180,7 +180,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.34 Title Menu Login Flow Release.
+  <!-- Pixel Pet Retro Guardian V33.36 Correct Audio Flow Release.
        Static web builds expose front-end code by nature.
        For stronger protection, move hatch/evolution/save logic to a backend API. -->
   <audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
@@ -192,7 +192,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.34</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.36</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -500,8 +500,8 @@ html.mobile-ui .mobile-debug-panel[hidden]{
 
 
 
-  <script defer src="assets/js/game.js?v=33-34-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-34-20260611"></script>
+  <script defer src="assets/js/game.js?v=33-36-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-36-20260611"></script>
 
 
 
@@ -608,12 +608,12 @@ html.mobile-ui .mobile-debug-panel[hidden]{
     </section>
   </div>
 
-  <audio id="introBgmAudio" preload="auto" src="assets/audio/intro_8bit.wav?v=33-33"></audio>
-  <audio id="mainBgmAudio" preload="auto" loop src="assets/audio/main_loop_8bit.wav?v=33-33"></audio>
+  <audio id="introBgmAudio" preload="auto" src="assets/audio/intro_8bit.wav?v=33-36"></audio></audio>
+  <audio id="mainBgmAudio" preload="auto" loop src="assets/audio/bgm.mp3?v=33-36"></audio></audio>
 
 
   <div class="title-menu-backdrop closed" id="titleMenuBackdrop" aria-hidden="true">
-    <section class="title-menu-lcd" role="dialog" aria-modal="true" aria-label="Title Menu">
+    <section class="title-menu-lcd title-menu-fullscreen" role="dialog" aria-modal="true" aria-label="Title Menu">
       <div class="title-menu-scanlines"></div>
       <div class="title-menu-logo">PIXEL PET</div>
       <div class="title-menu-subtitle">GUARDIAN SYSTEM</div>
@@ -633,6 +633,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
         </button>
       </div>
       <div class="title-menu-footer">SELECT LOGIN MODE</div>
+      <div class="title-menu-version">V33.35 / LOCAL + CLOUD SAVE</div>
     </section>
   </div>
 
@@ -644,7 +645,7 @@ html.mobile-ui .mobile-debug-panel[hidden]{
     </section>
   </div>
 
-  <audio id="menuBgmAudio" preload="auto" loop src="assets/audio/menu_loop_8bit.wav?v=33-34"></audio>
+  <audio id="menuBgmAudio" preload="auto" loop src="assets/audio/main_loop_8bit.wav?v=33-36"></audio></audio>
 
 </body>
 </html>

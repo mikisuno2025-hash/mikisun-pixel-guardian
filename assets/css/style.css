@@ -1,3 +1,4 @@
+/* V33.35 fullscreen title intro gate stylesheet */
 /* V33.34 title menu login flow stylesheet */
 /* V33.33 opening intro dual bgm stylesheet */
 /* V33.32 mobile bottom auto hide stylesheet */
@@ -2141,5 +2142,118 @@ body.login-loading-active #mobileNativeControls{
   .title-menu-btn{
     padding:10px 12px;
     border-radius:14px;
+  }
+}
+
+/* V33.35 Full Screen Title Menu + Correct Intro Gate */
+.title-menu-backdrop{
+  padding:0!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(173,199,126,.20) 0%, transparent 34%),
+    linear-gradient(180deg,#11120f 0%,#080807 100%)!important;
+}
+
+.title-menu-lcd.title-menu-fullscreen,
+.title-menu-lcd{
+  width:100vw!important;
+  height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:calc(48px + env(safe-area-inset-top)) 22px calc(34px + env(safe-area-inset-bottom))!important;
+  box-shadow:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  background:
+    linear-gradient(rgba(132,162,96,.20),rgba(132,162,96,.20)),
+    repeating-linear-gradient(0deg, rgba(33,50,34,.26) 0px, rgba(33,50,34,.26) 2px, rgba(198,219,150,.14) 3px, rgba(198,219,150,.14) 5px),
+    radial-gradient(circle at 50% 32%, #b7cc86 0%, #8aa35f 48%, #455239 100%)!important;
+}
+
+.title-menu-logo{
+  font-size:clamp(52px,13vw,118px)!important;
+  margin-top:0!important;
+}
+
+.title-menu-subtitle{
+  font-size:clamp(13px,3.8vw,25px)!important;
+  margin-top:12px!important;
+}
+
+.title-menu-pet{
+  width:clamp(88px,23vw,150px)!important;
+  height:clamp(70px,18vw,116px)!important;
+  margin:clamp(28px,6vh,58px) auto!important;
+}
+
+.title-menu-actions{
+  width:min(620px,88vw)!important;
+  gap:14px!important;
+  margin:0 auto!important;
+}
+
+.title-menu-btn{
+  border-radius:20px!important;
+  padding:16px 18px!important;
+}
+
+.title-menu-btn strong{
+  font-size:clamp(20px,5.2vw,30px)!important;
+}
+
+.title-menu-btn span{
+  font-size:clamp(12px,3.2vw,16px)!important;
+}
+
+.title-menu-footer{
+  position:static!important;
+  margin-top:clamp(22px,4.5vh,42px)!important;
+  font-size:clamp(11px,3vw,17px)!important;
+}
+
+.title-menu-version{
+  position:relative;
+  z-index:2;
+  margin-top:10px;
+  font-size:clamp(10px,2.7vw,14px);
+  font-weight:1000;
+  letter-spacing:.12em;
+  opacity:.56;
+}
+
+body.opening-active .title-menu-backdrop{
+  display:none!important;
+}
+
+.opening-intro-backdrop:not(.closed) ~ .title-menu-backdrop{
+  display:none!important;
+}
+
+@media (orientation:landscape) and (max-height:600px){
+  .title-menu-lcd.title-menu-fullscreen,
+  .title-menu-lcd{
+    padding:18px 22px!important;
+    justify-content:flex-start!important;
+    overflow:auto!important;
+  }
+  .title-menu-logo{
+    font-size:clamp(38px,9vw,74px)!important;
+  }
+  .title-menu-pet{
+    width:84px!important;
+    height:66px!important;
+    margin:14px auto!important;
+  }
+  .title-menu-actions{
+    gap:8px!important;
+  }
+  .title-menu-btn{
+    padding:10px 14px!important;
   }
 }
