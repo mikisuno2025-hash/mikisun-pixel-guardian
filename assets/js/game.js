@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.12",
+        "pixelPetRetroGuardianV33.13",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.12",
+        "pixelPetOwnedAppearancesV33.13",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1943,7 +1943,6 @@ LV 回到 1。
           return;
         }
 
-        // Use the existing core action() path, so mobile and desktop behavior stay identical.
         action(actionName);
         try { forcePetVisibleFallback(); } catch {}
       } catch (err) {
