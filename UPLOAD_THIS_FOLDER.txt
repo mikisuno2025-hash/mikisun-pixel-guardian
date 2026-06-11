@@ -1,1 +1,0 @@
-GitHub Pages 公開版：請上傳本資料夾內全部內容。此版本不含 functions、firestore.rules、部署說明等後端/開發檔案。
