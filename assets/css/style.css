@@ -1,3 +1,4 @@
+/* V33.34 title menu login flow stylesheet */
 /* V33.33 opening intro dual bgm stylesheet */
 /* V33.32 mobile bottom auto hide stylesheet */
 /* V33.31 cloud sync dialog stylesheet */
@@ -1917,5 +1918,228 @@ body.opening-active #mobileNativeControls{
     bottom:10px;
     min-width:74px;
     height:36px;
+  }
+}
+
+/* V33.34 Title Menu + Login Flow */
+.title-menu-backdrop,
+.login-loading-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:2147483550;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  box-sizing:border-box;
+  background:radial-gradient(circle at 50% 45%, #36362f 0%, #151411 62%, #070706 100%);
+}
+
+.title-menu-backdrop.closed,
+.login-loading-backdrop.closed{
+  display:none!important;
+}
+
+.title-menu-lcd,
+.login-loading-lcd{
+  position:relative;
+  width:min(92vw,900px);
+  aspect-ratio:4/3;
+  overflow:hidden;
+  border-radius:28px;
+  border:16px solid #1c1d19;
+  background:
+    linear-gradient(rgba(132,162,96,.22),rgba(132,162,96,.22)),
+    repeating-linear-gradient(0deg, rgba(33,50,34,.22) 0px, rgba(33,50,34,.22) 2px, rgba(198,219,150,.20) 3px, rgba(198,219,150,.20) 5px),
+    #a7bd7a;
+  box-shadow:0 26px 80px rgba(0,0,0,.55), inset 0 0 0 10px rgba(255,255,255,.06);
+  font-family:var(--pixel-font, monospace);
+  image-rendering:pixelated;
+  color:#142719;
+  text-align:center;
+  padding:6%;
+  box-sizing:border-box;
+}
+
+.title-menu-scanlines{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 2px, rgba(255,255,255,.05) 3px, transparent 5px);
+  mix-blend-mode:multiply;
+  z-index:1;
+}
+
+.title-menu-logo{
+  position:relative;
+  z-index:2;
+  font-size:clamp(42px,8vw,86px);
+  font-weight:1000;
+  letter-spacing:.10em;
+  line-height:.95;
+  margin-top:1%;
+}
+
+.title-menu-subtitle{
+  position:relative;
+  z-index:2;
+  font-size:clamp(13px,2vw,22px);
+  font-weight:1000;
+  letter-spacing:.18em;
+  margin-top:10px;
+  opacity:.85;
+}
+
+.title-menu-pet{
+  position:relative;
+  z-index:2;
+  width:clamp(76px,13vw,128px);
+  height:clamp(58px,10vw,98px);
+  margin:clamp(12px,2.2vw,22px) auto;
+  background:#152718;
+  clip-path:polygon(12% 42%,22% 42%,22% 18%,34% 18%,34% 42%,65% 42%,65% 18%,77% 18%,77% 42%,88% 42%,88% 78%,74% 78%,74% 88%,26% 88%,26% 78%,12% 78%);
+  animation:titlePetIdle .65s steps(2,end) infinite;
+}
+
+.title-menu-pet::before,
+.title-menu-pet::after{
+  content:"";
+  position:absolute;
+  top:52%;
+  width:12%;
+  height:14%;
+  background:#a7bd7a;
+}
+.title-menu-pet::before{left:27%}
+.title-menu-pet::after{right:27%}
+
+.title-menu-actions{
+  position:relative;
+  z-index:2;
+  display:grid;
+  gap:10px;
+  width:min(560px,92%);
+  margin:0 auto;
+}
+
+.title-menu-btn{
+  appearance:none;
+  -webkit-appearance:none;
+  text-align:left;
+  border:3px solid rgba(21,39,24,.45);
+  border-radius:18px;
+  background:rgba(225,238,178,.68);
+  color:#142719;
+  padding:13px 16px;
+  box-shadow:0 5px 0 rgba(21,39,24,.35), inset 2px 2px 0 rgba(255,255,255,.20);
+}
+
+.title-menu-btn.primary{ background:rgba(218,244,174,.82); }
+.title-menu-btn.quiet{ background:rgba(203,221,162,.55); }
+
+.title-menu-btn strong{
+  display:block;
+  font-size:clamp(17px,2.6vw,25px);
+  font-weight:1000;
+  letter-spacing:.06em;
+  margin-bottom:4px;
+}
+
+.title-menu-btn span{
+  display:block;
+  font-size:clamp(11px,1.7vw,15px);
+  font-weight:900;
+  opacity:.80;
+}
+
+.title-menu-footer{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:4%;
+  z-index:2;
+  font-size:clamp(11px,1.7vw,18px);
+  font-weight:1000;
+  letter-spacing:.18em;
+  opacity:.70;
+  animation:titleMenuBlink 1s steps(2,end) infinite;
+}
+
+.login-loading-lcd{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.login-loading-title{
+  font-size:clamp(36px,7vw,82px);
+  font-weight:1000;
+  letter-spacing:.15em;
+}
+
+.login-loading-bars{
+  display:flex;
+  gap:12px;
+  margin:34px 0 26px;
+}
+
+.login-loading-bars i{
+  width:clamp(24px,4vw,50px);
+  height:clamp(18px,3vw,36px);
+  background:#142719;
+  animation:loginLoadingBar .85s steps(4,end) infinite;
+}
+
+.login-loading-bars i:nth-child(2){animation-delay:.1s}
+.login-loading-bars i:nth-child(3){animation-delay:.2s}
+.login-loading-bars i:nth-child(4){animation-delay:.3s}
+.login-loading-bars i:nth-child(5){animation-delay:.4s}
+
+.login-loading-text{
+  font-size:clamp(14px,2.4vw,25px);
+  font-weight:1000;
+  letter-spacing:.08em;
+}
+
+@keyframes titlePetIdle{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-7px)}
+  100%{transform:translateY(0)}
+}
+@keyframes titleMenuBlink{
+  0%,60%{opacity:.75}
+  61%,100%{opacity:.28}
+}
+@keyframes loginLoadingBar{
+  0%{opacity:.18;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(-8px)}
+  100%{opacity:.18;transform:translateY(0)}
+}
+
+body.title-menu-active,
+body.login-loading-active{ overflow:hidden!important; }
+
+body.title-menu-active .device,
+body.title-menu-active #mobileNativeControls,
+body.login-loading-active .device,
+body.login-loading-active #mobileNativeControls{
+  pointer-events:none!important;
+}
+
+.settings-backdrop.open{ z-index:2147483700!important; }
+
+@media (max-width:700px){
+  .title-menu-backdrop,.login-loading-backdrop{ padding:10px; }
+  .title-menu-lcd,.login-loading-lcd{
+    width:96vw;
+    border-width:10px;
+    border-radius:20px;
+    padding:5%;
+  }
+  .title-menu-actions{ gap:8px; }
+  .title-menu-btn{
+    padding:10px 12px;
+    border-radius:14px;
   }
 }

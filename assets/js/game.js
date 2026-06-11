@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.33",
+        "pixelPetRetroGuardianV33.34",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.33",
+        "pixelPetOwnedAppearancesV33.34",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -447,6 +447,7 @@ const canvas = document.getElementById("petCanvas");
         ? "AUTO CARE：ON\\n全自動照顧啟動。"
         : "AUTO CARE：OFF\\n改回手動照顧模式。");
       v3329ApplyI18n();
+      if (typeof v3334ApplyTitleMenuI18n === 'function') v3334ApplyTitleMenuI18n();
       updateUI();
     }
 
@@ -901,7 +902,14 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系統設定",
-        "cloud.dialog.title": "雲端同步",
+        "title.guest": "訪客開始",
+    "title.guest.desc": "使用本機存檔進入遊戲",
+    "title.google": "Google登入",
+    "title.google.desc": "雲端保存與跨裝置同步",
+    "title.settings": "系統設定",
+    "title.settings.desc": "音量 / 語言 / 開場動畫",
+    "title.footer": "SELECT LOGIN MODE",
+    "cloud.dialog.title": "雲端同步",
     "cloud.dialog.text": "請選擇同步方向。這次不會再用「好 / 取消」混淆操作。",
     "cloud.upload.title": "上傳本機到雲端",
     "cloud.upload.desc": "用目前手機 / 瀏覽器的進度覆蓋雲端存檔。",
@@ -975,7 +983,14 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系统设置",
-        "cloud.dialog.title": "云端同步",
+        "title.guest": "游客开始",
+    "title.guest.desc": "使用本机存档进入游戏",
+    "title.google": "Google登录",
+    "title.google.desc": "云端保存与跨装置同步",
+    "title.settings": "系统设置",
+    "title.settings.desc": "音量 / 语言 / 开场动画",
+    "title.footer": "SELECT LOGIN MODE",
+    "cloud.dialog.title": "云端同步",
     "cloud.dialog.text": "请选择同步方向。这次不会再用“好 / 取消”混淆操作。",
     "cloud.upload.title": "上传本机到云端",
     "cloud.upload.desc": "用目前手机 / 浏览器的进度覆盖云端存档。",
@@ -1049,7 +1064,14 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "再孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "システム設定",
-        "cloud.dialog.title": "クラウド同期",
+        "title.guest": "ゲストではじめる",
+    "title.guest.desc": "この端末のローカルセーブで遊ぶ",
+    "title.google": "Googleログイン",
+    "title.google.desc": "クラウド保存と端末間同期を使う",
+    "title.settings": "システム設定",
+    "title.settings.desc": "音量 / 言語 / オープニング",
+    "title.footer": "LOGIN MODE SELECT",
+    "cloud.dialog.title": "クラウド同期",
     "cloud.dialog.text": "同期する方向を選んでください。「OK / キャンセル」ではなく、内容が分かるボタンにしました。",
     "cloud.upload.title": "この端末のデータをアップロード",
     "cloud.upload.desc": "今使っているスマホ / ブラウザの進行状況でクラウドセーブを上書きします。",
@@ -1123,7 +1145,14 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "Re-hatch",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "System Settings",
-        "cloud.dialog.title": "Cloud sync",
+        "title.guest": "Start as guest",
+    "title.guest.desc": "Play with local browser save",
+    "title.google": "Google sign in",
+    "title.google.desc": "Use cloud save and cross-device sync",
+    "title.settings": "System settings",
+    "title.settings.desc": "Volume / language / opening",
+    "title.footer": "SELECT LOGIN MODE",
+    "cloud.dialog.title": "Cloud sync",
     "cloud.dialog.text": "Choose the sync direction. These buttons clearly show what will happen.",
     "cloud.upload.title": "Upload this device to cloud",
     "cloud.upload.desc": "Overwrite the cloud save with the progress on this phone / browser.",
@@ -1263,7 +1292,7 @@ window.PixelPetI18N = {
     }
 
 
-/* V33.33 full i18n QA patch */
+/* V33.34 full i18n QA patch */
 const V3329_I18N = {
   "zh-TW": {
     "stat.hunger": "飽食",
@@ -1703,7 +1732,7 @@ function v3329PatchMessageHelpers() {
 
 
 
-/* V33.33 live volume patch */
+/* V33.34 live volume patch */
 
 window.PixelPetVolumeQA = {
   apply: () => v3330ApplyVolumes(),
@@ -1780,6 +1809,7 @@ function v3330SetSfxVolumeDisplay() {
 
 function v3330ApplyVolumes() {
   try { if (window.PixelPetOpening) window.PixelPetOpening.applyVolumes(); } catch {}
+  try { if (window.PixelPetTitleMenu) window.PixelPetTitleMenu.prepareAudio(); } catch {}
   v3330SetAudioElementVolume();
   v3330SetSfxVolumeDisplay();
 }
@@ -1867,7 +1897,7 @@ function v3330PatchSfxVolume() {
 
 
 
-/* V33.33 mobile bottom auto hide controller */
+/* V33.34 mobile bottom auto hide controller */
 function v3332IsMobileUi() {
   return document.documentElement.classList.contains("mobile-ui") ||
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
@@ -1954,7 +1984,7 @@ function v3332BindMobileBottomControls() {
 
 
 
-/* V33.33 Opening Intro + Dual 8bit BGM */
+/* V33.34 Opening Intro + Dual 8bit BGM */
 const OPENING_STORAGE_KEY = "pixelPetOpeningSeenV3333";
 
 function v3333IntroEnabled() {
@@ -1997,12 +2027,12 @@ function v3333PrepareAudio() {
 }
 
 function v3333StartMainBgm() {
+  // V33.34: game BGM starts only after title-menu login/loading flow.
+  if (!document.body.classList.contains("login-loading-active")) return;
   const main = document.getElementById("mainBgmAudio");
   if (!main) return;
   v3333PrepareAudio();
-  try {
-    if (settings && settings.bgmEnabled === false) return;
-  } catch {}
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
   main.play().catch(() => {});
 }
 
@@ -2034,7 +2064,7 @@ function v3333CloseOpening() {
   }
   document.body.classList.remove("opening-active");
   try { localStorage.setItem(OPENING_STORAGE_KEY, "1"); } catch {}
-  v3333StartMainBgm();
+  v3334OpenTitleMenu();
   if (typeof v3332SetMobileControlsMode === "function") setTimeout(v3332SetMobileControlsMode, 60);
 }
 
@@ -2147,7 +2177,7 @@ function v3333BindOpeningIntro() {
   if (seen) {
     backdrop.classList.add("closed");
     backdrop.setAttribute("aria-hidden", "true");
-    setTimeout(v3333StartMainBgm, 300);
+    setTimeout(v3334OpenTitleMenu, 300);
   } else {
     document.body.classList.add("opening-active");
     v3333SetOpeningStage("title");
@@ -2165,6 +2195,173 @@ window.PixelPetOpening = {
   applyVolumes: () => v3333PrepareAudio()
 };
 
+
+
+/* V33.34 Title Menu + Login Flow */
+function v3334AudioVol() {
+  try {
+    if (typeof v3330ReadVolumeSetting === "function") return v3330ReadVolumeSetting("bgmVolume", 0.38);
+  } catch {}
+  try { return Math.max(0, Math.min(1, Number(settings.bgmVolume ?? 0.38))); } catch { return 0.38; }
+}
+
+function v3334PrepareAllBgm() {
+  const vol = v3334AudioVol();
+  ["introBgmAudio", "menuBgmAudio", "mainBgmAudio"].forEach(id => {
+    const audio = document.getElementById(id);
+    if (!audio) return;
+    audio.volume = vol;
+    audio.muted = vol <= 0;
+  });
+}
+
+function v3334StopAudio(id) {
+  const audio = document.getElementById(id);
+  if (!audio) return;
+  try { audio.pause(); audio.currentTime = 0; } catch {}
+}
+
+function v3334StopAllBgm() {
+  v3334StopAudio("introBgmAudio");
+  v3334StopAudio("menuBgmAudio");
+  v3334StopAudio("mainBgmAudio");
+}
+
+function v3334PlayMenuBgm() {
+  v3334PrepareAllBgm();
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
+  v3334StopAudio("introBgmAudio");
+  v3334StopAudio("mainBgmAudio");
+  const menu = document.getElementById("menuBgmAudio");
+  if (menu) menu.play().catch(() => {});
+}
+
+function v3334PlayGameBgmAfterLoad() {
+  v3334PrepareAllBgm();
+  try { if (settings && settings.bgmEnabled === false) return; } catch {}
+  v3334StopAudio("introBgmAudio");
+  v3334StopAudio("menuBgmAudio");
+  const main = document.getElementById("mainBgmAudio");
+  if (main) main.play().catch(() => {});
+}
+
+function v3334OpenTitleMenu() {
+  const menu = document.getElementById("titleMenuBackdrop");
+  if (!menu) return;
+  document.body.classList.add("title-menu-active");
+  document.body.classList.remove("opening-active", "login-loading-active");
+  menu.classList.remove("closed");
+  menu.setAttribute("aria-hidden", "false");
+  v3334PlayMenuBgm();
+  if (typeof v3332SetMobileControlsMode === "function") setTimeout(v3332SetMobileControlsMode, 60);
+}
+
+function v3334CloseTitleMenu() {
+  const menu = document.getElementById("titleMenuBackdrop");
+  if (!menu) return;
+  menu.classList.add("closed");
+  menu.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("title-menu-active");
+}
+
+function v3334OpenLoading(text = "正在載入遊戲資料...") {
+  const loading = document.getElementById("loginLoadingBackdrop");
+  const label = document.getElementById("loginLoadingText");
+  if (label) label.textContent = text;
+  if (!loading) return;
+  document.body.classList.add("login-loading-active");
+  loading.classList.remove("closed");
+  loading.setAttribute("aria-hidden", "false");
+}
+
+function v3334CloseLoading() {
+  const loading = document.getElementById("loginLoadingBackdrop");
+  if (!loading) return;
+  loading.classList.add("closed");
+  loading.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("login-loading-active");
+}
+
+function v3334EnterGame(mode = "guest") {
+  v3334CloseTitleMenu();
+  v3334OpenLoading(mode === "google" ? "正在確認 Google 登入..." : "正在載入訪客資料...");
+  v3334StopAudio("menuBgmAudio");
+  setTimeout(() => {
+    v3334CloseLoading();
+    v3334PlayGameBgmAfterLoad();
+    if (typeof v3332SetMobileControlsMode === "function") setTimeout(v3332SetMobileControlsMode, 80);
+  }, mode === "google" ? 1300 : 850);
+}
+
+async function v3334GoogleLoginFromTitle() {
+  v3334CloseTitleMenu();
+  v3334OpenLoading("正在開啟 Google 登入...");
+  v3334StopAudio("menuBgmAudio");
+  try {
+    if (window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.signInOrOut === "function") {
+      await window.PixelPetCloudAuth.signInOrOut();
+      setTimeout(() => v3334EnterGame("google"), 700);
+    } else {
+      v3334CloseLoading();
+      v3334OpenTitleMenu();
+      setMessage("Google登入模組尚未載入。\n請重新整理後再試。");
+    }
+  } catch (error) {
+    console.error(error);
+    v3334CloseLoading();
+    v3334OpenTitleMenu();
+    setMessage("Google登入失敗。\n請確認網路或 Firebase 設定。");
+  }
+}
+
+
+function v3334ApplyTitleMenuI18n() {
+  const set = (selector, key) => {
+    const el = document.querySelector(selector);
+    if (el && typeof v3329Text === "function") el.textContent = v3329Text(key);
+  };
+  set("#titleGuestBtn strong", "title.guest");
+  set("#titleGuestBtn span", "title.guest.desc");
+  set("#titleGoogleBtn strong", "title.google");
+  set("#titleGoogleBtn span", "title.google.desc");
+  set("#titleSettingsBtn strong", "title.settings");
+  set("#titleSettingsBtn span", "title.settings.desc");
+  set(".title-menu-footer", "title.footer");
+}
+
+function v3334BindTitleMenu() {
+  if (window.__v3334TitleMenuBound) return;
+  window.__v3334TitleMenuBound = true;
+  const guest = document.getElementById("titleGuestBtn");
+  const google = document.getElementById("titleGoogleBtn");
+  const settingsBtn = document.getElementById("titleSettingsBtn");
+  if (guest) guest.addEventListener("click", ev => {
+    ev.preventDefault(); ev.stopPropagation(); v3334EnterGame("guest");
+  });
+  if (google) google.addEventListener("click", ev => {
+    ev.preventDefault(); ev.stopPropagation(); v3334GoogleLoginFromTitle();
+  });
+  if (settingsBtn) settingsBtn.addEventListener("click", ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    if (typeof openSettings === "function") openSettings();
+  });
+  document.addEventListener("keydown", ev => {
+    const menu = document.getElementById("titleMenuBackdrop");
+    if (!menu || menu.classList.contains("closed")) return;
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      v3334EnterGame("guest");
+    }
+  });
+}
+
+window.PixelPetTitleMenu = {
+  open: () => v3334OpenTitleMenu(),
+  enterGame: mode => v3334EnterGame(mode),
+  playGameBgm: () => v3334PlayGameBgmAfterLoad(),
+  playMenuBgm: () => v3334PlayMenuBgm(),
+  prepareAudio: () => v3334PrepareAllBgm()
+};
 
     function updateUI() {
       syncPetAppearanceStage();
@@ -2215,6 +2412,7 @@ window.PixelPetOpening = {
       ensureMobileControlsVisible();
       applyLanguage();
       v3330PatchSfxVolume();
+      v3334BindTitleMenu();
       v3333BindOpeningIntro();
       v3333BindOpeningSettings();
       v3332BindMobileBottomControls();
@@ -2501,7 +2699,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.33",
+        "Mikisun Pixel Guardian V33.34",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -3746,7 +3944,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.33: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.34: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
