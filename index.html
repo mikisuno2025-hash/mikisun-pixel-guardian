@@ -3,57 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Pixel Pet 方塊機 Prototype V33.10</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33-10-20260611">
-
-
-<style id="v337-mobile-native">
-@media (max-width:820px){
-html,body{width:100%!important;min-height:100dvh!important;height:auto!important;margin:0!important;padding:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:auto!important;background:#e9e1cf!important}
-body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bottom))!important}
-*,*:before,*:after{box-sizing:border-box!important}
-.app{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;display:block!important;overflow:visible!important}
-.device{width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:8px!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;transform:none!important;background:#d8cfba!important}
-.device:before,.device:after,.screw,.speaker-row,.notice{display:none!important}
-.top-strip{margin:0 0 6px!important;padding:0!important}
-.brand{font-size:20px!important;line-height:1!important;letter-spacing:.08em!important;white-space:nowrap!important}
-.subbrand{font-size:10px!important;line-height:1.1!important;letter-spacing:.08em!important;white-space:nowrap!important}
-.serial{display:none!important}
-.main{display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;overflow:visible!important}
-.screen-side,.control-side{width:100%!important;max-width:100%!important;margin:0!important;overflow:visible!important;position:relative!important}
-.screen-side{padding:6px!important;border-width:3px!important;border-radius:18px!important}
-.screen-title{margin:0 0 4px!important;font-size:11px!important}
-.screen-wrap{padding:6px!important;border-radius:16px!important;width:100%!important}
-#screen,.screen{width:100%!important;height:auto!important;min-height:0!important;padding:0!important;border-radius:12px!important;overflow:hidden!important;touch-action:auto!important;pointer-events:auto!important}
-.topbar{height:30px!important;min-height:30px!important;padding:0 8px!important;font-size:11px!important}
-.game-area{height:min(30dvh,230px)!important;min-height:145px!important;max-height:230px!important;touch-action:auto!important}
-#petCanvas{width:100%!important;height:100%!important;display:block!important;touch-action:auto!important;pointer-events:none!important}
-.shake-ui{height:26px!important;min-height:26px!important;padding:0 8px!important;font-size:10px!important}
-.message{min-height:44px!important;max-height:62px!important;overflow:auto!important;padding:6px 8px!important;font-size:11px!important;line-height:1.22!important}
-.info-card{padding:8px!important;border-radius:16px!important;border-width:2px!important}
-.stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;font-size:12px!important}
-.bar{height:9px!important;margin-top:3px!important}
-.control-panel{display:none!important}
-.tiny-row,.system-button-row{display:none!important}
-.mobile-native-controls{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:999999!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;padding:10px 10px calc(10px + env(safe-area-inset-bottom))!important;background:rgba(34,32,28,.94)!important;backdrop-filter:blur(10px)!important;border-top:2px solid rgba(255,255,255,.18)!important;box-shadow:0 -8px 24px rgba(0,0,0,.28)!important;pointer-events:auto!important}
-.mobile-native-controls button{appearance:none!important;-webkit-appearance:none!important;width:100%!important;min-height:54px!important;border:2px solid rgba(255,255,255,.28)!important;border-radius:14px!important;background:#e9dec4!important;color:#2e2b25!important;font-weight:900!important;font-size:15px!important;line-height:1!important;touch-action:manipulation!important;pointer-events:auto!important;user-select:none!important;-webkit-user-select:none!important;-webkit-tap-highlight-color:rgba(255,255,255,.35)!important}
-.mobile-native-controls button:active,.mobile-native-controls button.is-pressing{transform:translateY(3px) scale(.98)!important;filter:brightness(1.12)!important;background:#fff1cf!important}
-.settings-backdrop,.dex-backdrop{align-items:flex-start!important;padding:12px!important;overflow:auto!important;z-index:1000000!important}
-.settings-panel,.dex-panel{max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important}
-}
-@media (min-width:821px){.mobile-native-controls{display:none!important}}
-@media (max-width:430px){
-.device{padding:6px!important}.brand{font-size:18px!important}.subbrand{font-size:9px!important}
-.screen-side{padding:5px!important}.screen-wrap{padding:5px!important}
-.game-area{height:min(27dvh,205px)!important;min-height:135px!important}
-.message{min-height:42px!important;max-height:58px!important;font-size:11px!important}
-.mobile-native-controls{gap:6px!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important}
-.mobile-native-controls button{min-height:50px!important;font-size:14px!important;border-radius:13px!important}
-}
-</style>
+  <title>Pixel Pet 方塊機 Prototype V33.12</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=33-12-20260611">
 </head>
 <body>
-  <!-- Pixel Pet Retro Guardian V33.10 Mobile Classic Buttons<audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
+  <!-- Pixel Pet Retro Guardian V33.12 Full Status Fix<audio id="bgmAudio" src="assets/audio/bgm.mp3" loop autoplay playsinline preload="auto"></audio>
   <main class="app">
     <section class="device" aria-label="懷舊橫式方塊機遊戲主機">
       <span class="screw tl"></span><span class="screw tr"></span>
@@ -62,7 +16,7 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
       <div class="top-strip">
         <div class="brand-block">
           <div class="brand">PIXEL PET</div>
-          <div class="subbrand">RETRO LCD MONSTER UNIT V33.10</div>
+          <div class="subbrand">RETRO LCD MONSTER UNIT V33.12</div>
         </div>
         <div class="serial">
           MODEL : PP-RG-05<br>
@@ -299,18 +253,15 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
 
 
 
-  <script defer src="assets/js/game.js?v=33-10-20260611"></script>
-  <script type="module" src="assets/js/cloud-save.js?v=33-10-20260611"></script>
-
-
-
+  <script defer src="assets/js/game.js?v=33-12-20260611"></script>
+  <script type="module" src="assets/js/cloud-save.js?v=33-12-20260611"></script>
 <div id="mobileNativeControls" class="mobile-native-controls mobile-classic-controls" aria-label="手機經典操作列">
   <div class="mobile-classic-grid">
     <button type="button" class="mobile-classic-btn red" data-mobile-action="feed"><span>A</span><small>FEED<br>餵食</small></button>
     <button type="button" class="mobile-classic-btn blue" data-mobile-action="train"><span>B</span><small>TRAIN<br>訓練</small></button>
     <button type="button" class="mobile-classic-btn green" data-mobile-action="clean"><span>C</span><small>CLEAN<br>清潔</small></button>
     <button type="button" class="mobile-classic-btn orange" data-mobile-action="sleep"><span>D</span><small>SLEEP<br>睡眠</small></button>
-    <button type="button" class="mobile-classic-btn slate" data-mobile-action="scan"><span>E</span><small>SCAN<br>搜索</small></button>
+    <button type="button" class="mobile-classic-btn slate" data-mobile-action="patrol"><span>E</span><small>SCAN<br>搜索</small></button>
     <button type="button" class="mobile-classic-btn gray" data-mobile-action="status"><span>F</span><small>STATUS<br>狀態</small></button>
   </div>
   <div class="mobile-utility-grid">
@@ -320,5 +271,6 @@ body{display:block!important;padding-bottom:calc(230px + env(safe-area-inset-bot
     <button type="button" data-mobile-action="sync">雲端同步</button>
   </div>
 </div>
+
 </body>
 </html>

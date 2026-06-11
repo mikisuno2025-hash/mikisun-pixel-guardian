@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.10",
+        "pixelPetRetroGuardianV33.12",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.10",
+        "pixelPetOwnedAppearancesV33.12",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1921,78 +1921,81 @@ LV 回到 1。
 
 
 
-    function runMobileAction(action) {
-      try { initAudio(); } catch {}
-      if (action === "feed") {
-        feedPet();
-      } else if (action === "train") {
-        trainPet();
-      } else if (action === "clean") {
-        cleanPet();
-      } else if (action === "sleep") {
-        sleepPet();
-      } else if (action === "status") {
-        showStatus();
-      } else if (action === "dex") {
-        openDex();
-      } else if (action === "rename") {
-        renamePet();
-      } else if (action === "scan") {
-        setMessage("請在 LCD 畫面左右滑動或搖晃，累積搜索值。");
-      } else if (action === "login") {
-        const btn = document.getElementById("googleLoginBtn");
-        if (btn) btn.click();
-        else setMessage("登入模組尚未載入。");
-      } else if (action === "sync") {
-        const btn = document.getElementById("cloudSyncBtn");
-        if (btn) btn.click();
-        else setMessage("雲端同步模組尚未載入。");
+    function runMobileClassicAction(actionName) {
+      try {
+        if (actionName === "login") {
+          const btn = document.getElementById("googleLoginBtn");
+          if (btn) btn.click();
+          else {
+            setMessage("登入模組尚未載入。");
+            updateUI();
+          }
+          return;
+        }
+
+        if (actionName === "sync") {
+          const btn = document.getElementById("cloudSyncBtn");
+          if (btn) btn.click();
+          else {
+            setMessage("雲端同步模組尚未載入。");
+            updateUI();
+          }
+          return;
+        }
+
+        // Use the existing core action() path, so mobile and desktop behavior stay identical.
+        action(actionName);
+        try { forcePetVisibleFallback(); } catch {}
+      } catch (err) {
+        console.error("mobile action failed", err);
+        try {
+          setMessage("手機按鈕執行失敗：\n" + (err && err.message ? err.message : String(err)));
+          updateUI();
+        } catch {}
       }
-      updateUI();
-      try { forcePetVisibleFallback(); } catch {}
     }
 
-    function bindMobileNativeControls() {
-      if (window.__mobileNativeDelegationBound) return;
-      window.__mobileNativeDelegationBound = true;
+    function bindMobileClassicControls() {
+      if (window.__mobileClassicControlsBound) return;
+      window.__mobileClassicControlsBound = true;
 
-      const isTouchLike = () => (
-        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0
-      );
-
-      const findButton = target => target && target.closest ? target.closest("[data-mobile-action]") : null;
+      const getButton = target => {
+        if (!target || !target.closest) return null;
+        return target.closest("#mobileNativeControls [data-mobile-action]");
+      };
 
       document.addEventListener("touchstart", ev => {
-        const btn = findButton(ev.target);
+        const btn = getButton(ev.target);
         if (!btn) return;
         btn.classList.add("is-pressing");
         if (ev.cancelable) ev.preventDefault();
         ev.stopPropagation();
       }, { passive: false, capture: true });
 
-      document.addEventListener("touchcancel", ev => {
-        const btn = findButton(ev.target);
-        if (btn) btn.classList.remove("is-pressing");
-      }, { passive: true, capture: true });
-
       document.addEventListener("touchend", ev => {
-        const btn = findButton(ev.target);
+        const btn = getButton(ev.target);
         if (!btn) return;
         btn.classList.remove("is-pressing");
         if (ev.cancelable) ev.preventDefault();
         ev.stopPropagation();
-        runMobileAction(btn.dataset.mobileAction);
+        runMobileClassicAction(btn.dataset.mobileAction);
       }, { passive: false, capture: true });
 
+      document.addEventListener("touchcancel", ev => {
+        const btn = getButton(ev.target);
+        if (btn) btn.classList.remove("is-pressing");
+      }, { passive: true, capture: true });
+
       document.addEventListener("click", ev => {
-        const btn = findButton(ev.target);
+        const btn = getButton(ev.target);
         if (!btn) return;
-        // Desktop click support; on touch devices the touchend already handles it.
         ev.preventDefault();
         ev.stopPropagation();
-        if (!isTouchLike()) runMobileAction(btn.dataset.mobileAction);
+
+        const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+        if (!isTouchDevice) {
+          runMobileClassicAction(btn.dataset.mobileAction);
+        }
       }, { capture: true });
     }
 
@@ -2093,7 +2096,7 @@ LV 回到 1。
     bindBgmAutoStart();
     bindDex();
     bindSettingsMenu();
-    bindMobileNativeControls();
+    bindMobileClassicControls();
     applyLanguage();
     applySystemSettings();
     tryAutoStartBgm();
