@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.27",
+        "pixelPetRetroGuardianV33.28",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.27",
+        "pixelPetOwnedAppearancesV33.28",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -1553,7 +1553,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.27",
+        "Mikisun Pixel Guardian V33.28",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2447,6 +2447,42 @@ LV 回到 1。
     }
 
 
+
+    function bindDesktopCloudFallback() {
+      if (window.__desktopCloudFallbackBound) return;
+      window.__desktopCloudFallbackBound = true;
+
+      document.addEventListener("click", ev => {
+        const login = ev.target && ev.target.closest ? ev.target.closest("#googleLoginBtn") : null;
+        const sync = ev.target && ev.target.closest ? ev.target.closest("#cloudSyncBtn") : null;
+
+        if (login && !window.PixelPetCloudAuth) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const status = document.getElementById("cloudStatus");
+          if (status) {
+            status.textContent = "Google登入模組載入中或載入失敗";
+            status.classList.add("error");
+          }
+          setMessage("Google登入模組尚未載入。\n請重新整理，或開啟狀態診斷查看錯誤。");
+          updateUI();
+        }
+
+        if (sync && !window.PixelPetCloudAuth) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const status = document.getElementById("cloudStatus");
+          if (status) {
+            status.textContent = "雲端同步模組尚未載入";
+            status.classList.add("error");
+          }
+          setMessage("雲端同步模組尚未載入。\n請重新整理後再試。");
+          updateUI();
+        }
+      }, { capture: true });
+    }
+
+
     function setSystemTab(tabName = "actions") {
       const allowed = ["actions", "settings", "account"];
       const activeName = allowed.includes(tabName) ? tabName : "actions";
@@ -2761,7 +2797,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.27: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.28: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
@@ -2864,6 +2900,7 @@ LV 回到 1。
     bindBgmAutoStart();
     bindDex();
     bindSettingsMenu();
+    bindDesktopCloudFallback();
     bindSystemTabs();
     bindMobileV28Controls();
     bindMobileSystemDrawer();

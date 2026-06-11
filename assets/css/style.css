@@ -1,3 +1,4 @@
+/* V33.28 all device button check stylesheet */
 /* V33.27 login feedback system clean stylesheet */
 /* V33.26 system tabs stylesheet */
 /* V33.26 system tabs stylesheet */
@@ -1168,7 +1169,7 @@
   display:none!important;
 }
 
-/* V33.27 login feedback system clean */
+/* V33.28 all device button check */
 .system-tabs{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
