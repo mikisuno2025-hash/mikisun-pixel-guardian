@@ -57,18 +57,6 @@ function formatAuthError(error) {
   return "Google登入失敗：" + (code ? code + " " : "") + message;
 }
 
-
-function showCloudError(prefix, error) {
-  const code = error && error.code ? String(error.code) : "";
-  const msg = error && error.message ? String(error.message) : String(error || "");
-  let text = prefix;
-  if (code) text += "（" + code + "）";
-  if (msg && !msg.includes(code)) text += "\n" + msg;
-  setStatus(text, "error");
-  cloudGameMessage(text);
-  try { alert(text); } catch {}
-}
-
 function reportAuthError(error) {
   const text = formatAuthError(error);
   rememberLoginPending(false);
@@ -288,13 +276,13 @@ async function signInOrOut() {
     if (isMobileAuthEnvironment() && firebaseApi.signInWithRedirect) {
       rememberLoginPending(true);
       setStatus("正在前往 Google 登入...", "warn");
-      cloudGameMessage((window.PixelPetI18N && window.PixelPetI18N.text("msg.login.loading")) || "正在前往 Google 登入...\n返回遊戲後會自動確認登入結果。");
+      cloudGameMessage("正在前往 Google 登入...\n返回遊戲後會自動確認登入結果。");
       await firebaseApi.signInWithRedirect(auth, provider);
       return;
     }
 
     setStatus("正在開啟 Google 登入...", "warn");
-    cloudGameMessage((window.PixelPetI18N && window.PixelPetI18N.text("msg.login.loading")) || "正在開啟 Google 登入...");
+    cloudGameMessage("正在開啟 Google 登入...");
 
     try {
       await firebaseApi.signInWithPopup(auth, provider);
@@ -339,7 +327,7 @@ async function uploadCloudSave(showAlert = false) {
   } catch (error) {
     console.error(error);
     setStatus("保存失敗", "error");
-    if (showAlert) showCloudError("雲端保存失敗。", error);
+    if (showAlert) alert("雲端保存失敗，請查看瀏覽器 Console。");
     return false;
   }
 }
@@ -367,7 +355,7 @@ async function loadCloudSave(showAlert = false) {
   } catch (error) {
     console.error(error);
     setStatus("載入失敗", "error");
-    if (showAlert) showCloudError("雲端載入失敗。", error);
+    if (showAlert) alert("雲端載入失敗，請查看瀏覽器 Console。");
     return false;
   }
 }
@@ -469,58 +457,67 @@ window.addEventListener("pixel-pet-local-save", () => {
 });
 
 async function manualSync() {
-  try {
-    if (!auth) {
-      const ok = await initFirebase();
-      if (!ok) return;
-    }
+  if (!FIREBASE_CONFIG_READY) {
+    alert("Firebase 尚未設定。\n請先編輯 assets/js/firebase-config.js。");
+    return;
+  }
+  if (!currentUser) {
+    setStatus(cloudT("cloud.status.loginFirst"), "warn");
+    alert(cloudT("cloud.status.loginFirst"));
+    return;
+  }
 
-    if (!currentUser) {
-      const text = "請先 Google 登入後再使用手動同步。";
-      setStatus(text, "warn");
-      cloudGameMessage(text);
-      try { alert(text); } catch {}
-      return;
-    }
-
-    let choice = "upload";
-    if (window.PixelPetCloudUI && typeof window.PixelPetCloudUI.cloudSyncChoice === "function") {
-      choice = await window.PixelPetCloudUI.cloudSyncChoice();
-    } else {
-      const ok = confirm("雲端同步\n確定：上傳本機到雲端\n取消：先不要同步");
-      choice = ok ? "upload" : "cancel";
-    }
-
-    if (choice === "cancel") {
-      setStatus("已取消手動同步", "warn");
-      cloudGameMessage("已取消手動同步。");
-      return;
-    }
-
-    if (choice === "upload") {
-      setStatus("正在上傳本機存檔到雲端...", "warn");
-      await uploadCloudSave();
-      setStatus("雲端同步完成：已上傳本機存檔", "online");
-      cloudGameMessage("雲端同步完成。\\n已上傳本機存檔到雲端。");
-      return;
-    }
-
-    if (choice === "download") {
-      setStatus("正在下載雲端存檔...", "warn");
-      const loaded = await loadCloudSave();
-      if (loaded) {
-        setStatus("雲端同步完成：已下載雲端存檔", "online");
-        cloudGameMessage("雲端同步完成。\\n已下載雲端存檔到本機。");
-      } else {
-        const text = "雲端沒有可下載的存檔。";
-        setStatus(text, "warn");
-        cloudGameMessage(text);
-      }
-      return;
-    }
-  } catch (error) {
-    console.error(error);
-    showCloudError("雲端同步失敗，請確認是否已登入、網路是否正常，或 Firebase 權限設定是否正確。", error);
+  const upload = confirm("雲端同步\n\n按「確定」：上傳本機存檔到雲端\n按「取消」：載入雲端存檔到本機");
+  if (upload) {
+    await uploadCloudSave(true);
+  } else {
+    await loadCloudSave(true);
   }
 }
 
+window.PixelPetCloudAuth = {
+  isSignedIn() {
+    return !!currentUser;
+  },
+  currentUser() {
+    return currentUser ? {
+      uid: currentUser.uid,
+      email: currentUser.email,
+      displayName: currentUser.displayName
+    } : null;
+  },
+  status() {
+    return {
+      signedIn: !!currentUser,
+      uid: currentUser ? currentUser.uid : null,
+      email: currentUser ? currentUser.email : null,
+      displayName: currentUser ? currentUser.displayName : null,
+      lastCloudSaveAt,
+      lastCloudLoadAt,
+      lastStatus: lastStatusText
+    };
+  },
+  signInOrOut,
+  manualSync,
+  uploadCloudSave,
+  loadCloudSave
+};
+
+if (loginBtn) loginBtn.addEventListener("click", signInOrOut);
+if (syncBtn) syncBtn.addEventListener("click", manualSync);
+
+window.addEventListener("beforeunload", () => {
+  if (isReady && currentUser) {
+    uploadCloudSave(false);
+  }
+});
+
+updateCloudLoginUi(null);
+setStatus(FIREBASE_CONFIG_READY ? cloudT("cloud.status.signedOut") : "Firebase未設定", FIREBASE_CONFIG_READY ? "warn" : "warn");
+window.addEventListener("pixel-language-change", () => {
+  try {
+    updateCloudLoginUi(currentUser);
+    if (!currentUser && FIREBASE_CONFIG_READY) setStatus(cloudT("cloud.status.signedOut"), "warn");
+  } catch {}
+});
+initFirebase();

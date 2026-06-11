@@ -197,7 +197,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.32",
+        "pixelPetRetroGuardianV33.39",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -206,7 +206,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.32",
+        "pixelPetOwnedAppearancesV33.39",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -389,7 +389,6 @@ const canvas = document.getElementById("petCanvas");
     }
 
     function playBgm() {
-      v3330SetAudioElementVolume();
       if (!bgmEnabled || !bgmAudio) return;
       bgmAudio.muted = false;
       bgmAudio.volume = bgmEnabled ? bgmVolume / 100 : 0;
@@ -446,7 +445,6 @@ const canvas = document.getElementById("petCanvas");
       setMessage(autoCareEnabled
         ? "AUTO CARE：ON\\n全自動照顧啟動。"
         : "AUTO CARE：OFF\\n改回手動照顧模式。");
-      v3329ApplyI18n();
       updateUI();
     }
 
@@ -901,15 +899,7 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系統設定",
-        "cloud.dialog.title": "雲端同步",
-    "cloud.dialog.text": "請選擇同步方向。這次不會再用「好 / 取消」混淆操作。",
-    "cloud.upload.title": "上傳本機到雲端",
-    "cloud.upload.desc": "用目前手機 / 瀏覽器的進度覆蓋雲端存檔。",
-    "cloud.download.title": "下載雲端到本機",
-    "cloud.download.desc": "用雲端存檔覆蓋目前手機 / 瀏覽器的進度。",
-    "cloud.cancel.title": "先不要同步",
-    "cloud.cancel.desc": "保留目前狀態，不做任何更動。",
-    "cloud.local": "本機存檔",
+        "cloud.local": "本機存檔",
         "cloud.signedOutHint": "未登入：僅使用本機存檔",
         "cloud.signedInHint": "已登入：雲端會自動保存，手動同步只作備用",
         "cloud.status.signedOut": "未登入雲端",
@@ -975,15 +965,7 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "重新孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "系统设置",
-        "cloud.dialog.title": "云端同步",
-    "cloud.dialog.text": "请选择同步方向。这次不会再用“好 / 取消”混淆操作。",
-    "cloud.upload.title": "上传本机到云端",
-    "cloud.upload.desc": "用目前手机 / 浏览器的进度覆盖云端存档。",
-    "cloud.download.title": "下载云端到本机",
-    "cloud.download.desc": "用云端存档覆盖目前手机 / 浏览器的进度。",
-    "cloud.cancel.title": "先不要同步",
-    "cloud.cancel.desc": "保留目前状态，不做任何更动。",
-    "cloud.local": "本机存档",
+        "cloud.local": "本机存档",
         "cloud.signedOutHint": "未登录：仅使用本机存档",
         "cloud.signedInHint": "已登录：云端会自动保存，手动同步仅作备用",
         "cloud.status.signedOut": "未登录云端",
@@ -1049,15 +1031,7 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "再孵化",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "システム設定",
-        "cloud.dialog.title": "クラウド同期",
-    "cloud.dialog.text": "同期する方向を選んでください。「OK / キャンセル」ではなく、内容が分かるボタンにしました。",
-    "cloud.upload.title": "この端末のデータをアップロード",
-    "cloud.upload.desc": "今使っているスマホ / ブラウザの進行状況でクラウドセーブを上書きします。",
-    "cloud.download.title": "クラウドデータを読み込む",
-    "cloud.download.desc": "クラウドセーブで今使っているスマホ / ブラウザの進行状況を上書きします。",
-    "cloud.cancel.title": "今は同期しない",
-    "cloud.cancel.desc": "現在の状態をそのまま残し、何も変更しません。",
-    "cloud.local": "ローカル保存",
+        "cloud.local": "ローカル保存",
         "cloud.signedOutHint": "未ログイン：ローカル保存のみ",
         "cloud.signedInHint": "ログイン中：クラウドは自動保存、手動同期は予備用",
         "cloud.status.signedOut": "クラウド未ログイン",
@@ -1123,15 +1097,7 @@ const canvas = document.getElementById("petCanvas");
         "btn.rehatch": "Re-hatch",
         "btn.system": "SYSTEM",
         "btn.systemSettings": "System Settings",
-        "cloud.dialog.title": "Cloud sync",
-    "cloud.dialog.text": "Choose the sync direction. These buttons clearly show what will happen.",
-    "cloud.upload.title": "Upload this device to cloud",
-    "cloud.upload.desc": "Overwrite the cloud save with the progress on this phone / browser.",
-    "cloud.download.title": "Download cloud to this device",
-    "cloud.download.desc": "Overwrite this phone / browser with the cloud save.",
-    "cloud.cancel.title": "Do not sync now",
-    "cloud.cancel.desc": "Keep the current state and make no changes.",
-    "cloud.local": "Local Save",
+        "cloud.local": "Local Save",
         "cloud.signedOutHint": "Not signed in: local save only",
         "cloud.signedInHint": "Signed in: cloud auto-save is on; manual sync is backup only",
         "cloud.status.signedOut": "Cloud not signed in",
@@ -1232,8 +1198,7 @@ const canvas = document.getElementById("petCanvas");
       const languageSelect = document.getElementById("languageSelect");
       if (languageSelect) languageSelect.value = lang;
 
-      window.PixelPetCloudUI = { cloudSyncChoice: () => v3331OpenCloudSyncChoice() };
-window.PixelPetI18N = {
+      window.PixelPetI18N = {
         t,
         currentLanguage: getCurrentLanguage,
         applyLanguage
@@ -1261,696 +1226,6 @@ window.PixelPetI18N = {
         controls.style.opacity = "1";
       }
     }
-
-
-/* V33.32 full i18n QA patch */
-const V3329_I18N = {
-  "zh-TW": {
-    "stat.hunger": "飽食",
-    "stat.mood": "心情",
-    "stat.energy": "體力",
-    "stat.clean": "清潔",
-    "btn.feed": "餵食",
-    "btn.train": "訓練",
-    "btn.clean": "清潔",
-    "btn.sleep": "睡眠",
-    "btn.search": "探索",
-    "btn.status": "狀態",
-    "btn.rename": "命名",
-    "btn.dex": "圖鑑",
-    "btn.rehatch": "重新孵化",
-    "btn.debug": "狀態診斷",
-    "btn.google": "Google登入",
-    "btn.logout": "登出",
-    "btn.manualSync": "手動同步",
-    "tabs.actions": "操作",
-    "tabs.settings": "設定",
-    "tabs.account": "帳號",
-    "settings.animations": "動畫效果",
-    "settings.autoCare": "自動照顧",
-    "settings.autoPatrol": "掛機巡邏",
-    "settings.motionShake": "手機搖動探索",
-    "settings.motionSensitivity": "搖動靈敏度",
-    "settings.motionLow": "低：避免誤觸",
-    "settings.motionMedium": "中：標準",
-    "settings.motionHigh": "高：較容易觸發",
-    "settings.motionShakeNote": "手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。",
-    "settings.motionSensitivityNote": "如果搖不出來請調高；如果太容易誤觸請調低。",
-    "settings.bgmVolume": "BGM 音量",
-    "settings.sfxVolume": "音效音量",
-    "settings.fontSize": "字體大小",
-    "settings.language": "語言",
-    "settings.default": "恢復預設",
-    "settings.done": "完成",
-    "system.note.actions": "主畫面只保留 A / B / C / D / E / F。其他低頻操作集中在這裡。",
-    "account.saveTitle": "存檔模式",
-    "account.saveText": "未登入時使用本機瀏覽器存檔。登入 Google 後會啟用雲端自動保存，手動同步只作備用。",
-    "account.checkTitle": "登入檢查",
-    "account.checkText": "如果登入沒有成功，請確認 Firebase Authentication 的 Authorized domains 包含 mikisuno2025-hash.github.io。",
-    "cloud.local": "未登入：僅使用本機存檔",
-    "msg.ready": "準備好了。",
-    "msg.feed": "{name} 吃了資料飯糰。\n飽食上升，螢幕有點髒。",
-    "msg.train": "{name} 完成訓練。\nEXP 上升，體力下降。",
-    "msg.clean": "螢幕被擦亮了。\n清潔度上升。",
-    "msg.sleep": "{name} 開始休息。\n體力慢慢恢復。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n飽食 {hunger} 心情 {mood}\n體力 {energy} 清潔 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n巡邏沒有遇怪。\n保底條 +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n發現野生訊號。",
-    "msg.login.loading": "正在開啟 Google 登入...",
-    "msg.login.moduleMissing": "Google登入模組尚未載入。\n請重新整理後再試。"
-  },
-  "zh-CN": {
-    "stat.hunger": "饱食",
-    "stat.mood": "心情",
-    "stat.energy": "体力",
-    "stat.clean": "清洁",
-    "btn.feed": "喂食",
-    "btn.train": "训练",
-    "btn.clean": "清洁",
-    "btn.sleep": "睡眠",
-    "btn.search": "探索",
-    "btn.status": "状态",
-    "btn.rename": "命名",
-    "btn.dex": "图鉴",
-    "btn.rehatch": "重新孵化",
-    "btn.debug": "状态诊断",
-    "btn.google": "Google登录",
-    "btn.logout": "登出",
-    "btn.manualSync": "手动同步",
-    "tabs.actions": "操作",
-    "tabs.settings": "设置",
-    "tabs.account": "账号",
-    "settings.animations": "动画效果",
-    "settings.autoCare": "自动照顾",
-    "settings.autoPatrol": "挂机巡逻",
-    "settings.motionShake": "手机摇动探索",
-    "settings.motionSensitivity": "摇动灵敏度",
-    "settings.motionLow": "低：避免误触",
-    "settings.motionMedium": "中：标准",
-    "settings.motionHigh": "高：较容易触发",
-    "settings.motionShakeNote": "手机版可快速摇动 2 下进行探索。iPhone 第一次启用需要允许动作感测。",
-    "settings.motionSensitivityNote": "如果摇不出来请调高；如果太容易误触请调低。",
-    "settings.bgmVolume": "BGM 音量",
-    "settings.sfxVolume": "音效音量",
-    "settings.fontSize": "字体大小",
-    "settings.language": "语言",
-    "settings.default": "恢复默认",
-    "settings.done": "完成",
-    "system.note.actions": "主画面只保留 A / B / C / D / E / F。其他低频操作集中在这里。",
-    "account.saveTitle": "存档模式",
-    "account.saveText": "未登录时使用本机浏览器存档。登录 Google 后会启用云端自动保存，手动同步只作备用。",
-    "account.checkTitle": "登录检查",
-    "account.checkText": "如果登录没有成功，请确认 Firebase Authentication 的 Authorized domains 包含 mikisuno2025-hash.github.io。",
-    "cloud.local": "未登录：仅使用本机存档",
-    "msg.ready": "准备好了。",
-    "msg.feed": "{name} 吃了资料饭团。\n饱食上升，屏幕有点脏。",
-    "msg.train": "{name} 完成训练。\nEXP 上升，体力下降。",
-    "msg.clean": "屏幕被擦亮了。\n清洁度上升。",
-    "msg.sleep": "{name} 开始休息。\n体力慢慢恢复。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n饱食 {hunger} 心情 {mood}\n体力 {energy} 清洁 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n巡逻没有遇怪。\n保底条 +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n发现野生信号。",
-    "msg.login.loading": "正在打开 Google 登录...",
-    "msg.login.moduleMissing": "Google登录模块尚未载入。\n请重新整理后再试。"
-  },
-  "ja": {
-    "stat.hunger": "満腹",
-    "stat.mood": "ごきげん",
-    "stat.energy": "体力",
-    "stat.clean": "清潔",
-    "btn.feed": "ごはん",
-    "btn.train": "トレーニング",
-    "btn.clean": "そうじ",
-    "btn.sleep": "ねむる",
-    "btn.search": "探索",
-    "btn.status": "ステータス",
-    "btn.rename": "名前変更",
-    "btn.dex": "図鑑",
-    "btn.rehatch": "再孵化",
-    "btn.debug": "診断",
-    "btn.google": "Googleログイン",
-    "btn.logout": "ログアウト",
-    "btn.manualSync": "手動同期",
-    "tabs.actions": "操作",
-    "tabs.settings": "設定",
-    "tabs.account": "アカウント",
-    "settings.animations": "アニメーション",
-    "settings.autoCare": "オートケア",
-    "settings.autoPatrol": "オート探索",
-    "settings.motionShake": "スマホ振動探索",
-    "settings.motionSensitivity": "振動感度",
-    "settings.motionLow": "低：誤作動を防ぐ",
-    "settings.motionMedium": "中：標準",
-    "settings.motionHigh": "高：反応しやすい",
-    "settings.motionShakeNote": "スマホを素早く2回振ると探索できます。iPhoneでは初回のみモーション許可が必要です。",
-    "settings.motionSensitivityNote": "反応しにくい時は高めに、誤作動が多い時は低めに調整してください。",
-    "settings.bgmVolume": "BGM音量",
-    "settings.sfxVolume": "効果音音量",
-    "settings.fontSize": "文字サイズ",
-    "settings.language": "言語",
-    "settings.default": "初期設定に戻す",
-    "settings.done": "完了",
-    "system.note.actions": "メイン画面は A / B / C / D / E / F の操作だけに整理しています。",
-    "account.saveTitle": "セーブ方式",
-    "account.saveText": "未ログイン時はブラウザ内に保存します。Googleログイン後はクラウド自動保存が有効になり、手動同期は補助機能として使います。",
-    "account.checkTitle": "ログイン確認",
-    "account.checkText": "ログインできない場合は、Firebase Authentication の Authorized domains に mikisuno2025-hash.github.io が含まれているか確認してください。",
-    "cloud.local": "未ログイン：ローカル保存のみ",
-    "msg.ready": "準備OK。",
-    "msg.feed": "{name} はデータおにぎりを食べた。\n満腹度が上がり、画面が少し汚れた。",
-    "msg.train": "{name} はトレーニングした。\nEXPが上がり、体力が下がった。",
-    "msg.clean": "画面をきれいにした。\n清潔度が上がった。",
-    "msg.sleep": "{name} は休み始めた。\n体力が少しずつ回復する。",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\n満腹 {hunger} ごきげん {mood}\n体力 {energy} 清潔 {clean}",
-    "msg.patrol.none": "AUTO PATROL\n探索したが、何も現れなかった。\n保証ゲージ +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\n野生シグナルを発見。",
-    "msg.login.loading": "Googleログインを開いています...",
-    "msg.login.moduleMissing": "Googleログイン機能を読み込めません。\nページを再読み込みしてからお試しください。"
-  },
-  "en": {
-    "stat.hunger": "Food",
-    "stat.mood": "Mood",
-    "stat.energy": "Energy",
-    "stat.clean": "Clean",
-    "btn.feed": "Feed",
-    "btn.train": "Train",
-    "btn.clean": "Clean",
-    "btn.sleep": "Sleep",
-    "btn.search": "Search",
-    "btn.status": "Status",
-    "btn.rename": "Rename",
-    "btn.dex": "Dex",
-    "btn.rehatch": "Rehatch",
-    "btn.debug": "Debug",
-    "btn.google": "Google sign in",
-    "btn.logout": "Sign out",
-    "btn.manualSync": "Manual sync",
-    "tabs.actions": "Actions",
-    "tabs.settings": "Settings",
-    "tabs.account": "Account",
-    "settings.animations": "Animations",
-    "settings.autoCare": "Auto care",
-    "settings.autoPatrol": "Auto patrol",
-    "settings.motionShake": "Shake search",
-    "settings.motionSensitivity": "Shake sensitivity",
-    "settings.motionLow": "Low: fewer false triggers",
-    "settings.motionMedium": "Medium: standard",
-    "settings.motionHigh": "High: easier to trigger",
-    "settings.motionShakeNote": "On mobile, shake twice quickly to search. iPhone requires motion permission the first time.",
-    "settings.motionSensitivityNote": "Raise it if shaking does not work; lower it if it triggers too easily.",
-    "settings.bgmVolume": "BGM volume",
-    "settings.sfxVolume": "SFX volume",
-    "settings.fontSize": "Font size",
-    "settings.language": "Language",
-    "settings.default": "Reset defaults",
-    "settings.done": "Done",
-    "system.note.actions": "The main screen keeps only A / B / C / D / E / F controls. Less-used actions are collected here.",
-    "account.saveTitle": "Save mode",
-    "account.saveText": "When signed out, progress is saved in this browser. After Google sign-in, cloud auto-save is enabled; manual sync is only a backup action.",
-    "account.checkTitle": "Login check",
-    "account.checkText": "If login fails, confirm Firebase Authentication Authorized domains includes mikisuno2025-hash.github.io.",
-    "cloud.local": "Signed out: local save only",
-    "msg.ready": "Ready.",
-    "msg.feed": "{name} ate a data rice ball.\nFood increased, and the screen got a little dirty.",
-    "msg.train": "{name} trained.\nEXP increased, energy decreased.",
-    "msg.clean": "The screen was wiped clean.\nCleanliness increased.",
-    "msg.sleep": "{name} started resting.\nEnergy will recover gradually.",
-    "msg.status": "{name}\nLV {lv} / HP {hp}/{maxHp}\nFood {hunger} Mood {mood}\nEnergy {energy} Clean {clean}",
-    "msg.patrol.none": "AUTO PATROL\nNo encounter this time.\nPity gauge +1% → {pity}%",
-    "msg.encounter": "ENCOUNTER!\nA wild signal appeared.",
-    "msg.login.loading": "Opening Google sign-in...",
-    "msg.login.moduleMissing": "Google sign-in has not loaded.\nPlease refresh and try again."
-  }
-};
-
-function v3329Lang() {
-  try {
-    return localStorage.getItem("pixelPetLang") || currentLang || "zh-TW";
-  } catch {
-    return currentLang || "zh-TW";
-  }
-}
-
-function v3329Text(key, vars = {}) {
-  const lang = v3329Lang();
-  const table = V3329_I18N[lang] || V3329_I18N["zh-TW"];
-  let text = table[key] || V3329_I18N["zh-TW"][key] || key;
-  Object.entries(vars).forEach(([k, v]) => {
-    text = text.replaceAll(`{${k}}`, String(v));
-  });
-  return text;
-}
-
-function v3329ApplyI18n() {
-  const mapText = [
-    ["[data-stat-label='hunger']", "stat.hunger"],
-    ["[data-stat-label='mood']", "stat.mood"],
-    ["[data-stat-label='energy']", "stat.energy"],
-    ["[data-stat-label='clean']", "stat.clean"],
-    ["[data-system-tab='actions']", "tabs.actions"],
-    ["[data-system-tab='settings']", "tabs.settings"],
-    ["[data-system-tab='account']", "tabs.account"],
-    ["[data-mobile-action='feed'] small", "btn.feed"],
-    ["[data-mobile-action='train'] small", "btn.train"],
-    ["[data-mobile-action='clean'] small", "btn.clean"],
-    ["[data-mobile-action='sleep'] small", "btn.sleep"],
-    ["[data-mobile-action='patrol'] small", "btn.search"],
-    ["[data-mobile-action='status'] small", "btn.status"],
-    ["[data-mobile-action='rename']", "btn.rename"],
-    ["[data-mobile-action='dex']", "btn.dex"],
-    ["[data-mobile-action='reset']", "btn.rehatch"],
-    ["[data-mobile-action='debug']", "btn.debug"],
-    ["[data-mobile-action='login']", "btn.google"],
-    ["[data-mobile-action='sync']", "btn.manualSync"],
-    ["#settingsDefault", "settings.default"],
-    ["#settingsDone", "settings.done"]
-  ];
-
-  mapText.forEach(([selector, key]) => {
-    document.querySelectorAll(selector).forEach(el => {
-      el.textContent = v3329Text(key);
-    });
-  });
-
-  const idMap = {
-    "settingAnimations": "settings.animations",
-    "settingAutoCare": "settings.autoCare",
-    "settingAutoPatrol": "settings.autoPatrol",
-    "settingMotionShake": "settings.motionShake",
-    "settingMotionSensitivity": "settings.motionSensitivity",
-    "settingBgmVolume": "settings.bgmVolume",
-    "settingSfxVolume": "settings.sfxVolume",
-    "settingFontSize": "settings.fontSize",
-    "languageSelect": "settings.language"
-  };
-
-  Object.entries(idMap).forEach(([id, key]) => {
-    const el = document.getElementById(id);
-    const row = el ? el.closest(".setting-row") : null;
-    const label = row ? row.querySelector(".setting-label span") : null;
-    if (label) label.textContent = v3329Text(key);
-  });
-
-  const notes = [
-    ["#settingMotionShake", "settings.motionShakeNote"],
-    ["#settingMotionSensitivity", "settings.motionSensitivityNote"]
-  ];
-  notes.forEach(([selector, key]) => {
-    const el = document.querySelector(selector);
-    const row = el ? el.closest(".setting-row") : null;
-    const note = row ? row.querySelector(".setting-note") : null;
-    if (note) note.textContent = v3329Text(key);
-  });
-
-  const optMap = {
-    "low": "settings.motionLow",
-    "medium": "settings.motionMedium",
-    "high": "settings.motionHigh"
-  };
-  document.querySelectorAll("#settingMotionSensitivity option").forEach(opt => {
-    const key = optMap[opt.value];
-    if (key) opt.textContent = v3329Text(key);
-  });
-
-  const actionNote = document.querySelector(".system-tab-note");
-  if (actionNote) actionNote.textContent = v3329Text("system.note.actions");
-
-  const cloudHint = document.querySelector("[data-cloud-hint]");
-  if (cloudHint) cloudHint.textContent = v3329Text("cloud.local");
-
-  const accountCards = document.querySelectorAll(".account-save-card");
-  if (accountCards[0]) {
-    const strong = accountCards[0].querySelector("strong");
-    const p = accountCards[0].querySelector("p");
-    if (strong) strong.textContent = v3329Text("account.saveTitle");
-    if (p) p.textContent = v3329Text("account.saveText");
-  }
-  if (accountCards[1]) {
-    const strong = accountCards[1].querySelector("strong");
-    const p = accountCards[1].querySelector("p");
-    if (strong) strong.textContent = v3329Text("account.checkTitle");
-    if (p) p.textContent = v3329Text("account.checkText");
-  }
-
-  const loginBtn = document.getElementById("googleLoginBtn");
-  if (loginBtn && !document.documentElement.dataset.cloudState?.includes("signed-in")) {
-    loginBtn.textContent = v3329Text("btn.google");
-  }
-  const syncBtn = document.getElementById("cloudSyncBtn");
-  if (syncBtn) syncBtn.textContent = v3329Text("btn.manualSync");
-}
-
-
-function v3331ApplyCloudDialogI18n() {
-  const setText = (selector, text) => {
-    const el = document.querySelector(selector);
-    if (el) el.textContent = text;
-  };
-  setText("#cloudSyncChoiceTitle", v3329Text("cloud.dialog.title"));
-  setText("#cloudSyncChoiceText", v3329Text("cloud.dialog.text"));
-  setText("#cloudSyncUploadBtn strong", v3329Text("cloud.upload.title"));
-  setText("#cloudSyncUploadBtn span", v3329Text("cloud.upload.desc"));
-  setText("#cloudSyncDownloadBtn strong", v3329Text("cloud.download.title"));
-  setText("#cloudSyncDownloadBtn span", v3329Text("cloud.download.desc"));
-  setText("#cloudSyncCancelBtn strong", v3329Text("cloud.cancel.title"));
-  setText("#cloudSyncCancelBtn span", v3329Text("cloud.cancel.desc"));
-}
-
-function v3331OpenCloudSyncChoice() {
-  return new Promise(resolve => {
-    v3331ApplyCloudDialogI18n();
-
-    const backdrop = document.getElementById("cloudSyncChoiceBackdrop");
-    const upload = document.getElementById("cloudSyncUploadBtn");
-    const download = document.getElementById("cloudSyncDownloadBtn");
-    const cancel = document.getElementById("cloudSyncCancelBtn");
-    const close = document.getElementById("cloudSyncChoiceClose");
-
-    if (!backdrop || !upload || !download || !cancel || !close) {
-      const fallback = window.confirm("雲端同步：\\n確定＝上傳本機到雲端\\n取消＝先不要同步");
-      resolve(fallback ? "upload" : "cancel");
-      return;
-    }
-
-    const cleanup = value => {
-      backdrop.classList.remove("open");
-      backdrop.setAttribute("aria-hidden", "true");
-      upload.removeEventListener("click", onUpload);
-      download.removeEventListener("click", onDownload);
-      cancel.removeEventListener("click", onCancel);
-      close.removeEventListener("click", onCancel);
-      backdrop.removeEventListener("click", onBackdrop);
-      document.removeEventListener("keydown", onKey);
-      resolve(value);
-    };
-
-    const onUpload = () => cleanup("upload");
-    const onDownload = () => cleanup("download");
-    const onCancel = () => cleanup("cancel");
-    const onBackdrop = ev => {
-      if (ev.target === backdrop) cleanup("cancel");
-    };
-    const onKey = ev => {
-      if (ev.key === "Escape") cleanup("cancel");
-    };
-
-    upload.addEventListener("click", onUpload);
-    download.addEventListener("click", onDownload);
-    cancel.addEventListener("click", onCancel);
-    close.addEventListener("click", onCancel);
-    backdrop.addEventListener("click", onBackdrop);
-    document.addEventListener("keydown", onKey);
-
-    backdrop.classList.add("open");
-    backdrop.setAttribute("aria-hidden", "false");
-  });
-}
-
-function v3329PatchMessageHelpers() {
-  if (window.__v3329MessagePatched) return;
-  window.__v3329MessagePatched = true;
-
-  const originalSetMessage = setMessage;
-  setMessage = function patchedSetMessage(text) {
-    const lang = v3329Lang();
-    let out = String(text ?? "");
-
-    const name = pet && pet.name ? pet.name : "PICO";
-    const vars = {
-      name,
-      lv: pet?.level ?? 1,
-      hp: pet?.hp ?? 0,
-      maxHp: pet?.maxHp ?? 0,
-      hunger: pet?.hunger ?? 0,
-      mood: pet?.mood ?? 0,
-      energy: pet?.energy ?? 0,
-      clean: pet?.clean ?? 0,
-      pity: pet?.pity ?? 0
-    };
-
-    if (lang !== "zh-TW") {
-      if (/吃了資料飯糰|吃了资料饭团|ごはん|data rice ball/i.test(out)) out = v3329Text("msg.feed", vars);
-      else if (/完成訓練|完成训练|トレーニング|trained/i.test(out)) out = v3329Text("msg.train", vars);
-      else if (/螢幕被擦亮|屏幕被擦亮|画面をきれい|wiped clean/i.test(out)) out = v3329Text("msg.clean", vars);
-      else if (/開始休息|开始休息|休み始め|started resting/i.test(out)) out = v3329Text("msg.sleep", vars);
-      else if (/巡邏沒有遇怪|巡逻没有遇怪|探索したが|No encounter/i.test(out)) out = v3329Text("msg.patrol.none", vars);
-      else if (/ENCOUNTER|發現野生|发现野生|野生シグナル|wild signal/i.test(out)) out = v3329Text("msg.encounter", vars);
-    }
-
-    return originalSetMessage.call(this, out);
-  };
-}
-
-
-
-/* V33.32 live volume patch */
-
-window.PixelPetVolumeQA = {
-  apply: () => v3330ApplyVolumes(),
-  bgm: () => v3330ReadVolumeSetting("bgmVolume", 0.38),
-  sfx: () => v3330ReadVolumeSetting("sfxVolume", 0.7)
-};
-
-function v3330Clamp01(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.min(1, n));
-}
-
-function v3330ReadVolumeSetting(key, fallback) {
-  try {
-    const fromSettings = settings && typeof settings[key] === "number" ? settings[key] : null;
-    if (fromSettings !== null) return v3330Clamp01(fromSettings);
-  } catch {}
-  try {
-    const raw = localStorage.getItem("pixelPetSettings");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed[key] === "number") return v3330Clamp01(parsed[key]);
-    }
-  } catch {}
-  return v3330Clamp01(fallback);
-}
-
-function v3330SetAudioElementVolume() {
-  const bgmVolume = v3330ReadVolumeSetting("bgmVolume", 0.38);
-  const candidates = [
-    document.getElementById("bgm"),
-    document.getElementById("bgmAudio"),
-    document.getElementById("backgroundMusic"),
-    window.bgm,
-    window.bgmAudio,
-    window.backgroundMusic
-  ].filter(Boolean);
-
-  document.querySelectorAll("audio").forEach(audio => {
-    if (!candidates.includes(audio)) candidates.push(audio);
-  });
-
-  candidates.forEach(audio => {
-    try {
-      if ("volume" in audio) audio.volume = bgmVolume;
-      if ("muted" in audio) audio.muted = bgmVolume <= 0;
-    } catch {}
-  });
-
-  const bgmVal = document.getElementById("bgmVolValue");
-  if (bgmVal) bgmVal.textContent = `${Math.round(bgmVolume * 100)}%`;
-
-  const bgmSlider = document.getElementById("settingBgmVolume");
-  if (bgmSlider && String(bgmSlider.value) !== String(Math.round(bgmVolume * 100))) {
-    bgmSlider.value = Math.round(bgmVolume * 100);
-  }
-
-  return bgmVolume;
-}
-
-function v3330SetSfxVolumeDisplay() {
-  const sfxVolume = v3330ReadVolumeSetting("sfxVolume", 0.7);
-  const sfxVal = document.getElementById("sfxVolValue");
-  if (sfxVal) sfxVal.textContent = `${Math.round(sfxVolume * 100)}%`;
-
-  const sfxSlider = document.getElementById("settingSfxVolume");
-  if (sfxSlider && String(sfxSlider.value) !== String(Math.round(sfxVolume * 100))) {
-    sfxSlider.value = Math.round(sfxVolume * 100);
-  }
-
-  return sfxVolume;
-}
-
-function v3330ApplyVolumes() {
-  v3330SetAudioElementVolume();
-  v3330SetSfxVolumeDisplay();
-}
-
-function v3330SaveVolume(key, value01) {
-  try {
-    settings[key] = v3330Clamp01(value01);
-    if (typeof saveSettings === "function") saveSettings();
-    else localStorage.setItem("pixelPetSettings", JSON.stringify(settings));
-  } catch {
-    try {
-      const raw = localStorage.getItem("pixelPetSettings");
-      const parsed = raw ? JSON.parse(raw) : {};
-      parsed[key] = v3330Clamp01(value01);
-      localStorage.setItem("pixelPetSettings", JSON.stringify(parsed));
-    } catch {}
-  }
-}
-
-function v3330BindVolumeSliders() {
-  if (window.__v3330VolumeBound) return;
-  window.__v3330VolumeBound = true;
-
-  const bind = (id, key, after) => {
-    const slider = document.getElementById(id);
-    if (!slider) return;
-
-    const handler = () => {
-      const value01 = v3330Clamp01(Number(slider.value) / 100);
-      v3330SaveVolume(key, value01);
-      if (typeof after === "function") after(value01);
-      v3330ApplyVolumes();
-    };
-
-    slider.addEventListener("input", handler, { passive: true });
-    slider.addEventListener("change", handler, { passive: true });
-  };
-
-  bind("settingBgmVolume", "bgmVolume", value01 => {
-    try {
-      if (value01 > 0 && settings && settings.bgmEnabled && typeof playBgm === "function") playBgm();
-    } catch {}
-  });
-
-  bind("settingSfxVolume", "sfxVolume", value01 => {
-    try {
-      if (value01 > 0 && typeof sfx === "function") sfx("click");
-    } catch {}
-  });
-
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) v3330ApplyVolumes();
-  });
-
-  v3330ApplyVolumes();
-}
-
-
-function v3330BindVolumeResetHook() {
-  if (window.__v3330VolumeResetHookBound) return;
-  window.__v3330VolumeResetHookBound = true;
-  document.addEventListener("click", ev => {
-    const target = ev.target && ev.target.closest ? ev.target.closest("#settingsDefault,#settingsDone,#settingsClose") : null;
-    if (!target) return;
-    setTimeout(() => v3330ApplyVolumes(), 0);
-    setTimeout(() => v3330ApplyVolumes(), 120);
-  }, true);
-}
-
-function v3330PatchSfxVolume() {
-  if (window.__v3330SfxPatched) return;
-  if (typeof sfx !== "function") return;
-  window.__v3330SfxPatched = true;
-
-  const originalSfx = sfx;
-  sfx = function patchedSfx(...args) {
-    const sfxVolume = v3330ReadVolumeSetting("sfxVolume", 0.7);
-    if (sfxVolume <= 0) return;
-    try {
-      window.__pixelPetCurrentSfxVolume = sfxVolume;
-    } catch {}
-    return originalSfx.apply(this, args);
-  };
-}
-
-
-
-/* V33.32 mobile bottom auto hide controller */
-function v3332IsMobileUi() {
-  return document.documentElement.classList.contains("mobile-ui") ||
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
-    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-}
-
-function v3332AnyOverlayOpen() {
-  const selectors = [
-    "#settingsBackdrop.open",
-    "#dexBackdrop.open",
-    ".dex-backdrop.open",
-    "#cloudSyncChoiceBackdrop.open",
-    ".cloud-sync-backdrop.open",
-    ".battle-backdrop.open",
-    ".modal.open"
-  ];
-  return selectors.some(sel => document.querySelector(sel));
-}
-
-function v3332SetMobileControlsMode() {
-  if (!v3332IsMobileUi()) {
-    document.documentElement.classList.remove("mobile-controls-collapsed", "mobile-controls-suspended");
-    return;
-  }
-
-  const overlayOpen = v3332AnyOverlayOpen();
-  document.documentElement.classList.toggle("mobile-controls-suspended", overlayOpen);
-
-  if (overlayOpen) {
-    document.documentElement.classList.remove("mobile-controls-collapsed");
-    return;
-  }
-
-  const y = window.scrollY || document.documentElement.scrollTop || 0;
-  const shouldCollapse = y > 12 || window.__v3332ManualCollapsed === true;
-  document.documentElement.classList.toggle("mobile-controls-collapsed", shouldCollapse);
-}
-
-function v3332BindMobileBottomControls() {
-  if (window.__v3332MobileBottomBound) return;
-  window.__v3332MobileBottomBound = true;
-
-  const handle = document.getElementById("mobileControlCollapseHandle");
-  if (handle) {
-    handle.addEventListener("click", ev => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      window.__v3332ManualCollapsed = !document.documentElement.classList.contains("mobile-controls-collapsed");
-      v3332SetMobileControlsMode();
-    }, { passive:false });
-  }
-
-  let touchStartY = 0;
-  const controls = document.getElementById("mobileNativeControls");
-  if (controls) {
-    controls.addEventListener("touchstart", ev => {
-      touchStartY = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
-    }, { passive:true });
-
-    controls.addEventListener("touchmove", ev => {
-      const y = ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0;
-      if (touchStartY && Math.abs(y - touchStartY) > 18) {
-        window.__v3332ManualCollapsed = true;
-        document.documentElement.classList.add("mobile-controls-collapsed");
-      }
-    }, { passive:true });
-  }
-
-  window.addEventListener("scroll", () => {
-    window.__v3332ManualCollapsed = false;
-    v3332SetMobileControlsMode();
-  }, { passive:true });
-
-  window.addEventListener("resize", v3332SetMobileControlsMode, { passive:true });
-  window.addEventListener("orientationchange", () => setTimeout(v3332SetMobileControlsMode, 350), { passive:true });
-
-  const mo = new MutationObserver(() => v3332SetMobileControlsMode());
-  mo.observe(document.documentElement, { attributes:true, attributeFilter:["class"] });
-  mo.observe(document.body, { attributes:true, childList:true, subtree:true, attributeFilter:["class", "hidden", "aria-hidden"] });
-
-  setInterval(v3332SetMobileControlsMode, 800);
-  v3332SetMobileControlsMode();
-}
-
 
     function updateUI() {
       syncPetAppearanceStage();
@@ -1999,14 +1274,8 @@ function v3332BindMobileBottomControls() {
       const led = $("powerLed");
       if (led) led.classList.toggle("on", true);
       ensureMobileControlsVisible();
-      applyLanguage();
-      v3330PatchSfxVolume();
-      v3332BindMobileBottomControls();
-      v3330BindVolumeSliders();
-      v3330BindVolumeResetHook();
-      v3330ApplyVolumes();
-      v3329PatchMessageHelpers();
-      v3329ApplyI18n();
+      v3339ForceStableBootSettings();
+    applyLanguage();
       updateMotionShakeControls();
       save();
     }
@@ -2285,7 +1554,7 @@ LV 回到 1。
 
       const localUpdated = pet.updatedAt || pet.lastTick || 0;
       const lines = [
-        "Mikisun Pixel Guardian V33.32",
+        "Mikisun Pixel Guardian V33.39",
         "JS: OK",
         `URL: ${location.href}`,
         `UA: ${navigator.userAgent}`,
@@ -2369,7 +1638,7 @@ LV 回到 1。
         pet.hp = clamp(pet.hp + 3, 1, pet.maxHp);
         pet.sick = pet.hunger < 10 ? pet.sick : false;
         sfx("care");
-        setMessage(v3329Text("msg.feed", { name: pet.name }));
+        setMessage(`${pet.name} 吃了資料飯糰。\n飽食上升，螢幕有點髒。`);
       }
 
       if (type === "train") {
@@ -3246,7 +2515,6 @@ LV 回到 1。
 
 
     function openSettings() {
-      setTimeout(v3332SetMobileControlsMode, 0);
       applyLanguage();
       setSystemTab("actions");
       setSystemTab("actions");
@@ -3530,7 +2798,7 @@ LV 回到 1。
 
 
     function bindMobileSystemDrawer() {
-      // V33.32: mobile gear opens the unified SYSTEM MENU directly.
+      // V33.39: mobile gear opens the unified SYSTEM MENU directly.
     }
 
 
@@ -3538,11 +2806,16 @@ LV 回到 1。
     setInterval(() => { try { forcePetVisibleFallback(); } catch {} }, 1200);
 
     function loop() {
-      frame++;
-      battleLoop();
-      runAutoPatrol();
-      runAutoCare();
-      drawScene();
+      try {
+        frame++;
+        battleLoop();
+        runAutoPatrol();
+        runAutoCare();
+        drawScene();
+      } catch (err) {
+        console.error("V33.39 loop recovered", err);
+        try { v3339DeepUnblock(); } catch {}
+      }
       requestAnimationFrame(loop);
     }
 
@@ -3629,6 +2902,114 @@ LV 回到 1。
         OWNED_APPEARANCE_KEY
       }
     };
+
+
+/* V33.39 Deep Restore Controls Patch */
+function v3339DeepUnblock() {
+  try {
+    document.body.classList.remove("opening-active", "title-menu-active", "login-loading-active");
+    document.documentElement.classList.remove("mobile-controls-suspended");
+    ["openingIntroBackdrop", "titleMenuBackdrop", "loginLoadingBackdrop"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("closed");
+        el.setAttribute("aria-hidden", "true");
+        el.style.display = "none";
+        el.style.pointerEvents = "none";
+      }
+    });
+  } catch {}
+}
+
+function v3339RecoverIdleState(reason = "manual") {
+  try {
+    if (typeof gameMode !== "undefined") gameMode = "idle";
+    if (typeof battlePhase !== "undefined") battlePhase = "none";
+    if (typeof enemy !== "undefined") enemy = null;
+    if (typeof scan !== "undefined") scan = Math.max(0, Math.min(99, Number(scan || 0)));
+    if (typeof pet !== "undefined" && pet) {
+      pet.asleep = false;
+      if (typeof pet.hp === "number" && pet.hp <= 0) pet.hp = Math.max(1, pet.maxHp || 30);
+      if (typeof pet.energy === "number" && pet.energy < 5) pet.energy = 30;
+      if (typeof pet.hunger === "number" && pet.hunger < 5) pet.hunger = 45;
+    }
+    if (typeof setMessage === "function") {
+      setMessage("系統已回復可操作狀態。\nA-F 按鈕可重新使用。");
+    }
+    if (typeof updateUI === "function") updateUI();
+  } catch (err) {
+    console.error("v3339RecoverIdleState failed", err);
+  }
+}
+
+function v3339BindEmergencyControls() {
+  if (window.__v3339EmergencyControlsBound) return;
+  window.__v3339EmergencyControlsBound = true;
+
+  document.addEventListener("click", ev => {
+    const btn = ev.target && ev.target.closest ? ev.target.closest("[data-action],[data-mobile-action]") : null;
+    if (!btn) return;
+
+    const type = btn.dataset.mobileAction || btn.dataset.action;
+    if (!type) return;
+
+    try {
+      v3339DeepUnblock();
+
+      if (typeof action === "function" && !btn.dataset.mobileAction) {
+        return;
+      }
+
+      if (typeof runMobileV28Action === "function" && btn.dataset.mobileAction) {
+        return;
+      }
+
+      if (typeof action === "function") {
+        ev.preventDefault();
+        ev.stopPropagation();
+        action(type);
+      }
+    } catch (err) {
+      console.error("V33.39 button recovery error", err);
+      try {
+        v3339RecoverIdleState("button-error");
+      } catch {}
+    }
+  }, true);
+
+  window.addEventListener("error", () => {
+    setTimeout(() => v3339DeepUnblock(), 0);
+  });
+
+  window.addEventListener("unhandledrejection", () => {
+    setTimeout(() => v3339DeepUnblock(), 0);
+  });
+
+  setTimeout(v3339DeepUnblock, 0);
+  setTimeout(v3339DeepUnblock, 300);
+  setTimeout(() => {
+    try {
+      if (typeof gameMode !== "undefined" && (gameMode === "transition" || gameMode === "encounter")) {
+        v3339RecoverIdleState("boot-stuck");
+      }
+    } catch {}
+  }, 2600);
+}
+
+window.PixelPetEmergency = {
+  unblock: () => v3339DeepUnblock(),
+  recover: () => v3339RecoverIdleState("external")
+};
+
+
+    v3339BindEmergencyControls();
+
+    function v3339ForceStableBootSettings() {
+      try {
+        autoPatrolEnabled = false;
+        localStorage.setItem("pixelPetAutoPatrolDisabledForRestore", "1");
+      } catch {}
+    }
 
     bindBgmAutoStart();
     bindDex();
