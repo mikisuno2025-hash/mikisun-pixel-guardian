@@ -11,6 +11,10 @@ let currentUser = null;
 let firebaseApi = null;
 let isReady = false;
 let autoSaveTimer = null;
+let localSaveAutoTimer = null;
+let lastCloudSaveAt = 0;
+let lastCloudLoadAt = 0;
+let lastStatusText = "";
 
 function cloudT(key) {
   try {
@@ -33,10 +37,20 @@ function cloudT(key) {
 }
 
 function setStatus(text, mode = "") {
+  lastStatusText = text || "";
   if (!statusEl) return;
   statusEl.textContent = text;
+  statusEl.title = text;
   statusEl.classList.remove("online", "warn", "error");
   if (mode) statusEl.classList.add(mode);
+}
+
+function shortTime(ts = Date.now()) {
+  try {
+    return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
 }
 
 
@@ -165,13 +179,7 @@ async function signInOrOut() {
   }
 
   if (!auth) {
-    const ok = await window.addEventListener("pixel-language-change", () => {
-  try {
-    updateCloudLoginUi(currentUser);
-    if (!currentUser && FIREBASE_CONFIG_READY) setStatus(cloudT("cloud.status.signedOut"), "warn");
-  } catch {}
-});
-initFirebase();
+    const ok = await initFirebase();
     if (!ok) return;
   }
 
@@ -209,7 +217,8 @@ async function uploadCloudSave(showAlert = false) {
   try {
     const payload = buildCloudPayload();
     await firebaseApi.setDoc(saveDocRef(), payload, { merge: true });
-    setStatus(cloudT("cloud.status.saved"), "online");
+    lastCloudSaveAt = Date.now();
+    setStatus(`${cloudT("cloud.status.saved")} ${shortTime(lastCloudSaveAt)}`, "online");
     if (showAlert) alert("已上傳本機存檔到雲端。");
     return true;
   } catch (error) {
@@ -236,7 +245,8 @@ async function loadCloudSave(showAlert = false) {
     const data = snap.data();
     const api = gameApi();
     api.importCloudData(data);
-    setStatus("雲端已載入", "online");
+    lastCloudLoadAt = Date.now();
+    setStatus(`雲端已載入 ${shortTime(lastCloudLoadAt)}`, "online");
     if (showAlert) alert("已載入雲端存檔。");
     return true;
   } catch (error) {
@@ -257,33 +267,67 @@ async function handleInitialCloudMerge() {
 
     if (!snap.exists()) {
       await uploadCloudSave(false);
-      gameApi().setCloudMessage("Google 登入成功。\n已建立第一份雲端存檔。");
+      gameApi().setCloudMessage("Google 登入成功。
+沒有雲端存檔，已建立第一份雲端存檔。");
       return;
     }
 
-    const cloud = snap.data();
-    const cloudUpdated = Number(cloud.updatedAtMs || 0);
+    const cloudData = snap.data();
+    const cloudUpdated = Number(cloudData.updatedAtMs || (cloudData.pet && (cloudData.pet.updatedAt || cloudData.pet.lastTick)) || 0);
+    const diff = Math.abs(cloudUpdated - localUpdated);
 
+    if (cloudUpdated && localUpdated && diff < 10000) {
+      gameApi().setCloudMessage("Google 登入成功。
+本機與雲端存檔時間接近，已保留目前資料並啟用自動同步。");
+      setStatus(cloudT("cloud.status.signedIn"), "online");
+      return;
+    }
+
+    let question = "偵測到本機與雲端都有存檔。
+
+";
     if (cloudUpdated > localUpdated) {
-      const useCloud = confirm("偵測到較新的雲端存檔。\n按「確定」載入雲端存檔。\n按「取消」保留本機並上傳覆蓋雲端。");
-      if (useCloud) {
+      question += "雲端存檔看起來較新。
+
+";
+      question += "按「確定」：載入雲端
+按「取消」：保留本機並上傳";
+      if (confirm(question)) {
         await loadCloudSave(false);
-        gameApi().setCloudMessage("已載入較新的雲端存檔。");
+        gameApi().setCloudMessage("已載入雲端存檔。");
       } else {
         await uploadCloudSave(false);
-        gameApi().setCloudMessage("已用本機存檔覆蓋雲端。");
+        gameApi().setCloudMessage("已保留本機存檔並上傳雲端。");
       }
-    } else if (localUpdated > cloudUpdated) {
-      const uploadLocal = confirm("本機存檔看起來較新。\n按「確定」上傳本機存檔。\n按「取消」載入雲端存檔。");
-      if (uploadLocal) {
+      return;
+    }
+
+    if (localUpdated > cloudUpdated) {
+      question += "本機存檔看起來較新。
+
+";
+      question += "按「確定」：上傳本機
+按「取消」：載入雲端";
+      if (confirm(question)) {
         await uploadCloudSave(false);
         gameApi().setCloudMessage("已上傳本機存檔到雲端。");
       } else {
         await loadCloudSave(false);
         gameApi().setCloudMessage("已載入雲端存檔。");
       }
+      return;
+    }
+
+    question += "無法判斷哪份比較新。
+
+按「確定」：保留本機並上傳
+按「取消」：載入雲端";
+    if (confirm(question)) {
+      await uploadCloudSave(false);
+      gameApi().setCloudMessage("已保留本機存檔並上傳雲端。");
     } else {
-      gameApi().setCloudMessage("Google 登入成功。\n本機與雲端存檔時間相同。");
+      await loadCloudSave(false);
+      gameApi().setCloudMessage("已載入雲端存檔。");
     }
   } catch (error) {
     console.error(error);
@@ -303,7 +347,24 @@ function stopAutoSave() {
     clearInterval(autoSaveTimer);
     autoSaveTimer = null;
   }
+  if (localSaveAutoTimer) {
+    clearTimeout(localSaveAutoTimer);
+    localSaveAutoTimer = null;
+  }
 }
+
+function scheduleAutoCloudSave() {
+  if (!isReady || !currentUser) return;
+  if (localSaveAutoTimer) clearTimeout(localSaveAutoTimer);
+  localSaveAutoTimer = setTimeout(() => {
+    localSaveAutoTimer = null;
+    uploadCloudSave(false);
+  }, 3500);
+}
+
+window.addEventListener("pixel-pet-local-save", () => {
+  scheduleAutoCloudSave();
+});
 
 async function manualSync() {
   if (!FIREBASE_CONFIG_READY) {
@@ -334,6 +395,17 @@ window.PixelPetCloudAuth = {
       email: currentUser.email,
       displayName: currentUser.displayName
     } : null;
+  },
+  status() {
+    return {
+      signedIn: !!currentUser,
+      uid: currentUser ? currentUser.uid : null,
+      email: currentUser ? currentUser.email : null,
+      displayName: currentUser ? currentUser.displayName : null,
+      lastCloudSaveAt,
+      lastCloudLoadAt,
+      lastStatus: lastStatusText
+    };
   },
   signInOrOut,
   manualSync,

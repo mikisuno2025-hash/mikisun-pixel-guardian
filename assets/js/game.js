@@ -186,7 +186,7 @@ const canvas = document.getElementById("petCanvas");
       if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
 
       const legacySaveKeys = [
-        "pixelPetRetroGuardianV33.19",
+        "pixelPetRetroGuardianV33.20",
         "pixelPetRetroGuardianV28",
         "pixelPetRetroGuardianV27",
         "pixelPetRetroGuardianV26",
@@ -195,7 +195,7 @@ const canvas = document.getElementById("petCanvas");
       ];
 
       const legacyDexKeys = [
-        "pixelPetOwnedAppearancesV33.19",
+        "pixelPetOwnedAppearancesV33.20",
         "pixelPetOwnedAppearancesV28",
         "pixelPetOwnedAppearancesV27",
         "pixelPetOwnedAppearancesV26",
@@ -309,6 +309,8 @@ const canvas = document.getElementById("petCanvas");
     let autoCareEnabled = localStorage.getItem("pixelPetAutoCareEnabledV16") !== "false";
     let autoPatrolEnabled = localStorage.getItem("pixelPetAutoPatrolEnabledV16") !== "false";
     let motionShakeEnabled = localStorage.getItem("pixelPetMotionShakeEnabledV33") === "true";
+    let motionSensitivity = localStorage.getItem("pixelPetMotionSensitivityV33") || "medium";
+    let lastClientError = "";
     let motionListenerBound = false;
     let lastMotionMagnitude = null;
     let lastMotionPeakAt = 0;
@@ -341,6 +343,7 @@ const canvas = document.getElementById("petCanvas");
       const autoCareInput = document.getElementById("settingAutoCare");
       const autoPatrolInput = document.getElementById("settingAutoPatrol");
       const motionShakeInput = document.getElementById("settingMotionShake");
+      const motionSensitivitySelect = document.getElementById("settingMotionSensitivity");
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
@@ -350,6 +353,7 @@ const canvas = document.getElementById("petCanvas");
       if (autoCareInput) autoCareInput.checked = autoCareEnabled;
       if (autoPatrolInput) autoPatrolInput.checked = autoPatrolEnabled;
       if (motionShakeInput) motionShakeInput.checked = motionShakeEnabled;
+      if (motionSensitivitySelect) motionSensitivitySelect.value = motionSensitivity;
       if (bgmSlider) bgmSlider.value = bgmVolume;
       if (sfxSlider) sfxSlider.value = sfxVolume;
       if (fontSlider) fontSlider.value = fontSizePercent;
@@ -367,6 +371,7 @@ const canvas = document.getElementById("petCanvas");
       localStorage.setItem("pixelPetAutoCareEnabledV16", String(autoCareEnabled));
       localStorage.setItem("pixelPetAutoPatrolEnabledV16", String(autoPatrolEnabled));
       localStorage.setItem("pixelPetMotionShakeEnabledV33", String(motionShakeEnabled));
+      localStorage.setItem("pixelPetMotionSensitivityV33", String(motionSensitivity));
       localStorage.setItem("pixelPetBgmVolume", String(Math.round(bgmVolume)));
       localStorage.setItem("pixelPetSfxVolume", String(Math.round(sfxVolume)));
       localStorage.setItem("pixelPetFontSize", String(Math.round(fontSizePercent)));
@@ -443,6 +448,13 @@ const canvas = document.getElementById("petCanvas");
       updateUI();
     }
 
+
+
+    function motionShakeThreshold() {
+      if (motionSensitivity === "high") return 7.2;
+      if (motionSensitivity === "low") return 12.4;
+      return 9.5;
+    }
 
     function updateMotionShakeControls() {
       const input = document.getElementById("settingMotionShake");
@@ -590,7 +602,7 @@ const canvas = document.getElementById("petCanvas");
       lastMotionMagnitude = mag;
 
       // 門檻偏保守，避免拿起手機或輕微晃動就誤觸。
-      if (delta < 9.5) return;
+      if (delta < motionShakeThreshold()) return;
       if (tNow - lastMotionPeakAt < 260) return;
 
       lastMotionPeakAt = tNow;
@@ -782,7 +794,17 @@ const canvas = document.getElementById("petCanvas");
       pet.saveVersion = SAVE_VERSION;
       pet.lastTick = Date.now();
       pet.updatedAt = Date.now();
-      try { localStorage.setItem(SAVE_KEY, JSON.stringify(pet)); } catch (e) { console.warn("local save failed", e); }
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(pet));
+        window.dispatchEvent(new CustomEvent("pixel-pet-local-save", {
+          detail: {
+            updatedAt: pet.updatedAt || pet.lastTick || Date.now(),
+            saveVersion: SAVE_VERSION
+          }
+        }));
+      } catch (e) {
+        console.warn("local save failed", e);
+      }
     }
 
     function offlineDecay(p) {
@@ -880,6 +902,13 @@ const canvas = document.getElementById("petCanvas");
 
         "settings.motionShake": "手機搖動探索",
         "settings.motionShakeNote": "手機版可快速搖動 2 下進行探索。iPhone 第一次啟用需要允許動作感測。",
+        "settings.motionSensitivity": "搖動靈敏度",
+        "settings.motionLow": "低：避免誤觸",
+        "settings.motionMedium": "中：標準",
+        "settings.motionHigh": "高：較容易觸發",
+        "settings.motionSensitivityNote": "如果搖不出來請調高；如果太容易誤觸請調低。",
+        "btn.debug": "狀態診斷",
+        "debug.title": "狀態診斷",
         "motion.enabled": "手機搖動探索：ON\n快速搖動 2 下即可探索。",
         "motion.disabled": "手機搖動探索：OFF\n已關閉搖動判定。",
         "motion.unsupported": "此裝置或瀏覽器不支援搖動判定。",
@@ -939,6 +968,13 @@ const canvas = document.getElementById("petCanvas");
 
         "settings.motionShake": "手机摇动探索",
         "settings.motionShakeNote": "手机版可快速摇动 2 下进行探索。iPhone 第一次启用需要允许动作感测。",
+        "settings.motionSensitivity": "摇动灵敏度",
+        "settings.motionLow": "低：避免误触",
+        "settings.motionMedium": "中：标准",
+        "settings.motionHigh": "高：较容易触发",
+        "settings.motionSensitivityNote": "如果摇不出来请调高；如果太容易误触请调低。",
+        "btn.debug": "状态诊断",
+        "debug.title": "状态诊断",
         "motion.enabled": "手机摇动探索：ON\n快速摇动 2 下即可探索。",
         "motion.disabled": "手机摇动探索：OFF\n已关闭摇动判定。",
         "motion.unsupported": "此设备或浏览器不支持摇动判定。",
@@ -998,6 +1034,13 @@ const canvas = document.getElementById("petCanvas");
 
         "settings.motionShake": "スマホシェイク探索",
         "settings.motionShakeNote": "スマホでは素早く 2 回振ると探索できます。iPhone は初回にモーション許可が必要です。",
+        "settings.motionSensitivity": "シェイク感度",
+        "settings.motionLow": "低：誤作動を防ぐ",
+        "settings.motionMedium": "中：標準",
+        "settings.motionHigh": "高：反応しやすい",
+        "settings.motionSensitivityNote": "反応しにくい時は高、誤反応が多い時は低にしてください。",
+        "btn.debug": "状態診断",
+        "debug.title": "状態診断",
         "motion.enabled": "スマホシェイク探索：ON\n素早く 2 回振ると探索できます。",
         "motion.disabled": "スマホシェイク探索：OFF\nシェイク判定を停止しました。",
         "motion.unsupported": "この端末またはブラウザはシェイク判定に対応していません。",
@@ -1057,6 +1100,13 @@ const canvas = document.getElementById("petCanvas");
 
         "settings.motionShake": "Phone Shake Search",
         "settings.motionShakeNote": "On phones, shake quickly twice to search. iPhone requires motion permission the first time.",
+        "settings.motionSensitivity": "Shake sensitivity",
+        "settings.motionLow": "Low: avoid misfires",
+        "settings.motionMedium": "Medium: standard",
+        "settings.motionHigh": "High: easier trigger",
+        "settings.motionSensitivityNote": "Raise it if shaking does not trigger; lower it if it triggers too easily.",
+        "btn.debug": "Status Debug",
+        "debug.title": "Status Debug",
         "motion.enabled": "Phone Shake Search: ON\nShake quickly twice to search.",
         "motion.disabled": "Phone Shake Search: OFF\nShake detection is disabled.",
         "motion.unsupported": "This device or browser does not support shake detection.",
@@ -1439,6 +1489,85 @@ LV 回到 1。
       updateUI();
       save();
     }
+
+
+    function recordClientError(error) {
+      try {
+        const message = error && error.message ? error.message : String(error || "Unknown error");
+        lastClientError = `${new Date().toLocaleTimeString()} ${message}`.slice(0, 500);
+      } catch {
+        lastClientError = "Unknown error";
+      }
+    }
+
+    window.addEventListener("error", ev => {
+      recordClientError(ev && ev.error ? ev.error : ev.message);
+    });
+
+    window.addEventListener("unhandledrejection", ev => {
+      recordClientError(ev && ev.reason ? ev.reason : "Unhandled promise rejection");
+    });
+
+    function collectDebugText() {
+      const cloud = window.PixelPetCloudAuth && typeof window.PixelPetCloudAuth.status === "function"
+        ? window.PixelPetCloudAuth.status()
+        : null;
+
+      const localUpdated = pet.updatedAt || pet.lastTick || 0;
+      const lines = [
+        "Mikisun Pixel Guardian V33.20",
+        "JS: OK",
+        `URL: ${location.href}`,
+        `UA: ${navigator.userAgent}`,
+        "",
+        `[Pet]`,
+        `Name: ${pet.name}`,
+        `LV: ${pet.lv}`,
+        `HP: ${pet.hp}/${pet.maxHp}`,
+        `Appearance: ${pet.appearanceId}`,
+        `Updated: ${localUpdated ? new Date(localUpdated).toLocaleString() : "unknown"}`,
+        "",
+        `[Mobile]`,
+        `Motion shake: ${motionShakeEnabled ? "ON" : "OFF"}`,
+        `Sensitivity: ${motionSensitivity}`,
+        `Touch: ${("ontouchstart" in window) || navigator.maxTouchPoints > 0 ? "YES" : "NO"}`,
+        "",
+        `[Cloud]`,
+        `Signed in: ${cloud ? (cloud.signedIn ? "YES" : "NO") : "unknown"}`,
+        `Email: ${cloud && cloud.email ? cloud.email : "-"}`,
+        `Last save: ${cloud && cloud.lastCloudSaveAt ? new Date(cloud.lastCloudSaveAt).toLocaleString() : "-"}`,
+        `Last load: ${cloud && cloud.lastCloudLoadAt ? new Date(cloud.lastCloudLoadAt).toLocaleString() : "-"}`,
+        `Last status: ${cloud && cloud.lastStatus ? cloud.lastStatus : "-"}`,
+        "",
+        `[Error]`,
+        lastClientError || "none"
+      ];
+      return lines.join("\\n");
+    }
+
+    function openDebugPanel() {
+      const panel = document.getElementById("mobileDebugPanel");
+      const text = document.getElementById("mobileDebugText");
+      if (text) text.textContent = collectDebugText();
+      if (panel) panel.hidden = false;
+    }
+
+    function closeDebugPanel() {
+      const panel = document.getElementById("mobileDebugPanel");
+      if (panel) panel.hidden = true;
+    }
+
+    function bindDebugPanel() {
+      const closeBtn = document.getElementById("mobileDebugClose");
+      const panel = document.getElementById("mobileDebugPanel");
+      if (closeBtn) closeBtn.addEventListener("click", closeDebugPanel);
+      if (panel) {
+        panel.addEventListener("click", ev => {
+          if (ev.target === panel) closeDebugPanel();
+        });
+      }
+    }
+
 
     function action(type) {
       initAudio();
@@ -2313,6 +2442,7 @@ LV 回到 1。
       const autoCareInput = document.getElementById("settingAutoCare");
       const autoPatrolInput = document.getElementById("settingAutoPatrol");
       const motionShakeInput = document.getElementById("settingMotionShake");
+      const motionSensitivitySelect = document.getElementById("settingMotionSensitivity");
       const bgmSlider = document.getElementById("settingBgmVolume");
       const sfxSlider = document.getElementById("settingSfxVolume");
       const fontSlider = document.getElementById("settingFontSize");
@@ -2385,6 +2515,17 @@ LV 回到 1。
         });
       }
 
+      if (motionSensitivitySelect) {
+        motionSensitivitySelect.value = motionSensitivity;
+        motionSensitivitySelect.addEventListener("change", () => {
+          motionSensitivity = motionSensitivitySelect.value || "medium";
+          saveSystemSettings();
+          sfx("click");
+          setMessage("SYSTEM MENU\n搖動靈敏度已更新。");
+          updateUI();
+        });
+      }
+
       if (bgmSlider) {
         bgmSlider.addEventListener("input", () => {
           bgmVolume = Number(bgmSlider.value);
@@ -2420,6 +2561,7 @@ LV 回到 1。
           autoCareEnabled = true;
           autoPatrolEnabled = true;
           motionShakeEnabled = false;
+          motionSensitivity = "medium";
           bgmVolume = 38;
           sfxVolume = 70;
           fontSizePercent = 100;
@@ -2462,6 +2604,11 @@ LV 回到 1。
 
         if (actionName === "motion") {
           toggleMotionShake();
+          return;
+        }
+
+        if (actionName === "debug") {
+          openDebugPanel();
           return;
         }
 
@@ -2664,6 +2811,9 @@ LV 回到 1。
       saveLocal() {
         save();
       },
+      debugStatus() {
+        return collectDebugText();
+      },
       constants: {
         SAVE_VERSION,
         SAVE_KEY,
@@ -2676,6 +2826,7 @@ LV 回到 1。
     bindSettingsMenu();
     bindMobileV28Controls();
     bindMobileSystemDrawer();
+    bindDebugPanel();
     applyLanguage();
     applySystemSettings();
     updateMotionShakeControls();
